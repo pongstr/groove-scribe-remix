@@ -1,0 +1,5 @@
+Drum and metronome samples from GrooveScribe
+Copyright 2015 Lou Montulli, Mike Johnston
+Licensed under GPL v2 — see LICENSE.txt
+
+Original source: https://github.com/montulli/GrooveScribe

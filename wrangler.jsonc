@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "groove-scribe-remix",
+  "compatibility_flags": [
+    "nodejs_als"
+  ],
+  "compatibility_date": "2026-08-01",
+  "pages_build_output_dir": ".svelte-kit/cloudflare",
+  "env": {
+    "production": {
+      "vars": {
+        "PUBLIC_POCKETBASE_API": "https://fly.pongstr.dev",
+      },
+      "placement": {
+        "mode": "smart"
+      }
+    },
+    "preview": {
+      "vars": {
+        "PUBLIC_POCKETBASE_API": "https://fly.pongstr.dev",
+      },
+      "placement": {
+        "mode": "smart"
+      }
+    }
+  }
+}
