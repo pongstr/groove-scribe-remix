@@ -81,11 +81,11 @@
 
 <div
   bind:this={rootEl}
-  class="flex w-max min-w-full items-stretch gap-1.5"
+  class="bg-background flex w-max min-w-full items-stretch gap-1.5"
   aria-label="Measure {highlightedMeasure} of {measureCount}"
 >
   <div
-    class="bg-card sticky left-0 z-10 flex w-40 shrink-0 items-center border-r border-b px-2 text-[0.7rem] font-bold tracking-wide text-slate-500 uppercase md:w-50"
+    class="bg-background sticky left-0 z-10 flex w-40 shrink-0 items-center border-r border-b px-2 py-1 text-[0.7rem] font-bold tracking-wide text-slate-500 uppercase md:w-50"
   >
     <span class="truncate">
       {#if measureCount > 1}
@@ -97,7 +97,7 @@
   </div>
 
   <div
-    class="grid flex-1 gap-2 p-1"
+    class="grid flex-1 gap-2 px-1 py-2.5"
     style:grid-template-columns="repeat({slotCount}, minmax(3rem, 1fr))"
     style:width="max(100%, calc({slotCount} * 3rem + {Math.max(
       0,
@@ -109,14 +109,16 @@
       <div
         data-measure-marker={measure}
         class={[
-          'flex h-2 items-center px-2 text-[0.7rem] font-bold tracking-wide uppercase transition-colors',
+          'flex h-1 items-center text-[0.7rem] font-bold tracking-wide uppercase transition-colors',
           active
-            ? 'text-foreground bg-accent/50'
+            ? 'text-foreground bg-yellow-500'
             : 'bg-card/80 text-secondary-foreground',
         ]}
         style:grid-column="span {notesPerMeasure}"
       >
-        Bar {measure}
+        <span class="inline-block bg-yellow-500 px-1.5 py-0.5 text-amber-950"
+          >Bar {measure}</span
+        >
       </div>
     {/each}
   </div>

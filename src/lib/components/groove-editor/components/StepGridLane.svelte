@@ -34,14 +34,24 @@
 
 <div class={cn('group flex w-max min-w-full items-stretch gap-x-2', className)}>
   <div
-    class="bg-background/95 sticky left-0 z-20 flex w-40 shrink-0 cursor-default items-center gap-2 border-r border-b pr-2 text-[0.8rem] font-semibold text-(--lane-color) backdrop-blur-xs md:w-50"
+    class="bg-background/95 sticky left-0 z-20 flex w-40 shrink-0 cursor-default items-center gap-2 overflow-hidden border-r border-b pr-2 text-[0.8rem] font-semibold text-(--lane-color) backdrop-blur-xs md:w-50"
     style="--lane-color: var({meta.color}); --lane-bg: var({meta.bgSecondary})"
   >
-    <span
-      class="ml-px h-[calc(100%-2px)] w-1 shrink-0 bg-(--lane-bg)"
+    <div
+      style="--offset-position: 24px;"
+      class="absolute -top-[calc(var(--offset-position)/2)] -left-[calc(var(--offset-position)/2)] h-6 w-6 rotate-45 bg-(--lane-bg)"
       aria-hidden="true"
-    ></span>
-    <span class="min-w-0 flex-1 truncate whitespace-nowrap">{meta.label}</span>
+    ></div>
+
+    <!-- <span -->
+    <!--   class="ml-px h-[calc(100%-2px)] w-1 shrink-0 bg-(--lane-bg)" -->
+    <!--   aria-hidden="true" -->
+    <!-- ></span> -->
+
+    <span class="block min-w-0 flex-1 truncate px-4 whitespace-nowrap"
+      >{meta.label}</span
+    >
+
     {#if onClear}
       <button
         type="button"

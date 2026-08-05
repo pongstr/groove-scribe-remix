@@ -7,15 +7,17 @@
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { setClickSubdivision } from '$lib/utils/shortcuts'
 
-  const ui = getUIContext()
-  const data = getDataContext()
-
-  const OPTIONS: {
+  type ClickOptionType = {
     value: string
     desc: string
     label: string
     num: 0 | 4 | 8 | 16
-  }[] = [
+  }
+
+  let ui = getUIContext()
+  let data = getDataContext()
+
+  const OPTIONS: Array<ClickOptionType> = [
     { value: '0', label: 'Off', desc: 'Off', num: 0 },
     { value: '4', label: '♩', desc: 'Quarter note', num: 4 },
     { value: '8', label: '♪', desc: 'Eighth note', num: 8 },

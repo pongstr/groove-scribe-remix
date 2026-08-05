@@ -1,7 +1,7 @@
 <script lang="ts">
   import { cubicIn, cubicOut } from 'svelte/easing'
   import { fly } from 'svelte/transition'
-  import { CircleQuestionMark, FolderOpen, Keyboard } from '@lucide/svelte'
+  import { CircleQuestionMark, Keyboard } from '@lucide/svelte'
 
   import PracticeModeBar from '$lib/components/groove-notation/components/PracticeModeBar.svelte'
   import PlaybackControls from '$lib/components/groove-toolbar/components/PlaybackControls.svelte'
@@ -49,16 +49,6 @@
 {/if}
 
 {#snippet LeftSection()}
-  <Button
-    variant="outline"
-    size="sm"
-    class="h-9 gap-3 text-xs font-bold"
-    onclick={() => ui.showDrawer('mine')}
-  >
-    <FolderOpen class="size-4" />
-    <span class="sr-only">My Groove</span>
-  </Button>
-
   <PlaybackFile />
 {/snippet}
 
