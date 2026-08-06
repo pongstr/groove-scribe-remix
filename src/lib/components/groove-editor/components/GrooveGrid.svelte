@@ -77,7 +77,7 @@
   bind:this={scrollEl}
   data-step-grid-scroll
   class={cn(
-    'bg-card/50 w-full max-w-full min-w-0 shrink-0 scrollbar-none overflow-x-auto overflow-y-hidden overscroll-none pt-px [&::-webkit-scrollbar]:hidden',
+    'w-full max-w-full min-w-0 shrink-0 scrollbar-none overflow-x-auto overflow-y-hidden overscroll-none [&::-webkit-scrollbar]:hidden',
     // Snap fights programmatic follow during playback (esp. 1/32 / fast tempos).
     !$data.playback.isPlaying && 'snap-x snap-mandatory',
   )}

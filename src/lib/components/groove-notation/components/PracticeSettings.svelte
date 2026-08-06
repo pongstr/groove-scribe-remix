@@ -68,7 +68,7 @@
   onMount(async () => void (await refresh()))
 </script>
 
-<Drawer.Root direction="left" open>
+<Drawer.Root direction="left">
   <Drawer.Trigger
     class={cn(
       buttonVariants({ variant: 'outline' }),

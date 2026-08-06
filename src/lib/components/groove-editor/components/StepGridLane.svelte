@@ -34,7 +34,7 @@
 
 <div class={cn('group flex w-max min-w-full items-stretch gap-x-2', className)}>
   <div
-    class="bg-background/95 sticky left-0 z-20 flex w-40 shrink-0 cursor-default items-center gap-2 overflow-hidden border-r border-b pr-2 text-[0.8rem] font-semibold text-(--lane-color) backdrop-blur-xs md:w-50"
+    class="bg-background/95 sticky left-0 z-20 flex h-14 w-40 shrink-0 cursor-default items-center gap-2 overflow-hidden border-r border-b pr-2 text-[0.8rem] font-semibold text-(--lane-color) backdrop-blur-xs md:w-50"
     style="--lane-color: var({meta.color}); --lane-bg: var({meta.bgSecondary})"
   >
     <div

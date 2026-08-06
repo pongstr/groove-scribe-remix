@@ -106,6 +106,9 @@
       alert('Could not save this groove. Please try again.')
     } finally {
       isSaving = false
+      if (openRename) {
+        openRename = false
+      }
     }
   }
 
@@ -251,19 +254,19 @@
   <Dialog.Content>
     <Dialog.Header>
       <Dialog.Title>Rename Groove File</Dialog.Title>
-      <Dialog.Description>
-        This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.
-      </Dialog.Description>
     </Dialog.Header>
 
-    <Input
-      type="text"
-      value={$data.groove.name}
-      oninput={handleNameInput}
-      placeholder="Untitled Groove"
-      class="text-foreground hover:border-border focus-visible:border-border focus-visible:bg-background h-8 rounded-lg text-lg font-bold"
-    />
+    <div class="space-y-4">
+      <Input
+        type="text"
+        value={$data.groove.name}
+        oninput={handleNameInput}
+        placeholder="Untitled Groove"
+        class="text-foreground hover:border-border focus-visible:border-border focus-visible:bg-background h-8 rounded-lg text-lg font-bold"
+      />
+
+      <Button class="h-9" onclick={handleSave}>Rename</Button>
+    </div>
   </Dialog.Content>
 </Dialog.Root>
 

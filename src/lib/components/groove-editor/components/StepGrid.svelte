@@ -9,7 +9,7 @@
   const tomLanes = ['tom1', 'tom2', 'tom3', 'tom4'] as const
 </script>
 
-<div class="bg-background flex w-max min-w-full flex-col">
+<div class="bg-background flex w-max min-w-auto flex-col">
   <StepGridMeasureIndicator />
 
   {#each mainLanes as lane (lane)}

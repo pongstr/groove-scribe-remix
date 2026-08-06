@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronDown, SlidersHorizontal } from '@lucide/svelte'
+  import { SlidersHorizontal } from '@lucide/svelte'
 
   import GrooveDivision from '$lib/components/groove-editor/components/GrooveDivision.svelte'
   import GrooveEditorElements from '$lib/components/groove-editor/components/GrooveEditorElements.svelte'
@@ -7,37 +7,37 @@
   import GrooveSwingControl from '$lib/components/groove-editor/components/GrooveSwingControl.svelte'
   import GrooveTimeSignature from '$lib/components/groove-editor/components/GrooveTimeSignature.svelte'
   import { buttonVariants } from '$lib/components/ui/button/button.svelte'
-  import * as Popover from '$lib/components/ui/popover/index'
+  import * as Drawer from '$lib/components/ui/drawer/index'
   import { cn } from '$lib/utils'
+  import { getUIContext } from '$lib/utils/context'
+
+  let ui = getUIContext()
 </script>
 
 <div
-  class="absolute -top-11 left-0 flex w-full items-center justify-start gap-2 px-2"
+  class="absolute -top-11 left-0 flex w-full items-center justify-between gap-2 px-2"
 >
-  <Popover.Root>
-    <Popover.Trigger
-      class={cn(
-        buttonVariants({ variant: 'outline' }),
-        'group flex h-9 w-auto justify-start gap-2 pr-2 pl-2.5 font-sans text-xs',
-        'data-[state=open]:bg-red!',
-      )}
-    >
-      <SlidersHorizontal class="size-5" />
-      <span class="hidden md:inline-block">Groove Settings</span>
-      <ChevronDown
-        class="size-4 transition-transform group-data-[state=open]:rotate-180"
-      />
-    </Popover.Trigger>
-    <Popover.Content
-      align="start"
-      side="top"
-      class={cn('min-w-80 overflow-y-auto font-sans text-sm ')}
-    >
-      {@render GrooveSettingsMain()}
-    </Popover.Content>
-  </Popover.Root>
+  <div class="bg-background flex items-center justify-start">
+    <Drawer.Root direction="left">
+      <Drawer.Trigger
+        class={cn(
+          buttonVariants({ variant: 'outline' }),
+          'group flex h-9 w-auto justify-start gap-2 pr-2 pl-2.5 font-sans text-xs',
+          'data-[state=open]:bg-red!',
+        )}
+      >
+        <SlidersHorizontal class="size-5" />
+        <span class="hidden md:inline-block">Groove Settings</span>
+      </Drawer.Trigger>
+      <Drawer.Content class={cn('min-w-80 overflow-y-auto font-sans text-sm ')}>
+        {@render GrooveSettingsMain()}
+      </Drawer.Content>
+    </Drawer.Root>
+  </div>
 
-  <GrooveEditorElements />
+  {#if !$ui.previewMode}
+    <GrooveEditorElements />
+  {/if}
 </div>
 
 {#snippet GrooveSettingsMain()}

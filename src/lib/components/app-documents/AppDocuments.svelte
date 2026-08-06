@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { get } from 'svelte/store'
-
   import { Button, buttonVariants } from '$lib/components/ui/button'
   import * as Drawer from '$lib/components/ui/drawer'
   import { Input } from '$lib/components/ui/input'
@@ -14,7 +12,7 @@
   } from '$lib/utils/storage/share'
   import type { PresetGroove, SavedGroove } from '$lib/utils/types'
 
-  const data = getDataContext()
+  const data: App.Groove.ContextStore = getDataContext()
   const ui = getUIContext()
 
   let savedGrooves = $state<SavedGroove[]>([])
@@ -42,7 +40,7 @@
     const open = $ui.drawer.open
     if (open && !wasDrawerOpen) {
       void refresh()
-      saveNameValue = get(data).groove.name || ''
+      saveNameValue = $data.groove.name || ''
       errorMessage = null
     }
     wasDrawerOpen = open

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { cn } from '$lib/utils'
   import { getDataContext } from '$lib/utils/context'
   import { calcNotesPerMeasure } from '$lib/utils/music-math'
 
@@ -116,8 +117,13 @@
         ]}
         style:grid-column="span {notesPerMeasure}"
       >
-        <span class="inline-block bg-yellow-500 px-1.5 py-0.5 text-amber-950"
-          >Bar {measure}</span
+        <span
+          class={cn(
+            'inline-block  px-1.5 py-0.5 text-amber-950',
+            active
+              ? 'bg-yellow-500 text-amber-950'
+              : 'bg-muted/80 text-muted-foreground',
+          )}>Bar {measure}</span
         >
       </div>
     {/each}

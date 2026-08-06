@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition'
+  import { quadIn, quadOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
 
   import NotationQueue from '$lib/components/groove-notation/components/NotationQueue.svelte'
   import NotationStaff from '$lib/components/groove-notation/components/NotationStaff.svelte'
@@ -23,8 +24,8 @@
 >
   {#if $ui.practiceMode.active}
     <div
-      in:fade={{ duration: 200 }}
-      out:fade={{ duration: 100 }}
+      in:fly={{ duration: 250, delay: 200, y: -150, easing: quadIn }}
+      out:fly={{ duration: 250, y: -50, easing: quadOut }}
       class="mx-auto h-full w-full max-w-6xl pt-[10vh] select-none"
     >
       <NotationQueue />
@@ -32,7 +33,11 @@
   {/if}
 
   {#if !$ui.practiceMode.active}
-    <div class="mx-auto flex w-full max-w-7xl flex-col pt-10 pb-22">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-col pt-10 pb-22"
+      in:fly={{ duration: 250, y: 150, delay: 140, easing: quadOut }}
+      out:fade={{ duration: 250, easing: quadOut }}
+    >
       <div class="text-muted-foreground/90 mx-auto w-6xl font-sans text-lg">
         {#if $data.groove.name.length}
           <span>{$data.groove.name}</span>
