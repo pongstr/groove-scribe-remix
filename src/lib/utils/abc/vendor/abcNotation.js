@@ -5,6 +5,7 @@
 
 import { constant_NUMBER_OF_TOMS } from './constants.js'
 import {
+  getNoteScaler,
   isTripletDivisionFromNotesPerMeasure,
   notesPerMeasureInFullSizeArray,
   scaleNoteArrayToFullSize,
@@ -13,6 +14,7 @@ import {
   create_note_mapping_array_for_highlighting,
   convert_sticking_counts_to_actual_counts,
 } from './noteArrays.js'
+import { abcTupletMarker, findTupletAtFullIndex } from '../abc-tuplet.js'
 
 function moveAccentsOrOtherModifiersOutsideOfGroup(
   abcNoteStrings,
@@ -192,6 +194,25 @@ function getABCforRest(
   }
 
   return ABC_String
+}
+
+function getABCforNoteOrRest(
+  note_array_of_arrays,
+  start_index,
+  end_of_group,
+  scaler,
+  use_hidden_rest,
+) {
+  if (testArrayOfArraysForEquality(note_array_of_arrays, start_index, false)) {
+    return getABCforRest(
+      note_array_of_arrays,
+      start_index,
+      end_of_group,
+      scaler,
+      use_hidden_rest,
+    )
+  }
+  return getABCforNote(note_array_of_arrays, start_index, end_of_group, scaler)
 }
 
 function abc_gen_note_grouping_size(usingTriplets, timeSigTop, timeSigBottom) {
@@ -494,13 +515,13 @@ function snare_HH_kick_ABC_for_triplets(
             }
             if (
               0 <
-              count_active_notes_in_arrays(
-                all_drum_array_of_array,
-                j + 1,
-                1,
-              ) ||
+                count_active_notes_in_arrays(
+                  all_drum_array_of_array,
+                  j + 1,
+                  1,
+                ) ||
               0 <
-              count_active_notes_in_arrays(all_drum_array_of_array, j + 3, 1)
+                count_active_notes_in_arrays(all_drum_array_of_array, j + 3, 1)
             ) {
               can_fake_sixes = false
             }
@@ -621,8 +642,8 @@ function snare_HH_kick_ABC_for_triplets(
       if (
         i < num_notes - 1 &&
         (i + 1) %
-        (12 * timeSigTop * (4 / timeSigBottom) * numberOfMeasuresPerLine) ===
-        0
+          (12 * timeSigTop * (4 / timeSigBottom) * numberOfMeasuresPerLine) ===
+          0
       ) {
         stickings_voice_string += '\n'
         hh_snare_voice_string += '\n'
@@ -663,8 +684,18 @@ function snare_HH_kick_ABC_for_quads(
   timeSigTop,
   timeSigBottom,
   numberOfMeasuresPerLine,
+  tuplet_groups,
+  grid_notes_per_measure,
 ) {
-  var scaler = 1 // we are always in 32ths notes here
+  var scaler = 1 // we are always in 32ths notes here (see getABCforNote)
+  var gridScaler = 1
+  if (grid_notes_per_measure > 0) {
+    gridScaler = getNoteScaler(
+      grid_notes_per_measure,
+      timeSigTop,
+      timeSigBottom,
+    )
+  }
   var ABC_String = ''
   var stickings_voice_string = 'V:Stickings\n' // for stickings.  they are all rests with text comments added
   var hh_snare_voice_string = 'V:Hands stem=up\n%%voicemap drum\n' // for hh and snare
@@ -680,7 +711,43 @@ function snare_HH_kick_ABC_for_quads(
   if (kick_stems_up)
     all_drum_array_of_array = all_drum_array_of_array.concat([kick_array])
 
+  var slots_per_measure = (32 / timeSigBottom) * timeSigTop
+
+  function appendMeasureLayout(idx) {
+    var layoutTuplet = findTupletAtFullIndex(tuplet_groups, idx, gridScaler)
+    if (
+      idx % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) ==
+        abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) - 1 &&
+      !layoutTuplet
+    ) {
+      stickings_voice_string += ' '
+      hh_snare_voice_string += ' '
+      kick_voice_string += ' '
+    }
+    if ((idx + 1) % slots_per_measure === 0) {
+      stickings_voice_string += '|'
+      hh_snare_voice_string += '|'
+      kick_voice_string += '|'
+    }
+    if (
+      idx < num_notes - 1 &&
+      (idx + 1) % (slots_per_measure * numberOfMeasuresPerLine) === 0
+    ) {
+      stickings_voice_string += '\n'
+      hh_snare_voice_string += '\n'
+      kick_voice_string += '\n'
+    }
+  }
+
   for (var i = 0; i < num_notes; i++) {
+    var tupletHit = findTupletAtFullIndex(tuplet_groups, i, gridScaler)
+
+    // Scaled arrays have empty 32nd slots between grid cells — skip them in tuplets.
+    if (tupletHit && i % gridScaler !== 0) {
+      appendMeasureLayout(i)
+      continue
+    }
+
     var grouping_size_for_rests = abc_gen_note_grouping_size(
       false,
       timeSigTop,
@@ -693,7 +760,13 @@ function snare_HH_kick_ABC_for_quads(
     }
 
     var end_of_group
-    if (i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) === 0)
+    if (tupletHit) {
+      // One grid cell in 32nd units — do not merge into the next grid cell.
+      end_of_group = gridScaler
+    } else if (
+      i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) ===
+      0
+    )
       end_of_group = abc_gen_note_grouping_size(
         false,
         timeSigTop,
@@ -705,14 +778,17 @@ function snare_HH_kick_ABC_for_quads(
         (i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom))
 
     // make sure the group end doesn't go beyond the measure.   Happens in odd time sigs
-    if ((i % notes_per_measure) + end_of_group > notes_per_measure) {
+    if (
+      !tupletHit &&
+      (i % notes_per_measure) + end_of_group > notes_per_measure
+    ) {
       // if we are in an odd time signature then the last few notes will have a different grouping to reach the end of the measure
       end_of_group = notes_per_measure - (i % notes_per_measure)
     }
 
     if (
-      i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) ===
-      0
+      !tupletHit &&
+      i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) === 0
     ) {
       // we will only output a rest at the beginning of a beat phrase
       stickings_voice_string += getABCforRest(
@@ -750,57 +826,80 @@ function snare_HH_kick_ABC_for_quads(
       }
     }
 
-    stickings_voice_string += getABCforNote(
-      [sticking_array],
-      i,
-      end_of_group,
-      scaler,
-    )
+    if (tupletHit && tupletHit.isStart) {
+      var tupletMarker = abcTupletMarker(tupletHit.kind)
+      stickings_voice_string += tupletMarker
+      hh_snare_voice_string += tupletMarker
+      if (!kick_stems_up) kick_voice_string += tupletMarker
+    }
 
-    if (kick_stems_up) {
-      hh_snare_voice_string += getABCforNote(
-        all_drum_array_of_array,
+    if (tupletHit) {
+      stickings_voice_string += getABCforNoteOrRest(
+        [sticking_array],
         i,
         end_of_group,
         scaler,
+        true,
       )
-      kick_voice_string = ''
+
+      if (kick_stems_up) {
+        hh_snare_voice_string += getABCforNoteOrRest(
+          all_drum_array_of_array,
+          i,
+          end_of_group,
+          scaler,
+          false,
+        )
+        kick_voice_string = ''
+      } else {
+        hh_snare_voice_string += getABCforNoteOrRest(
+          all_drum_array_of_array,
+          i,
+          end_of_group,
+          scaler,
+          false,
+        )
+        kick_voice_string += getABCforNoteOrRest(
+          [kick_array],
+          i,
+          end_of_group,
+          scaler,
+          true,
+        )
+      }
     } else {
-      hh_snare_voice_string += getABCforNote(
-        all_drum_array_of_array,
+      stickings_voice_string += getABCforNote(
+        [sticking_array],
         i,
         end_of_group,
         scaler,
       )
-      kick_voice_string += getABCforNote([kick_array], i, end_of_group, scaler)
+
+      if (kick_stems_up) {
+        hh_snare_voice_string += getABCforNote(
+          all_drum_array_of_array,
+          i,
+          end_of_group,
+          scaler,
+        )
+        kick_voice_string = ''
+      } else {
+        hh_snare_voice_string += getABCforNote(
+          all_drum_array_of_array,
+          i,
+          end_of_group,
+          scaler,
+        )
+        kick_voice_string += getABCforNote(
+          [kick_array],
+          i,
+          end_of_group,
+          scaler,
+        )
+      }
     }
 
-    if (
-      i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) ==
-      abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) - 1
-    ) {
-      stickings_voice_string += ' '
-      hh_snare_voice_string += ' ' // Add a space to break the bar line every group notes
-      kick_voice_string += ' '
-    }
-
-    // add a bar line every measure.   32 notes in 4/4 time.   (32/timeSigBottom * timeSigTop)
-    if ((i + 1) % ((32 / timeSigBottom) * timeSigTop) === 0) {
-      stickings_voice_string += '|'
-      hh_snare_voice_string += '|'
-      kick_voice_string += '|'
-    }
-    // add a line break every numberOfMeasuresPerLine measures, except the last
-    if (
-      i < num_notes - 1 &&
-      (i + 1) %
-      ((32 / timeSigBottom) * timeSigTop * numberOfMeasuresPerLine) ===
-      0
-    ) {
-      stickings_voice_string += '\n'
-      hh_snare_voice_string += '\n'
-      kick_voice_string += '\n'
-    }
+    appendMeasureLayout(i)
   }
 
   if (kick_stems_up)
@@ -943,6 +1042,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
   kick_stems_up,
   timeSigTop,
   timeSigBottom,
+  tuplet_groups,
+  grid_notes_per_measure,
 ) {
   // convert sticking count symbol to the actual count
   // do this right before ABC output so it can't every get encoded into something that gets saved.
@@ -997,6 +1098,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
       timeSigTop,
       timeSigBottom,
       numberOfMeasuresPerLine,
+      tuplet_groups ?? [],
+      grid_notes_per_measure ?? notes_per_measure,
     )
   }
 }
@@ -1086,6 +1189,8 @@ export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
     myGrooveData.kickStemsUp,
     myGrooveData.numBeats,
     myGrooveData.noteValue,
+    myGrooveData.tupletGroups ?? [],
+    myGrooveData.notesPerMeasure,
   )
 
   gu.note_mapping_array = create_note_mapping_array_for_highlighting(

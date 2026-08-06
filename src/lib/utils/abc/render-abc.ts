@@ -37,6 +37,11 @@ interface LegacyGrooveData {
   comments: string
   showLegend: boolean
   kickStemsUp: boolean
+  tupletGroups?: Array<{
+    id: string
+    kind: 'triplet' | 'sixtuplet'
+    startSlot: number
+  }>
 }
 
 interface AbcInstance {
@@ -107,6 +112,8 @@ class AbcBridge {
     kick_stems_up: boolean,
     timeSigTop: number,
     timeSigBottom: number,
+    tuplet_groups?: LegacyGrooveData['tupletGroups'],
+    grid_notes_per_measure?: number,
   ) =>
     create_ABC_from_snare_HH_kick_arrays(
       this,
@@ -122,6 +129,8 @@ class AbcBridge {
       kick_stems_up,
       timeSigTop,
       timeSigBottom,
+      tuplet_groups,
+      grid_notes_per_measure,
     )
 }
 
@@ -144,6 +153,7 @@ function toLegacy(data: GrooveData): LegacyGrooveData {
     comments: data.comments || '',
     showLegend: data.showLegend,
     kickStemsUp: data.kickStemsUp,
+    tupletGroups: data.tupletGroups ?? [],
   }
 }
 
@@ -164,8 +174,8 @@ function createCallback(bridge: AbcBridge) {
       if (isBenignAbcWarning(msg)) return
       cb.abc_error_output += msg + '<br/>\n'
     },
-    get_abcmodel() { },
-    anno_start() { },
+    get_abcmodel() {},
+    anno_start() {},
     svg_highlight_y: 0,
     svg_highlight_h: 44,
     anno_stop(

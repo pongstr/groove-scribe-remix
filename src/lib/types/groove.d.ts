@@ -70,6 +70,14 @@ declare global {
       /** A single grid slot: `null` is a rest, otherwise the articulation played there. */
       type Slot<A extends string = Articulation> = A | null
 
+      type TupletKind = 'triplet' | 'sixtuplet'
+
+      type TupletGroup = {
+        id: string
+        kind: TupletKind
+        startSlot: number
+      }
+
       type Data = {
         /** IndexedDB key when this groove was loaded from / saved to "My Grooves"; `null` otherwise. */
         id: string | null
@@ -102,6 +110,9 @@ declare global {
           Slot<TomArticulation>[],
         ]
         sticking: Slot<StickingArticulation>[]
+
+        /** In-bar tuplet spans on a straight grid (experiment). */
+        tupletGroups?: TupletGroup[]
       }
 
       /** @deprecated Prefer `App.Groove.Data`. */
@@ -162,6 +173,7 @@ declare global {
           index: number,
           articulation: NonNullable<Slot>,
         ) => void
+        setTupletAt: (startSlot: number, kind: TupletKind | null) => void
         setDivision: (division: GrooveData['division']) => void
         setTimeSignature: (timeSignature: GrooveData['timeSignature']) => void
         setMeasures: (measures: number) => void

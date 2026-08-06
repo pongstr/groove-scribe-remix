@@ -155,6 +155,7 @@ export function createEmptyGrooveData(
       new Array(length).fill(null),
     ],
     sticking: new Array(length).fill(null),
+    tupletGroups: [],
     ...overrides,
   }
 }

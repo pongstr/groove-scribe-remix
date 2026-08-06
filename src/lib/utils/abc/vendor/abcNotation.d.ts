@@ -26,6 +26,12 @@ export function create_ABC_from_snare_HH_kick_arrays(
   kick_stems_up: boolean,
   timeSigTop: number,
   timeSigBottom: number,
+  tuplet_groups?: Array<{
+    id: string
+    kind: 'triplet' | 'sixtuplet'
+    startSlot: number
+  }>,
+  grid_notes_per_measure?: number,
 ): string
 
 export function createABCFromGrooveData(

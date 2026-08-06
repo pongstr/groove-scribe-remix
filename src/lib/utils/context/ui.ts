@@ -148,9 +148,9 @@ function toContext(input: App.UI.ContextInput): App.UI.Context {
     queue.length === 0
       ? 0
       : Math.min(
-        Math.max(0, practiceSource?.currentIndex ?? 0),
-        queue.length - 1,
-      )
+          Math.max(0, practiceSource?.currentIndex ?? 0),
+          queue.length - 1,
+        )
 
   return {
     version: UI_CONTEXT_VERSION,
@@ -484,10 +484,10 @@ export function createUIContextStore(
       const queue = store.practiceMode.queue.map((item) =>
         item.id === entryId
           ? {
-            ...item,
-            name: name.trim() || item.name,
-            data: cloneGroove(groove),
-          }
+              ...item,
+              name: name.trim() || item.name,
+              data: cloneGroove(groove),
+            }
           : item,
       )
       return {

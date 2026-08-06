@@ -11,6 +11,7 @@ import {
   isUpbeatSlot,
   swingDelaySeconds,
 } from '../music-math'
+import { slotAbsoluteMs } from '../tuplet-timing'
 import type { GrooveData, LaneId, Slot } from '../types'
 import { sampleLibrary } from './sample-library'
 
@@ -200,6 +201,15 @@ export function createScheduler(host: SchedulerHost) {
     }
   }
 
+  function slotDurationSeconds(index: number): number {
+    const groove = host.getGroove()
+    const groups = groove.tupletGroups ?? []
+    const slotMs = host.getSlotMs()
+    const next = slotAbsoluteMs(index + 1, slotMs, groups)
+    const current = slotAbsoluteMs(index, slotMs, groups)
+    return (next - current) / 1000
+  }
+
   function scheduleNoteSlot(index: number, time: number): void {
     const groove = host.getGroove()
     const division = groove.division
@@ -228,7 +238,7 @@ export function createScheduler(host: SchedulerHost) {
     while (!finished && nextNoteTime < horizon) {
       scheduleNoteSlot(nextNoteIndex, nextNoteTime)
       uiEvents.push({ index: nextNoteIndex, time: nextNoteTime })
-      nextNoteTime += host.getSlotMs() / 1000
+      nextNoteTime += slotDurationSeconds(nextNoteIndex)
       nextNoteIndex += 1
 
       if (nextNoteIndex >= host.getTotalSlots()) {

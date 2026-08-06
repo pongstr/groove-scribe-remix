@@ -19,12 +19,18 @@ import {
 } from '../music-math'
 import * as db from '../storage/db'
 import { createEmptyGrooveData } from '../tab-notation'
+import {
+  clampTupletGroups,
+  removeTupletAt,
+  upsertTupletAt,
+} from '../tuplet-timing'
 import type {
   Division,
   GrooveData,
   LaneId,
   Slot,
   TimeSignature,
+  TupletKind,
 } from '../types'
 import type { App, LoopMode } from './types'
 
@@ -195,6 +201,10 @@ export function createDataContextStore(
     for (const lane of map.all) {
       map[lane] = resampleArray(map[lane], newLength)
     }
+    groove.tupletGroups = clampTupletGroups(
+      groove.tupletGroups ?? [],
+      newLength,
+    )
   }
 
   function setCell(lane: LaneId, index: number, value: Slot): void {
@@ -216,6 +226,21 @@ export function createDataContextStore(
   ): void {
     const current = getCell(lane, index)
     setCell(lane, index, current === articulation ? null : articulation)
+  }
+
+  function setTupletAt(startSlot: number, kind: TupletKind | null): void {
+    recordHistoryBeforeMutation()
+    update((store) => {
+      const groove = structuredClone(store.groove)
+      const groups = groove.tupletGroups ?? []
+      const total =
+        calcNotesPerMeasure(groove.division, groove.timeSignature) *
+        groove.measures
+      groove.tupletGroups = kind
+        ? upsertTupletAt(groups, startSlot, kind, total)
+        : removeTupletAt(groups, startSlot)
+      return { ...store, groove, dirty: true }
+    })
   }
 
   function setDivision(division: Division): void {
@@ -264,6 +289,10 @@ export function createDataContextStore(
         map[lane] = arr
       }
       groove.measures = clamped
+      groove.tupletGroups = clampTupletGroups(
+        groove.tupletGroups ?? [],
+        newLength,
+      )
       return { ...store, groove, dirty: true }
     })
   }
@@ -468,6 +497,7 @@ export function createDataContextStore(
     getCell,
     setCell,
     toggleCell,
+    setTupletAt,
     setDivision,
     setTimeSignature,
     setMeasures,
