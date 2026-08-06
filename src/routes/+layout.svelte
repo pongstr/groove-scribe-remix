@@ -12,6 +12,20 @@
 <svelte:head>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
+    rel="icon"
+    href="/pongstr-light.svg"
+    media="(prefers-color-scheme: light)"
+    type="image/svg+xml"
+    sizes="any"
+  />
+  <link
+    rel="icon"
+    href="/pongstr-dark.svg"
+    media="(prefers-color-scheme: dark)"
+    type="image/svg+xml"
+    sizes="any"
+  />
+  <link
     rel="preconnect"
     href="https://fonts.gstatic.com"
     crossorigin="anonymous"
