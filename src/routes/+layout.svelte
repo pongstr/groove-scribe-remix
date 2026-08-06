@@ -1,9 +1,19 @@
 <script lang="ts">
   import './layout.css'
 
-  import { setDataContext, setUIContext, uiDefaults } from '$lib/utils/context'
+  import dayjs from 'dayjs'
+  import relativeTime from 'dayjs/plugin/relativeTime'
 
-  const data = setDataContext()
+  import { setDataContext, setUIContext, uiDefaults } from '$lib/utils/context'
+  import { defaultEditorGroove } from '$lib/utils/storage/seed-grooves'
+
+  dayjs.extend(relativeTime)
+
+  let defaultGroove = defaultEditorGroove()
+  let data = setDataContext({
+    groove: defaultGroove,
+    sourceLabel: defaultGroove.name,
+  })
   setUIContext(uiDefaults, data)
 
   let { children } = $props()

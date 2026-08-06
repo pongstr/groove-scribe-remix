@@ -10,6 +10,10 @@
   // import PermutationsPanel from '$lib/components/PermutationsPanel/PermutationsPanel.svelte';
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { applyUiPrefsToGroove } from '$lib/utils/shortcuts'
+  import {
+    defaultEditorGroove,
+    seedGroovesIfEmpty,
+  } from '$lib/utils/storage/seed-grooves'
 
   type Props = { children?: Snippet }
 
@@ -21,7 +25,14 @@
   let saveTimer: ReturnType<typeof setTimeout> | null = null
 
   onMount(async () => {
-    await data.restoreDraft()
+    await seedGroovesIfEmpty()
+
+    const hasDraft = await data.restoreDraft()
+    if (!hasDraft) {
+      const groove = defaultEditorGroove()
+      data.load(groove, groove.name)
+    }
+
     await data.restoreHistory()
 
     applyUiPrefsToGroove(ui, data, { quiet: true })

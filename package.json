@@ -61,6 +61,7 @@
     "wrangler": "4.118.0"
   },
   "dependencies": {
+    "dayjs": "^1.11.21",
     "idb": "^8.0.3",
     "vaul-svelte": "1.0.0-next.7"
   },

@@ -2,22 +2,14 @@ import { getContext, setContext } from 'svelte'
 import { get, writable } from 'svelte/store'
 
 import { browser } from '$app/environment'
-// import type { GrooveData } from '../types'
-// import type {
-//   // App,
-//   ClickSubdivision,
-//   DrawerTab,
-//   LoopMode,
-//   PracticeQueueItem,
-//   StickingMode,
-// } from './types'
+import { defaultPracticeQueue } from '$lib/utils/storage/seed-grooves'
 
 export const UI_CONTEXT = 'app.ui'
 
 // NOTE:
 // Whenever changes are made in the UI Context, bump the version
 // (patch/minor/major) so that `initUIContext` can migrate via `migrate` below.
-const UI_CONTEXT_VERSION = '0.3.1'
+const UI_CONTEXT_VERSION = '0.3.2'
 
 const STICKING_MODES: App.Groove.StickingMode[] = ['off', 'visible', 'reverse']
 const CLICK_SUBDIVISIONS: App.Groove.ClickSubdivision[] = [0, 4, 8, 16]
@@ -28,7 +20,7 @@ export const uiDefaults: App.UI.ContextInput = {
   theme: 'dark',
   practiceMode: {
     active: false,
-    queue: [],
+    queue: defaultPracticeQueue(),
     currentIndex: 0,
     autoAdvance: true,
     selectedTab: 'queue',
@@ -92,6 +84,30 @@ const migrate: Record<string, MigrateFunction> = {
     shortcutsOpen: false,
     version: '0.3.0',
   }),
+  '0.3.2': (update, local) => {
+    const practiceMode = practiceModeFromLocal(local, update.practiceMode)
+    const queue =
+      practiceMode && practiceMode.queue && practiceMode.queue?.length > 0
+        ? practiceMode.queue
+        : defaultPracticeQueue()
+
+    return {
+      ...update,
+      ...local,
+      practiceMode: { ...practiceMode, queue },
+      previewMode: local.previewMode ?? false,
+      stickingMode: local.stickingMode ?? update.stickingMode ?? 'off',
+      showToms: local.showToms ?? update.showToms ?? false,
+      showLegend: local.showLegend ?? update.showLegend ?? false,
+      clickSubdivision: local.clickSubdivision ?? update.clickSubdivision ?? 0,
+      editorVisible: local.editorVisible ?? update.editorVisible ?? true,
+      queueOpen: local.queueOpen ?? update.queueOpen ?? true,
+      helpOpen: false,
+      permutationsOpen: false,
+      shortcutsOpen: false,
+      version: '0.3.2',
+    }
+  },
 }
 
 function cloneGroove(data: App.Groove.Data): App.Groove.Data {
@@ -132,9 +148,9 @@ function toContext(input: App.UI.ContextInput): App.UI.Context {
     queue.length === 0
       ? 0
       : Math.min(
-          Math.max(0, practiceSource?.currentIndex ?? 0),
-          queue.length - 1,
-        )
+        Math.max(0, practiceSource?.currentIndex ?? 0),
+        queue.length - 1,
+      )
 
   return {
     version: UI_CONTEXT_VERSION,
@@ -468,10 +484,10 @@ export function createUIContextStore(
       const queue = store.practiceMode.queue.map((item) =>
         item.id === entryId
           ? {
-              ...item,
-              name: name.trim() || item.name,
-              data: cloneGroove(groove),
-            }
+            ...item,
+            name: name.trim() || item.name,
+            data: cloneGroove(groove),
+          }
           : item,
       )
       return {
