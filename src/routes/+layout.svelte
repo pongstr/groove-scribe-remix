@@ -1,7 +1,6 @@
 <script lang="ts">
   import './layout.css'
 
-  import favicon from '$lib/assets/favicon.svg'
   import { setDataContext, setUIContext, uiDefaults } from '$lib/utils/context'
 
   const data = setDataContext()
@@ -11,7 +10,6 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" href={favicon} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     rel="preconnect"

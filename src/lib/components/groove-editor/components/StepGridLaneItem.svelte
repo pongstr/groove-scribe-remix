@@ -104,7 +104,7 @@
   <ContextMenu.Trigger>
     {#snippet child({ props })}
       <div
-        class="bg-background flex aspect-square w-12 touch-manipulation snap-end items-center justify-center select-none"
+        class="bg-background flex aspect-square w-11 touch-manipulation snap-end items-center justify-center select-none"
       >
         <!-- class={cn( -->
         <!--   'relative box-border flex aspect-square w-full items-center justify-center', -->
