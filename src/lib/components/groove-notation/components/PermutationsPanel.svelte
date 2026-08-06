@@ -66,6 +66,7 @@
     if (!open) ui.closePermutations()
   }}
 >
+  <Dialog.Trigger>Permutations</Dialog.Trigger>
   <Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-lg">
     <Dialog.Header>
       <Dialog.Title>Practice mode</Dialog.Title>

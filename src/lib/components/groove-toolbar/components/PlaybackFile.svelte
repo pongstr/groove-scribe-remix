@@ -21,6 +21,7 @@
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index'
   import { buttonVariants } from '$lib/components/ui/button'
   import Button from '$lib/components/ui/button/button.svelte'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import * as Dialog from '$lib/components/ui/dialog/index'
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index'
   import Input from '$lib/components/ui/input/input.svelte'
@@ -122,25 +123,27 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<Button
+<ButtonWithTooltip
   variant="outline"
   size="icon-sm"
   class="text-muted-foreground hover:text-foreground size-9"
   onclick={() => ui.showDrawer('mine')}
+  content="My Grooves"
+  tooltipContentProps={{ align: 'start', sideOffset: 4 }}
 >
   <FolderOpen class="size-5" />
-  <span class="sr-only">New</span>
-</Button>
+</ButtonWithTooltip>
 
-<Button
+<ButtonWithTooltip
   variant="outline"
   size="icon-sm"
   class="text-muted-foreground hover:text-foreground size-9"
   onclick={handleNewGroove}
+  tooltipContentProps={{ align: 'start', sideOffset: 4 }}
+  content="New Groove"
 >
   <Plus class="size-5" />
-  <span class="sr-only">New</span>
-</Button>
+</ButtonWithTooltip>
 
 <DropdownMenu.Root>
   <DropdownMenu.Trigger

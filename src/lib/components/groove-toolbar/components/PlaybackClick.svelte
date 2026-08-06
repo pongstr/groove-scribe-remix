@@ -42,7 +42,7 @@
       size="sm"
       value={clickValue}
       onValueChange={handleValueChange}
-      class="bg-muted"
+      class="bg-muted p-0"
     >
       {#each OPTIONS as opt (opt.value)}
         <ToggleGroup.Item
@@ -63,7 +63,7 @@
               {/if}
             </Tooltip.Trigger>
 
-            <Tooltip.Content>
+            <Tooltip.Content sideOffset={16}>
               {opt.desc}
             </Tooltip.Content>
           </Tooltip.Root>

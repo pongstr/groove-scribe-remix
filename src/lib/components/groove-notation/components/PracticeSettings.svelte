@@ -42,10 +42,6 @@
     }
   }
 
-  // function addCurrent() {
-  //   ui.enqueue($data.groove.name || $data.sourceLabel, $data.groove)
-  // }
-
   function addSaved(record: SavedGroove) {
     ui.enqueue(record.name, record.data)
   }
@@ -56,7 +52,9 @@
 
   async function loadItem(index: number) {
     const item = ui.selectQueueIndex(index)
+
     if (!item) return
+
     const resolved = await hydrateQueueItem(ui, item)
     data.load(resolved.data, resolved.name, { clearHistory: false })
   }

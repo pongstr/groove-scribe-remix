@@ -7,6 +7,7 @@
   import GrooveSwingControl from '$lib/components/groove-editor/components/GrooveSwingControl.svelte'
   import GrooveTimeSignature from '$lib/components/groove-editor/components/GrooveTimeSignature.svelte'
   import { buttonVariants } from '$lib/components/ui/button/button.svelte'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import * as Drawer from '$lib/components/ui/drawer/index'
   import { cn } from '$lib/utils'
   import { getUIContext } from '$lib/utils/context'
@@ -19,16 +20,21 @@
 >
   <div class="bg-background flex items-center justify-start">
     <Drawer.Root direction="left">
-      <Drawer.Trigger
-        class={cn(
-          buttonVariants({ variant: 'outline' }),
-          'group flex h-9 w-auto justify-start gap-2 pr-2 pl-2.5 font-sans text-xs',
-          'data-[state=open]:bg-red!',
-        )}
-      >
-        <SlidersHorizontal class="size-5" />
-        <span class="hidden md:inline-block">Groove Settings</span>
+      <Drawer.Trigger>
+        <ButtonWithTooltip
+          content="Groove Settings"
+          tooltipContentProps={{ align: 'start' }}
+          class={cn(
+            buttonVariants({ variant: 'outline' }),
+            'group flex h-9 w-auto justify-start gap-2 pr-2 pl-2.5 font-sans text-xs',
+            'data-[state=open]:bg-red!',
+          )}
+        >
+          <SlidersHorizontal class="size-5" />
+          <span class="sr-only">Groove Settings</span>
+        </ButtonWithTooltip>
       </Drawer.Trigger>
+
       <Drawer.Content class={cn('min-w-80 overflow-y-auto font-sans text-sm ')}>
         {@render GrooveSettingsMain()}
       </Drawer.Content>

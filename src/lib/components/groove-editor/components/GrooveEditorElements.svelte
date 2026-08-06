@@ -69,20 +69,21 @@
 
 <Tooltip.Provider>
   <div class="flex flex-1 items-center gap-2">
-    <ButtonGroup.Root class="bg-background">
+    <ButtonGroup.Root class="bg-background h-9">
       <ButtonWithTooltip
         variant="outline"
-        size="icon"
         content="Add Bar"
+        class="aspect-square h-9"
         tooltipContentProps={{ align: 'start' }}
         onclick={() => data.setMeasures($data.groove.measures + 1)}
       >
         <PanelRightClose class="size-5" />
       </ButtonWithTooltip>
+
       <ButtonWithTooltip
         variant="outline"
-        size="icon"
         content="Remove Bar"
+        class="aspect-square h-9"
         onclick={() => data.setMeasures($data.groove.measures - 1)}
         tooltipContentProps={{ align: 'start' }}
       >
@@ -195,7 +196,7 @@
         <Label for={id} class="font-sans text-xs">{opt.label}</Label>
       {/if}
     </Tooltip.Trigger>
-    <Tooltip.Content align={opt.value === 'reverse' ? 'end' : 'start'}>
+    <Tooltip.Content align={opt.value !== 'reverse' ? 'end' : 'start'}>
       {opt.label}
     </Tooltip.Content>
   </Tooltip.Root>

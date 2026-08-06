@@ -6,7 +6,7 @@
   import PracticeModeBar from '$lib/components/groove-notation/components/PracticeModeBar.svelte'
   import PlaybackControls from '$lib/components/groove-toolbar/components/PlaybackControls.svelte'
   import PlaybackFile from '$lib/components/groove-toolbar/components/PlaybackFile.svelte'
-  import { Button } from '$lib/components/ui/button'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import { cn } from '$lib/utils'
   import { getUIContext } from '$lib/utils/context'
 
@@ -53,24 +53,27 @@
 {/snippet}
 
 {#snippet RightSection()}
-  <Button
+  <ButtonWithTooltip
     variant="outline"
     size="icon"
     class="text-muted-foreground hover:text-foreground ml-auto size-9"
     onclick={() => ui.openShortcuts()}
     aria-label="Keyboard shortcuts"
-    title="Keyboard shortcuts (H)"
+    content="Hotkeys (H)"
+    tooltipContentProps={{ align: 'end' }}
   >
     <Keyboard class="size-4" />
-  </Button>
+  </ButtonWithTooltip>
 
-  <Button
+  <ButtonWithTooltip
     variant="outline"
     size="icon"
     class="text-muted-foreground hover:text-foreground size-9"
     onclick={() => ui.toggleHelp()}
     aria-label="Help and notation key"
+    content="Help Docs"
+    tooltipContentProps={{ align: 'end' }}
   >
     <CircleQuestionMark class="size-4" />
-  </Button>
+  </ButtonWithTooltip>
 {/snippet}

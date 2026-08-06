@@ -12,7 +12,8 @@
   import PlaybackClick from '$lib/components/groove-toolbar/components/PlaybackClick.svelte'
   import PlaybackClickControl from '$lib/components/groove-toolbar/components/PlaybackClickControl.svelte'
   import { Button } from '$lib/components/ui/button'
-  import { Toggle } from '$lib/components/ui/toggle'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
+  import ToggleWithTooltip from '$lib/components/ui/toggle/toggle-with-tooltip.svelte'
   import { getDataContext, getUIContext } from '$lib/utils/context'
 
   let data = getDataContext()
@@ -114,28 +115,28 @@
   {/if}
 </Button>
 
-<Toggle
+<ToggleWithTooltip
   variant="outline"
   size="sm"
-  class="aria-pressed:bg-primary aria-pressed:text-primary-foreground text-muted-foreground hover:text-foreground aspect-square size-9"
+  class="aria-pressed:bg-primary aria-pressed:text-primary-foreground over:text-foreground aspect-square size-9"
   pressed={loopOn}
   onPressedChange={() => toggleLoop()}
   aria-label="Toggle loop"
-  title="Loop"
+  content="Loop [C]"
 >
   <RotateCw class="size-4" />
-</Toggle>
+</ToggleWithTooltip>
 
-<Toggle
+<ToggleWithTooltip
   variant="outline"
   size="sm"
-  class="aria-pressed:bg-primary aria-pressed:text-primary-foreground text-muted-foreground hover:text-foreground size-9"
+  class="aria-pressed:bg-primary aria-pressed:text-primary-foreground hover:text-foreground size-9"
   pressed={countInOn}
   onPressedChange={() => toggleCountIn()}
-  title="Count-in: one bar of {countInLabel} before play"
+  content="Count-in one bar of {countInLabel}"
 >
   <Timer class="size-4" />
-</Toggle>
+</ToggleWithTooltip>
 
 <div class="bg-secondary h-9 w-px">&nbsp;</div>
 
@@ -145,17 +146,17 @@
 {#if !$ui.practiceMode.active}
   <div class="bg-secondary h-9 w-px">&nbsp;</div>
 
-  <Button
+  <ButtonWithTooltip
     variant="outline"
     size="icon"
     class="text-muted-foreground hover:text-foreground h-9"
     onclick={() => ui.togglePreviewMode()}
-    title="Preview mode (V)"
+    content="Preview mode (V)"
     aria-label="Toggle preview mode"
     aria-pressed={$ui.previewMode}
   >
     <Fullscreen class="size-4" />
-  </Button>
+  </ButtonWithTooltip>
 
   <Button
     variant="outline"

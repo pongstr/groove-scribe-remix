@@ -53,18 +53,22 @@
   )
 
   async function handleSave() {
-    const name = saveNameValue.trim() || 'Untitled Groove'
+    const name = saveNameValue.trim() ?? 'Untitled Groove'
     const record = await db.saveGroove(name, $data.groove, $data.groove.id)
+
     data.applySavedRecord(record)
     ui.syncQueueGroove(record.id, record.name, record.data)
+
     await refresh()
   }
 
   async function handleSaveAsNew() {
-    const name = saveNameValue.trim() || 'Untitled Groove'
+    const name = saveNameValue.trim() ?? 'Untitled Groove'
     const record = await db.saveGroove(name, $data.groove, null)
+
     data.applySavedRecord(record)
     ui.syncQueueGroove(record.id, record.name, record.data)
+
     await refresh()
   }
 
