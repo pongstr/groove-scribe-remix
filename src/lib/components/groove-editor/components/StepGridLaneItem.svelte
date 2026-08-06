@@ -146,7 +146,9 @@
               'bg-background flex aspect-square size-full items-center justify-center rounded-[8px]',
               isPlayhead
                 ? 'bg-radial from-yellow-300 from-10% to-yellow-400 text-amber-900'
-                : 'bg-gray-900/5 text-(--lane-color)',
+                : isMeasureStart
+                  ? 'bg-background text-(--lane-color)'
+                  : 'bg-gray-900/5 text-(--lane-color)',
             )}
           >
             {#if beatNumber !== null}

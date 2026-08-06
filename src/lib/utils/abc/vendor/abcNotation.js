@@ -494,13 +494,13 @@ function snare_HH_kick_ABC_for_triplets(
             }
             if (
               0 <
-                count_active_notes_in_arrays(
-                  all_drum_array_of_array,
-                  j + 1,
-                  1,
-                ) ||
+              count_active_notes_in_arrays(
+                all_drum_array_of_array,
+                j + 1,
+                1,
+              ) ||
               0 <
-                count_active_notes_in_arrays(all_drum_array_of_array, j + 3, 1)
+              count_active_notes_in_arrays(all_drum_array_of_array, j + 3, 1)
             ) {
               can_fake_sixes = false
             }
@@ -621,8 +621,8 @@ function snare_HH_kick_ABC_for_triplets(
       if (
         i < num_notes - 1 &&
         (i + 1) %
-          (12 * timeSigTop * (4 / timeSigBottom) * numberOfMeasuresPerLine) ===
-          0
+        (12 * timeSigTop * (4 / timeSigBottom) * numberOfMeasuresPerLine) ===
+        0
       ) {
         stickings_voice_string += '\n'
         hh_snare_voice_string += '\n'
@@ -794,8 +794,8 @@ function snare_HH_kick_ABC_for_quads(
     if (
       i < num_notes - 1 &&
       (i + 1) %
-        ((32 / timeSigBottom) * timeSigTop * numberOfMeasuresPerLine) ===
-        0
+      ((32 / timeSigBottom) * timeSigTop * numberOfMeasuresPerLine) ===
+      0
     ) {
       stickings_voice_string += '\n'
       hh_snare_voice_string += '\n'
@@ -867,15 +867,15 @@ export function get_top_ABC_BoilerPlate(
     '%%leftmargin 0cm\n' +
     '%%rightmargin 0cm\n' +
     '%%topspace 10px\n' +
-    '%%titlefont "Noto Sans Variable" 12\n' +
-    '%%partsfont calibri 12\n' +
+    '%%titlefont "JetBrains Mono" 12\n' +
+    '%%partsfont "JetBrains Mono" 12\n' +
     // Single-token name: abc2svg splits %%xxxfont on whitespace, so
     // multi-word families like "JetBrains Mono Variable" break both name and size.
     // render-abc.ts remaps AbcSticking → JetBrains Mono Variable in the SVG CSS.
-    '%%gchordfont AbcSticking 12\n' +
-    '%%annotationfont calibri 12\n' +
-    '%%infofont calibri 12\n' +
-    '%%textfont calibri 12\n' +
+    '%%gchordfont "JetBrains Mono" 12\n' +
+    '%%annotationfont "JetBrains Mono" 12\n' +
+    '%%infofont "JetBrains Mono" 12\n' +
+    '%%textfont "JetBrains Mono" 12\n' +
     '%%deco (. 0 a 5 1 1 "@-8,-3("\n' +
     '%%deco ). 0 a 5 1 1 "@4,-3)"\n' +
     '%%beginsvg\n' +

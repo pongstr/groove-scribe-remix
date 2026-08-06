@@ -164,8 +164,8 @@ function createCallback(bridge: AbcBridge) {
       if (isBenignAbcWarning(msg)) return
       cb.abc_error_output += msg + '<br/>\n'
     },
-    get_abcmodel() {},
-    anno_start() {},
+    get_abcmodel() { },
+    anno_start() { },
     svg_highlight_y: 0,
     svg_highlight_h: 44,
     anno_stop(
@@ -294,7 +294,7 @@ export function renderGrooveToSvg(
 function remapStickingFont(svg: string): string {
   return svg.replace(
     /\{font:([\d.]+)px AbcSticking\}/g,
-    '{font:$1px "JetBrains Mono Variable",monospace}',
+    '{font:$1px "JetBrains Mono",monospace}',
   )
 }
 
