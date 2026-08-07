@@ -62,6 +62,16 @@ export type LaneId = (typeof LANE_IDS)[number]
 /** A single grid slot: `null` is a rest, otherwise the articulation played there. */
 export type Slot<A extends string = Articulation> = A | null
 
+/** In-bar tuplet grouping on a straight grid (experiment). */
+export type TupletKind = 'triplet' | 'sixtuplet'
+
+export interface TupletGroup {
+  id: string
+  kind: TupletKind
+  /** First grid column included in the group. */
+  startSlot: number
+}
+
 export interface GrooveData {
   /** IndexedDB key when this groove was loaded from / saved to "My Grooves"; `null` otherwise. */
   id: string | null
@@ -94,6 +104,9 @@ export interface GrooveData {
     Slot<TomArticulation>[],
   ]
   sticking: Slot<StickingArticulation>[]
+
+  /** Optional per-bar tuplet spans; straight division grid stays unchanged. */
+  tupletGroups?: TupletGroup[]
 }
 
 /** A saved "My Grooves" record, as stored in IndexedDB. */

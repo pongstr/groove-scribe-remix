@@ -14,8 +14,20 @@
   } from '$lib/utils/config'
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { lanes } from '$lib/utils/groove-lanes'
+  import { calcNotesPerMeasure } from '$lib/utils/music-math'
+  import { isTripletDivision } from '$lib/utils/music-math'
   import { reverseStickingSlot } from '$lib/utils/sticking-display'
-  import type { LaneId, StickingArticulation } from '$lib/utils/types'
+  import {
+    findTupletGroup,
+    TUPLET_SLOT_COUNT,
+    tupletSlotCount,
+  } from '$lib/utils/tuplet-timing'
+  import type {
+    LaneId,
+    StickingArticulation,
+    TupletGroup,
+    TupletKind,
+  } from '$lib/utils/types'
 
   let data = getDataContext()
   let ui = getUIContext()
@@ -59,6 +71,33 @@
   let options = $derived(LANE_ARTICULATION_ORDER[lane])
   let articulationMeta = $derived(LANE_ARTICULATION_META[lane])
   let laneLabel = $derived(LANE_META[lane].label)
+  let tupletGroups = $derived($data.groove.tupletGroups ?? [])
+  let tupletAtCell = $derived(findTupletGroup(tupletGroups, index))
+  let straightGrid = $derived(!isTripletDivision($data.groove.division))
+
+  function canPlaceTuplet(kind: TupletKind): boolean {
+    if (!straightGrid) return false
+    const span = tupletSlotCount(kind)
+    const total =
+      $data.groove.measures *
+      calcNotesPerMeasure($data.groove.division, $data.groove.timeSignature)
+    if (index + span > total) return false
+    return !tupletGroups.some((g: TupletGroup) => {
+      const gSpan = TUPLET_SLOT_COUNT[g.kind]
+      const gEnd = g.startSlot + gSpan
+      const end = index + span
+      return !(end <= g.startSlot || index >= gEnd)
+    })
+  }
+
+  function assignTuplet(kind: TupletKind) {
+    if (!canPlaceTuplet(kind)) return
+    data.setTupletAt(index, kind)
+  }
+
+  function removeTuplet() {
+    data.setTupletAt(index, null)
+  }
 
   function handleClick(e: MouseEvent) {
     let articulation = LANE_DEFAULT_ARTICULATION[lane]
@@ -130,6 +169,7 @@
             isBeatStart && !isMeasureStart && 'bg-(--lane-primary)',
             isMeasureStart && 'bg-(--lane-secondary)',
             isPlayhead && 'border-yellow-500! bg-yellow-500/20!',
+            tupletAtCell && 'ring-2 ring-violet-400/70 ring-inset',
           )}
           onclick={(e) => {
             handleClick(e)
@@ -165,6 +205,14 @@
                 class="pointer-events-none size-4"
               />
             {/if}
+            {#if tupletAtCell && tupletAtCell.position === 0}
+              <span
+                class="pointer-events-none absolute right-1 bottom-1 rounded bg-violet-500/15 px-1 text-[0.6rem] font-bold text-violet-700 dark:text-violet-300"
+                aria-hidden="true"
+              >
+                {tupletAtCell.kind === 'triplet' ? '3' : '6'}
+              </span>
+            {/if}
           </div>
         </button>
       </div>
@@ -188,6 +236,31 @@
         {/if}
       </ContextMenu.Item>
     {/each}
+    {#if straightGrid}
+      <ContextMenu.Separator />
+      <ContextMenu.Label>Rhythm grouping</ContextMenu.Label>
+      <ContextMenu.Item
+        disabled={!canPlaceTuplet('triplet')}
+        onclick={() => assignTuplet('triplet')}
+      >
+        <span class="w-5 text-center text-sm font-bold">♪</span>
+        <span>Triplet (3)</span>
+        <ContextMenu.Shortcut>3 in 2</ContextMenu.Shortcut>
+      </ContextMenu.Item>
+      <ContextMenu.Item
+        disabled={!canPlaceTuplet('sixtuplet')}
+        onclick={() => assignTuplet('sixtuplet')}
+      >
+        <span class="w-5 text-center text-sm font-bold">♪</span>
+        <span>Sixtuplet (6)</span>
+        <ContextMenu.Shortcut>6 in 4</ContextMenu.Shortcut>
+      </ContextMenu.Item>
+      {#if tupletAtCell}
+        <ContextMenu.Item variant="destructive" onclick={removeTuplet}>
+          Remove tuplet group
+        </ContextMenu.Item>
+      {/if}
+    {/if}
     <ContextMenu.Separator />
     <ContextMenu.Item variant="destructive" onclick={clear}>
       Clear

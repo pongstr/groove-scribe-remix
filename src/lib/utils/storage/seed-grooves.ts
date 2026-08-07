@@ -37,10 +37,7 @@ export function seedGrooveData(id: string, raw: GrooveData): GrooveData {
 }
 
 export function defaultEditorGroove(): GrooveData {
-  return seedGrooveData(
-    SEED_GROOVE_IDS.ghostNotes1,
-    ghostNotes1 as GrooveData,
-  )
+  return seedGrooveData(SEED_GROOVE_IDS.ghostNotes1, ghostNotes1 as GrooveData)
 }
 
 export function defaultPracticeQueue(): App.UI.PracticeQueueItem[] {

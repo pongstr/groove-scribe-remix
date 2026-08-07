@@ -12,9 +12,8 @@ async function freshDbModule() {
 describe('storage/seed-grooves', () => {
   it('seeds both ghost-note grooves when the library is empty', async () => {
     const db = await freshDbModule()
-    const { seedGroovesIfEmpty, SEED_GROOVE_IDS } = await import(
-      '$lib/utils/storage/seed-grooves'
-    )
+    const { seedGroovesIfEmpty, SEED_GROOVE_IDS } =
+      await import('$lib/utils/storage/seed-grooves')
 
     await seedGroovesIfEmpty()
 
@@ -33,7 +32,8 @@ describe('storage/seed-grooves', () => {
 
   it('does not re-seed when grooves already exist', async () => {
     const db = await freshDbModule()
-    const { seedGroovesIfEmpty } = await import('$lib/utils/storage/seed-grooves')
+    const { seedGroovesIfEmpty } =
+      await import('$lib/utils/storage/seed-grooves')
 
     await db.saveGroove('Existing', createEmptyGrooveData({ name: 'Existing' }))
     await seedGroovesIfEmpty()
@@ -42,9 +42,8 @@ describe('storage/seed-grooves', () => {
   })
 
   it('uses ghost-notes-1 as the default editor groove', async () => {
-    const { defaultEditorGroove, SEED_GROOVE_IDS } = await import(
-      '$lib/utils/storage/seed-grooves'
-    )
+    const { defaultEditorGroove, SEED_GROOVE_IDS } =
+      await import('$lib/utils/storage/seed-grooves')
 
     const groove = defaultEditorGroove()
     expect(groove.id).toBe(SEED_GROOVE_IDS.ghostNotes1)
@@ -53,9 +52,8 @@ describe('storage/seed-grooves', () => {
   })
 
   it('builds a two-item default practice queue', async () => {
-    const { defaultPracticeQueue, SEED_GROOVE_IDS } = await import(
-      '$lib/utils/storage/seed-grooves'
-    )
+    const { defaultPracticeQueue, SEED_GROOVE_IDS } =
+      await import('$lib/utils/storage/seed-grooves')
 
     const queue = defaultPracticeQueue()
     expect(queue).toHaveLength(2)
