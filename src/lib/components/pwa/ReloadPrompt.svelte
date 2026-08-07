@@ -1,10 +1,11 @@
 <script lang="ts">
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
+  import type { RegisterSWOptions } from 'vite-plugin-pwa/types'
 
   import { Button } from '$lib/components/ui/button'
 
-  const { needRefresh, updateServiceWorker, offlineReady } = useRegisterSW({
-    onRegistered(registration) {
+  const registerOptions = {
+    onRegistered(registration: ServiceWorkerRegistration | undefined) {
       if (!registration) return
 
       setInterval(
@@ -14,10 +15,13 @@
         60 * 60 * 1000,
       )
     },
-    onRegisterError(error) {
+    onRegisterError(error: unknown) {
       console.error('Service worker registration failed', error)
     },
-  })
+  } satisfies RegisterSWOptions
+
+  const { needRefresh, updateServiceWorker, offlineReady } =
+    useRegisterSW(registerOptions)
 
   let visible = $derived($offlineReady || $needRefresh)
 
@@ -38,9 +42,9 @@
   >
     <p class="text-foreground text-sm">
       {#if $needRefresh}
-        A new version of Groove Studio is available.
+        A new version of GrooveScribe Remix is available.
       {:else}
-        Groove Studio is ready to work offline.
+      GrooveScribe Remix is ready to work offline.
       {/if}
     </p>
 

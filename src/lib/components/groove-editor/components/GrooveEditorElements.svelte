@@ -41,6 +41,11 @@
   let stickingMode = $state(stickingModes[0])
   let hasHistory = $derived.by(() => $history.canUndo ?? $history.canRedo)
 
+  $effect(() => {
+    const match = stickingModes.find((opt) => opt.value === $ui.stickingMode)
+    if (match) stickingMode = match
+  })
+
   function handleValueChange(value: string) {
     if (!value) return
 

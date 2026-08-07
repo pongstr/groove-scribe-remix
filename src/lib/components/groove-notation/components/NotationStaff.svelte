@@ -37,6 +37,10 @@
 
     const reverse = $ui.stickingMode === 'reverse'
     const displaySource = withDisplayStickings(source, reverse)
+    // Display toggles live on UI prefs — queue snapshots keep their own copies.
+    const showToms = $ui.showToms
+    const showStickings = $ui.stickingMode !== 'off'
+    const showLegend = $ui.showLegend
 
     // Destructure (with defaults) so $derived tracks every field that affects engraving.
     const {
@@ -48,9 +52,6 @@
       division = 16,
       measures = 1,
       timeSignature = { beats: 4, noteValue: 4 as const },
-      showToms = false,
-      showStickings = false,
-      showLegend = false,
       kickStemsUp = true,
       author = '',
       comments = '',

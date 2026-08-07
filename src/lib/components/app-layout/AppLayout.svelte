@@ -57,7 +57,7 @@
 </script>
 
 <svelte:head>
-  <title>Groove Studio</title>
+  <title>GrooveScribe Remix</title>
 </svelte:head>
 
 <main
