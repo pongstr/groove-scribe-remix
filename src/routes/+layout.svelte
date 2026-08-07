@@ -3,6 +3,7 @@
 
   import dayjs from 'dayjs'
   import relativeTime from 'dayjs/plugin/relativeTime'
+  import { pwaInfo } from 'virtual:pwa-info'
 
   import { setDataContext, setUIContext, uiDefaults } from '$lib/utils/context'
   import { defaultEditorGroove } from '$lib/utils/storage/seed-grooves'
@@ -17,9 +18,13 @@
   setUIContext(uiDefaults, data)
 
   let { children } = $props()
+  let manifestHref = $derived(pwaInfo?.webManifest.href)
 </script>
 
 <svelte:head>
+  {#if manifestHref}
+    <link rel="manifest" href={manifestHref} />
+  {/if}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     rel="icon"
@@ -47,3 +52,7 @@
 </svelte:head>
 
 {@render children()}
+
+{#await import('$lib/components/pwa/ReloadPrompt.svelte') then { default: ReloadPrompt }}
+  <ReloadPrompt />
+{/await}

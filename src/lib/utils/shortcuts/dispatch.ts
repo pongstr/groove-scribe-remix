@@ -1,10 +1,9 @@
-import type { App } from '../context/types'
 import { createShortcutHandlers } from './handlers'
 import { createShortcutDefs, matchShortcut } from './registry'
 import type { ShortcutDef } from './types'
 
 type UI = App.UI.ContextStore
-type Data = App.Data.ContextStore
+type Data = App.Groove.ContextStore
 
 /** True when letter/space shortcuts should defer to the focused field. */
 export function isTextEditableTarget(target: EventTarget | null): boolean {

@@ -9,9 +9,8 @@ import {
   HIHAT_ARTICULATIONS,
   KICK_ARTICULATIONS,
   SNARE_ARTICULATIONS,
-} from '../config'
-import { calcNotesPerMeasure, isUpbeatSlot } from '../music-math'
-import type { GrooveData } from '../types'
+} from '$lib/utils/config'
+import { calcNotesPerMeasure, isUpbeatSlot } from '$lib/utils/music-math'
 
 const PERCUSSION_CHANNEL = 9 // MIDI channel 10, 0-indexed
 const TICKS_PER_QUARTER = 480
@@ -61,7 +60,7 @@ function encodeVarLen(value: number): number[] {
     buffer |= (value & 0x7f) | 0x80
   }
   const out: number[] = []
-  for (;;) {
+  for (; ;) {
     out.push(buffer & 0xff)
     if (buffer & 0x80) buffer >>>= 8
     else break
@@ -73,7 +72,7 @@ function uint32be(n: number): number[] {
   return [(n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff]
 }
 
-export function grooveDataToMidiBytes(data: GrooveData): Uint8Array {
+export function grooveDataToMidiBytes(data: App.Groove.Data): Uint8Array {
   const notesPerMeasure = calcNotesPerMeasure(data.division, data.timeSignature)
   const totalSlots = notesPerMeasure * data.measures
   const slotTicks = (TICKS_PER_QUARTER * 4) / data.division
@@ -195,8 +194,9 @@ export function grooveDataToMidiBytes(data: GrooveData): Uint8Array {
   return new Uint8Array([...header, ...trackHeader, ...track])
 }
 
-export function downloadGrooveAsMidi(data: GrooveData): void {
+export function downloadGrooveAsMidi(data: App.Groove.Data): void {
   const bytes = grooveDataToMidiBytes(data)
+  // @ts-expect-error - idk how to type this
   const blob = new Blob([bytes], { type: 'audio/midi' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

@@ -74,7 +74,7 @@ export default defineConfig(
         },
       ],
       // #== Svelte/Svelteki: specific rules
-      'svelte/no-navigation-without-resolve': 'off', // what an annoying piece of shit rule. if this needs to be enforced then why the fuck are types mismatched?
+      'svelte/no-navigation-without-resolve': 'off',
       'svelte/no-unused-svelte-ignore': 'off',
     },
   },

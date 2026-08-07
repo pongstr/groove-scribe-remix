@@ -3,17 +3,16 @@
   import { cn } from '$lib/utils'
   import { getDataContext, getUIContext } from '$lib/utils/context'
 
-  const data = getDataContext()
-  const playhead = data.playhead
-  const ui = getUIContext()
-
   /** Fallback if sticky lane gutter isn't measurable yet (`w-40` / `md:w-50`). */
   const LANE_LABEL_WIDTH_PX = 160
 
+  let data = getDataContext()
+  let playhead = data.playhead
+  let ui = getUIContext()
   let scrollEl = $state<HTMLDivElement | null>(null)
 
   /** Previous playhead slot — used to detect groove loop wrap (end → start). */
-  let prevScrollSlot = -1
+  let prevScrollSlot = $state(-1)
 
   function gutterWidth(el: HTMLElement): number {
     const gutterEl = el.querySelector('.sticky.left-0')
@@ -40,6 +39,7 @@
     const visibleLeft = containerRect.left + gutterWidth(el) + pad
     const visibleRight = containerRect.right - pad
     const visibleWidth = Math.max(1, visibleRight - visibleLeft)
+
     // Page before the active cell reaches the right edge (~2–3 cells of lead).
     const lead = Math.min(cellWidth * 3, visibleWidth * 0.3)
     const rightLimit = visibleRight - lead

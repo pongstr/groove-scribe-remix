@@ -41,7 +41,7 @@
     </Drawer.Root>
   </div>
 
-  {#if !$ui.previewMode}
+  {#if !$ui.previewMode && $ui.editorVisible}
     <GrooveEditorElements />
   {/if}
 </div>
