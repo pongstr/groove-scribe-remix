@@ -28,7 +28,9 @@
 
   function handleValueChange(value: string | undefined) {
     if (value == null) return
+
     const match = OPTIONS.find((opt) => opt.value === value)
+
     if (!match) return
     setClickSubdivision(ui, data, match.num)
   }

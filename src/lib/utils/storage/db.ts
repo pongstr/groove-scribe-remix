@@ -33,12 +33,24 @@ interface GrooveDBSchema extends DBSchema {
     key: string
     value: HistoryRecord
   }
+  practiceQueue: {
+    key: string
+    value: { id: string; queue: PracticeQueueRecord[]; updatedAt: number }
+  }
+}
+
+/** Lightweight queue entry stored in IndexedDB (full groove snapshots). */
+export type PracticeQueueRecord = {
+  id: string
+  name: string
+  data: GrooveData
 }
 
 const DB_NAME = 'groove-studio'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const DRAFT_KEY = 'current'
 const HISTORY_KEY = 'current'
+const PRACTICE_QUEUE_KEY = 'current'
 
 let dbPromise: Promise<IDBPDatabase<GrooveDBSchema>> | null = null
 
@@ -55,6 +67,9 @@ function getDb(): Promise<IDBPDatabase<GrooveDBSchema>> {
         }
         if (!db.objectStoreNames.contains('history')) {
           db.createObjectStore('history', { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains('practiceQueue')) {
+          db.createObjectStore('practiceQueue', { keyPath: 'id' })
         }
       },
     })
@@ -194,4 +209,24 @@ export async function loadHistory(): Promise<
 export async function clearHistory(): Promise<void> {
   const db = await getDb()
   await db.delete('history', HISTORY_KEY)
+}
+
+export async function savePracticeQueue(
+  queue: PracticeQueueRecord[],
+): Promise<void> {
+  const db = await getDb()
+  await db.put('practiceQueue', {
+    id: PRACTICE_QUEUE_KEY,
+    queue: toPlain(queue),
+    updatedAt: Date.now(),
+  })
+}
+
+export async function loadPracticeQueue(): Promise<
+  PracticeQueueRecord[] | undefined
+> {
+  const db = await getDb()
+  const record = await db.get('practiceQueue', PRACTICE_QUEUE_KEY)
+  if (!record?.queue?.length) return undefined
+  return record.queue
 }

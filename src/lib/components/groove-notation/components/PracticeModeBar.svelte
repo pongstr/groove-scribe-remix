@@ -56,6 +56,7 @@
 
   $effect(() => {
     const count = $data.playback.naturalEndCount
+    const chainAt = $data.playback.naturalEndAt
 
     if (!$ui.practiceMode.active) {
       lastNaturalEnd = count
@@ -66,20 +67,27 @@
 
     lastNaturalEnd = count
 
-    if (!$ui.practiceMode.autoAdvance) return
-    if ($ui.practiceMode.queue.length < 2) return
+    if (!$ui.practiceMode.autoAdvance) {
+      data.stop()
+      return
+    }
+    if ($ui.practiceMode.queue.length < 2) {
+      data.stop()
+      return
+    }
     if ($data.playback.loop === 'loop') return
 
     const item = ui.nextInQueue()
 
-    if (!item) return
+    if (!item || chainAt == null) {
+      data.stop()
+      return
+    }
 
-    void (async () => {
-      const resolved = await hydrateQueueItem(ui, item)
-      data.load(resolved.data, resolved.name, { clearHistory: false })
-      applyUiPrefsToGroove(ui, data, { quiet: true })
-      void data.play({ skipCountIn: true })
-    })()
+    // Chain immediately from the in-memory snapshot; refresh from IndexedDB in the background.
+    data.chainPlay(item.data, item.name, chainAt)
+    applyUiPrefsToGroove(ui, data, { quiet: true })
+    void hydrateQueueItem(ui, item)
   })
 
   // On practice enter, refresh saved queue snapshots from IndexedDB.

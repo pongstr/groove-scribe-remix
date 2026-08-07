@@ -60,7 +60,7 @@ function encodeVarLen(value: number): number[] {
     buffer |= (value & 0x7f) | 0x80
   }
   const out: number[] = []
-  for (; ;) {
+  for (;;) {
     out.push(buffer & 0xff)
     if (buffer & 0x80) buffer >>>= 8
     else break

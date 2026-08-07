@@ -80,4 +80,26 @@ describe('storage/db', () => {
     await db.clearDraft()
     expect(await db.loadDraft()).toBeUndefined()
   })
+
+  it('round-trips the practice queue', async () => {
+    const db = await freshDbModule()
+    expect(await db.loadPracticeQueue()).toBeUndefined()
+    const queue = [
+      {
+        id: 'q1',
+        name: 'Groove A',
+        data: createEmptyGrooveData({ name: 'Groove A', id: 'a-1' }),
+      },
+      {
+        id: 'q2',
+        name: 'Groove B',
+        data: createEmptyGrooveData({ name: 'Groove B', id: 'b-1' }),
+      },
+    ]
+    await db.savePracticeQueue(queue)
+    const loaded = await db.loadPracticeQueue()
+    expect(loaded).toHaveLength(2)
+    expect(loaded?.[0]?.name).toBe('Groove A')
+    expect(loaded?.[1]?.data.id).toBe('b-1')
+  })
 })

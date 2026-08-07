@@ -40,12 +40,18 @@
     commitTempo()
   }
 
+  function blurInput(e: KeyboardEvent) {
+    if (e.currentTarget instanceof HTMLInputElement) {
+      e.currentTarget.blur()
+    }
+  }
+
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter') {
-      e.currentTarget instanceof HTMLInputElement && e.currentTarget.blur()
+      blurInput(e)
     } else if (e.key === 'Escape') {
       draft = null
-      e.currentTarget instanceof HTMLInputElement && e.currentTarget.blur()
+      blurInput(e)
     }
   }
 </script>

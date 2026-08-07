@@ -1,6 +1,6 @@
 <script lang="ts">
   import { cubicIn, cubicOut } from 'svelte/easing'
-  import { fly, slide } from 'svelte/transition'
+  import { slide } from 'svelte/transition'
 
   import GrooveGrid from '$lib/components/groove-editor/components/GrooveGrid.svelte'
   import GrooveSettings from '$lib/components/groove-editor/components/GrooveSettings.svelte'
@@ -27,13 +27,5 @@
   >
     <GrooveSettings />
     <GrooveGrid />
-  </div>
-{:else}
-  <div
-    in:fly={{ duration: 150, y: 200, delay: 80, easing: cubicIn }}
-    out:fly={{ duration: 150, y: -40, easing: cubicOut }}
-    class="relative h-0 w-full"
-  >
-    <GrooveSettings />
   </div>
 {/if}

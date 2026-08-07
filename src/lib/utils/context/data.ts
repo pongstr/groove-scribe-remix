@@ -54,6 +54,7 @@ function initDataContext(init: App.Data.ContextInput = {}): App.Data.Context {
       loop: 'loop',
       countInEnabled: true,
       naturalEndCount: 0,
+      naturalEndAt: null as number | null,
       loadProgress: { loaded: 0, total: 0, ready: false },
       ...init.playback,
     },
@@ -182,12 +183,13 @@ export function createDataContextStore(
     getIsCountingIn: () => playheadSnapshot().isCountingIn,
     patchPlayback,
     patchPlayhead,
-    notifyNaturalEnd: () => {
+    notifyNaturalEnd: (chainAt: number) => {
       update((store) => ({
         ...store,
         playback: {
           ...store.playback,
           naturalEndCount: store.playback.naturalEndCount + 1,
+          naturalEndAt: chainAt,
         },
       }))
     },
@@ -309,9 +311,9 @@ export function createDataContextStore(
   function load(
     data: GrooveData,
     sourceLabel: string,
-    options?: { clearHistory?: boolean },
+    options?: { clearHistory?: boolean; keepTransport?: boolean },
   ): void {
-    scheduler.stop()
+    if (!options?.keepTransport) scheduler.stop()
     const plain = JSON.parse(JSON.stringify(data)) as GrooveData
     if (plain.showLegend === undefined) plain.showLegend = false
     if (plain.kickStemsUp === undefined) plain.kickStemsUp = true
@@ -325,6 +327,16 @@ export function createDataContextStore(
     suppressHistory = false
     // Default: clear (New / library open). Practice/queue loads pass clearHistory: false.
     if (options?.clearHistory !== false) resetHistory()
+  }
+
+  function chainPlay(
+    grooveData: GrooveData,
+    sourceLabel: string,
+    chainAt: number,
+  ): void {
+    load(grooveData, sourceLabel, { clearHistory: false, keepTransport: true })
+    scheduler.chain({ startAt: chainAt })
+    patchPlayback({ naturalEndAt: null })
   }
 
   function markSaved(sourceLabel: string): void {
@@ -606,6 +618,7 @@ export function createDataContextStore(
       suppressHistory = false
     },
     load,
+    chainPlay,
     markSaved,
     applySavedRecord,
     newGroove: () => load(createEmptyGrooveData(), 'Untitled Groove'),
