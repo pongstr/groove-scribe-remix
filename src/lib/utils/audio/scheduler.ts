@@ -70,6 +70,8 @@ export function createScheduler(host: SchedulerHost) {
   let countInNextTime = 0
   let metronomeNextTime = 0
   let metronomeTickCounter = 0
+  /** Tracks subdivision so live changes can resync click timing to the groove. */
+  let lastMetronomeSubdivision: 0 | 4 | 8 | 16 | null = null
   let uiEvents: UiEvent[] = []
   /** Slot to resume from after pause; null means start from the beginning. */
   let resumeSlot: number | null = null
@@ -144,6 +146,31 @@ export function createScheduler(host: SchedulerHost) {
     })
   }
 
+  function metronomeTickForSlot(groove: GrooveData, slot: number): number {
+    const npm = calcNotesPerMeasure(groove.division, groove.timeSignature)
+    const ticksPerBeat = groove.metronomeSubdivision / 4
+    const slotsPerBeat = npm / groove.timeSignature.beats
+    return Math.round((slot % npm) * (ticksPerBeat / slotsPerBeat))
+  }
+
+  function syncMetronomeToSlot(
+    groove: GrooveData,
+    slot: number,
+    nextClickTime: number,
+  ): void {
+    if (groove.metronomeSubdivision === 0) return
+    metronomeTickCounter = metronomeTickForSlot(groove, slot)
+    metronomeNextTime = nextClickTime
+  }
+
+  function syncMetronomeToCurrentPosition(): void {
+    const groove = host.getGroove()
+    if (groove.metronomeSubdivision === 0) return
+    const slot = host.getCurrentSlot()
+    if (slot < 0) return
+    syncMetronomeToSlot(groove, slot, ensureContext().currentTime)
+  }
+
   function scheduleCountIn(horizon: number): void {
     if (countInNextBeat >= countInBeatsTotal) return
     const beatSeconds = 60 / host.getGroove().tempo
@@ -175,7 +202,19 @@ export function createScheduler(host: SchedulerHost) {
   function scheduleClick(horizon: number): void {
     const groove = host.getGroove()
     const subdivision = groove.metronomeSubdivision
-    if (subdivision === 0) return
+    if (subdivision === 0) {
+      lastMetronomeSubdivision = 0
+      return
+    }
+    if (
+      lastMetronomeSubdivision !== null &&
+      lastMetronomeSubdivision !== subdivision &&
+      host.getIsPlaying() &&
+      !host.getIsCountingIn()
+    ) {
+      syncMetronomeToCurrentPosition()
+    }
+    lastMetronomeSubdivision = subdivision
     const intervalSeconds = (60 / groove.tempo) * (4 / subdivision)
     const ticksPerBeat = subdivision / 4
     const ticksPerMeasure = Math.max(
@@ -316,13 +355,9 @@ export function createScheduler(host: SchedulerHost) {
     nextNoteTime = grooveStartTime
     metronomeNextTime = grooveStartTime
     metronomeTickCounter = 0
+    lastMetronomeSubdivision = groove.metronomeSubdivision
     if (isResume && groove.metronomeSubdivision > 0) {
-      const npm = calcNotesPerMeasure(groove.division, groove.timeSignature)
-      const ticksPerBeat = groove.metronomeSubdivision / 4
-      const slotsPerBeat = npm / groove.timeSignature.beats
-      metronomeTickCounter = Math.round(
-        (startIndex % npm) * (ticksPerBeat / slotsPerBeat),
-      )
+      syncMetronomeToSlot(groove, startIndex, grooveStartTime)
     }
     finished = false
     uiEvents = []
@@ -384,6 +419,7 @@ export function createScheduler(host: SchedulerHost) {
     clearTransportTimers()
     setAudible(false)
     resumeSlot = null
+    lastMetronomeSubdivision = null
     host.patchPlayhead({
       currentSlot: -1,
       isCountingIn: false,
@@ -445,14 +481,10 @@ export function createScheduler(host: SchedulerHost) {
     nextNoteTime = startAt
     metronomeNextTime = startAt
     metronomeTickCounter = 0
+    lastMetronomeSubdivision = groove.metronomeSubdivision
 
     if (groove.metronomeSubdivision > 0) {
-      const npm = calcNotesPerMeasure(groove.division, groove.timeSignature)
-      const ticksPerBeat = groove.metronomeSubdivision / 4
-      const slotsPerBeat = npm / groove.timeSignature.beats
-      metronomeTickCounter = Math.round(
-        (clamped % npm) * (ticksPerBeat / slotsPerBeat),
-      )
+      syncMetronomeToSlot(groove, clamped, startAt)
     }
 
     resumeSlot = null
