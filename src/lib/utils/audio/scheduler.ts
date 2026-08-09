@@ -50,7 +50,7 @@ export interface SchedulerHost {
   getIsCountingIn: () => boolean
   patchPlayback: (partial: Partial<App.Data.PlaybackState>) => void
   patchPlayhead: (partial: Partial<App.Data.PlayheadState>) => void
-  notifyNaturalEnd: () => void
+  notifyNaturalEnd: (chainAt: number) => void
   onStopped: () => void
 }
 
@@ -285,12 +285,14 @@ export function createScheduler(host: SchedulerHost) {
           nextNoteIndex = 0
         } else {
           finished = true
-          const stopDelayMs =
-            Math.max(0, (nextNoteTime - audio.currentTime) * 1000) + 30
+          const chainAt = nextNoteTime
+          const notifyDelayMs = Math.max(
+            0,
+            (chainAt - audio.currentTime) * 1000,
+          )
           setTimeout(() => {
-            host.notifyNaturalEnd()
-            stop()
-          }, stopDelayMs)
+            host.notifyNaturalEnd(chainAt)
+          }, notifyDelayMs)
         }
       }
     }
@@ -327,13 +329,16 @@ export function createScheduler(host: SchedulerHost) {
     if (host.getIsPlaying()) rafId = requestAnimationFrame(() => runUiLoop())
   }
 
-  async function start(options?: { skipCountIn?: boolean }): Promise<void> {
+  async function start(options?: {
+    skipCountIn?: boolean
+    startAt?: number
+  }): Promise<void> {
     if (host.getIsPlaying()) return
     await prepare()
     const audio = ensureContext()
     const groove = host.getGroove()
     const beatSeconds = 60 / groove.tempo
-    const startAt = audio.currentTime + START_DELAY_SECONDS
+    const startAt = options?.startAt ?? audio.currentTime + START_DELAY_SECONDS
     const total = host.getTotalSlots()
     const isResume = resumeSlot !== null && resumeSlot >= 0 && total > 0
 
@@ -500,5 +505,40 @@ export function createScheduler(host: SchedulerHost) {
     runUiLoop()
   }
 
-  return { start, pause, stop, toggle, previewSample, prepare, seek }
+  /**
+   * Swap to a new groove mid-transport without muting — used when a practice
+   * queue item ends and the next should start on the downbeat.
+   */
+  function chain(options: { startAt: number }): void {
+    const groove = host.getGroove()
+    const startAt = options.startAt
+
+    clearTransportTimers()
+    finished = false
+    countInBeatsTotal = 0
+    countInNextBeat = 0
+    countInNextTime = startAt
+    grooveStartTime = startAt
+    nextNoteIndex = 0
+    nextNoteTime = startAt
+    metronomeNextTime = startAt
+    metronomeTickCounter = 0
+    lastMetronomeSubdivision = groove.metronomeSubdivision
+    uiEvents = []
+    resumeSlot = null
+
+    host.patchPlayhead({
+      currentSlot: -1,
+      isCountingIn: false,
+      countInBeat: 0,
+    })
+    host.patchPlayback({ isPlaying: true })
+
+    setAudible(true)
+    tick()
+    timerId = setInterval(() => tick(), LOOKAHEAD_MS)
+    runUiLoop()
+  }
+
+  return { start, pause, stop, toggle, previewSample, prepare, seek, chain }
 }

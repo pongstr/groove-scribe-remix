@@ -44,7 +44,8 @@ describe('practice + preview modes', () => {
 
     ui.exitPracticeMode()
     expect(get(ui).practiceMode.active).toBe(false)
-    expect(get(data).groove.id).toBe('b-1')
+    expect(get(data).groove.id).toBe('e-1')
+    expect(get(data).sourceLabel).toBe('Editor')
     expect(get(ui).practiceMode.queue).toHaveLength(2)
   })
 

@@ -18,10 +18,10 @@
   let data = getDataContext()
 
   const OPTIONS: Array<ClickOptionType> = [
-    { value: '0', label: 'Off', desc: 'Off', num: 0 },
+    { value: '0', label: 'Off', desc: 'Metronome Off', num: 0 },
     { value: '4', label: '♩', desc: 'Quarter note', num: 4 },
-    { value: '8', label: '♪', desc: 'Eighth note', num: 8 },
-    { value: '16', label: '♬ ', desc: 'Sixteenth note', num: 16 },
+    { value: '8', label: '♪', desc: '8th note', num: 8 },
+    { value: '16', label: '♬ ', desc: '16th note', num: 16 },
   ]
 
   const clickValue = $derived(String($ui.clickSubdivision))
@@ -29,6 +29,7 @@
   function handleValueChange(value: string | undefined) {
     if (value == null) return
     const match = OPTIONS.find((opt) => opt.value === value)
+
     if (!match) return
     setClickSubdivision(ui, data, match.num)
   }
@@ -39,7 +40,7 @@
     <ToggleGroup.Root
       type="single"
       variant="outline"
-      size="sm"
+      size="icon"
       value={clickValue}
       onValueChange={handleValueChange}
       class="bg-muted p-0"
@@ -47,7 +48,7 @@
       {#each OPTIONS as opt (opt.value)}
         <ToggleGroup.Item
           value={opt.value}
-          class="data-[state=on]:bg-background size-9 rounded-md px-2 text-xs font-semibold data-[state=on]:text-indigo-400 data-[state=on]:shadow-sm"
+          class="data-[state=on]:bg-background rounded-md px-2 text-xs font-semibold data-[state=on]:text-indigo-400 data-[state=on]:shadow-sm"
         >
           <Tooltip.Root>
             <Tooltip.Trigger>
@@ -63,7 +64,7 @@
               {/if}
             </Tooltip.Trigger>
 
-            <Tooltip.Content sideOffset={16}>
+            <Tooltip.Content sideOffset={12}>
               {opt.desc}
             </Tooltip.Content>
           </Tooltip.Root>

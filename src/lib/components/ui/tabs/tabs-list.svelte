@@ -2,7 +2,7 @@
   import { tv, type VariantProps } from 'tailwind-variants'
 
   export const tabsListVariants = tv({
-    base: 'rounded-2xl p-[3px] group-data-horizontal/tabs:h-8 group-data-vertical/tabs:p-1 data-[variant=line]:rounded-none group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
+    base: 'p-1 group-data-horizontal/tabs:h-10 group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
     variants: {
       variant: {
         default: 'cn-tabs-list-variant-default bg-muted',
@@ -19,7 +19,6 @@
 
 <script lang="ts">
   import { Tabs as TabsPrimitive } from 'bits-ui'
-
   import { cn } from '$lib/utils.js'
 
   let {

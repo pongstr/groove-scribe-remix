@@ -124,18 +124,18 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <ButtonWithTooltip
-  variant="outline"
+  variant="ghost"
   size="icon-sm"
   class="text-muted-foreground hover:text-foreground size-9"
   onclick={() => ui.showDrawer('mine')}
   content="My Grooves"
   tooltipContentProps={{ align: 'start', sideOffset: 4 }}
 >
-  <FolderOpen class="size-5" />
+  <FolderOpen class="size-4.5" />
 </ButtonWithTooltip>
 
 <ButtonWithTooltip
-  variant="outline"
+  variant="ghost"
   size="icon-sm"
   class="text-muted-foreground hover:text-foreground size-9"
   onclick={handleNewGroove}
@@ -148,7 +148,7 @@
 <DropdownMenu.Root>
   <DropdownMenu.Trigger
     class={cn(
-      buttonVariants({ variant: 'outline', size: 'sm' }),
+      buttonVariants({ variant: 'ghost', size: 'sm' }),
       'group text-muted-foreground h-9 gap-2 font-sans  text-sm ',
     )}
   >
@@ -163,7 +163,7 @@
       class="size-4 transition-transform group-data-[state=open]:rotate-180"
     />
   </DropdownMenu.Trigger>
-  <DropdownMenu.Content class="min-w-64  text-sm">
+  <DropdownMenu.Content class="min-w-64 text-sm" alignOffset={2}>
     <DropdownMenu.Group class="gap-2">
       <DropdownMenu.Label class="text-muted-foreground/50 cursor-default">
         Current File

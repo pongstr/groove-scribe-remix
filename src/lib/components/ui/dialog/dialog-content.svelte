@@ -1,13 +1,12 @@
 <script lang="ts">
   import { Dialog as DialogPrimitive } from 'bits-ui'
-  import type { Snippet } from 'svelte'
-  import type { ComponentProps } from 'svelte'
   import XIcon from '@lucide/svelte/icons/x'
-
-  import DialogPortal from './dialog-portal.svelte'
-  import * as Dialog from './index.js'
   import { Button } from '$lib/components/ui/button/index.js'
   import { cn, type WithoutChildrenOrChild } from '$lib/utils.js'
+  import * as Dialog from './index.js'
+  import DialogPortal from './dialog-portal.svelte'
+  import type { Snippet } from 'svelte'
+  import type { ComponentProps } from 'svelte'
 
   let {
     ref = $bindable(null),
@@ -29,7 +28,7 @@
     bind:ref
     data-slot="dialog-content"
     class={cn(
-      'bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/5 dark:ring-foreground/10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-[min(var(--radius-4xl),24px)] p-6 text-sm shadow-xl ring-1 duration-100 outline-none sm:max-w-md',
+      'bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-none p-6 text-sm shadow-md ring-1 duration-100 outline-none sm:max-w-md',
       className,
     )}
     {...restProps}
@@ -40,7 +39,7 @@
         {#snippet child({ props })}
           <Button
             variant="ghost"
-            class="bg-secondary absolute top-4 right-4"
+            class="bg-secondary absolute top-5 right-5"
             size="icon-sm"
             {...props}
           >

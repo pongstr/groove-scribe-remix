@@ -1,6 +1,5 @@
 import { get } from 'svelte/store'
 
-import type { App } from '../context/types'
 import {
   applyUiPrefsToGroove,
   cycleClick,
@@ -11,7 +10,7 @@ import {
 import type { ShortcutId } from './types'
 
 type UI = App.UI.ContextStore
-type Data = App.Data.ContextStore
+type Data = App.Groove.ContextStore
 
 export type ShortcutHandlers = Record<
   ShortcutId,

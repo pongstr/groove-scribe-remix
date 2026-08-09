@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { cubicIn, cubicOut } from 'svelte/easing'
+  import { quintOut } from 'svelte/easing'
   import { fly } from 'svelte/transition'
   import { CircleQuestionMark, Keyboard } from '@lucide/svelte'
 
@@ -15,22 +15,22 @@
 
 {#if !$ui.practiceMode.active}
   <div
-    in:fly={{ y: 20, easing: cubicIn, duration: 300 }}
-    out:fly={{ y: 20, easing: cubicOut, duration: 300 }}
+    in:fly={{ duration: 600, easing: quintOut, y: 40 }}
+    out:fly={{ duration: 300, easing: quintOut, y: -40 }}
     class={cn(
       'no-print fixed top-0 left-0 flex h-16 w-full items-center justify-between gap-2 px-4 select-none',
-      'bg-background/80 bottom-10 backdrop-blur-xs',
+      'bottom-10',
     )}
   >
-    <div class="flex w-60 items-center justify-start gap-3">
+    <div class="flex w-72 items-center justify-start gap-1">
       {@render LeftSection()}
     </div>
 
-    <div class="flex items-center justify-start gap-3">
+    <div class="flex items-center justify-center gap-1">
       <PlaybackControls />
     </div>
 
-    <div class="flex w-60 items-center justify-end gap-3">
+    <div class="flex w-72 items-center justify-end gap-1">
       {@render RightSection()}
     </div>
   </div>
@@ -38,9 +38,9 @@
 
 {#if $ui.practiceMode.active}
   <div
-    in:fly={{ y: 20, easing: cubicIn, duration: 300 }}
-    out:fly={{ y: 20, easing: cubicOut, duration: 300 }}
-    class="no-print bg-background fixed top-0 left-0 z-20 flex h-16 w-full items-center select-none"
+    in:fly={{ duration: 600, easing: quintOut, y: 40 }}
+    out:fly={{ duration: 300, easing: quintOut, y: -40 }}
+    class="no-print fixed top-0 left-0 z-20 flex h-16 w-full items-center select-none"
   >
     <PracticeModeBar>
       <PlaybackControls />
@@ -53,27 +53,29 @@
 {/snippet}
 
 {#snippet RightSection()}
-  <ButtonWithTooltip
-    variant="outline"
-    size="icon"
-    class="text-muted-foreground hover:text-foreground ml-auto size-9"
-    onclick={() => ui.openShortcuts()}
-    aria-label="Keyboard shortcuts"
-    content="Hotkeys (H)"
-    tooltipContentProps={{ align: 'end' }}
-  >
-    <Keyboard class="size-4" />
-  </ButtonWithTooltip>
+  <div class="ml-auto flex items-center justify-end">
+    <ButtonWithTooltip
+      variant="ghost"
+      size="icon"
+      class="hover:text-muted-foreground"
+      onclick={() => ui.openShortcuts()}
+      aria-label="Keyboard shortcuts"
+      content="Hotkeys (H)"
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
+    >
+      <Keyboard class="size-5" />
+    </ButtonWithTooltip>
 
-  <ButtonWithTooltip
-    variant="outline"
-    size="icon"
-    class="text-muted-foreground hover:text-foreground size-9"
-    onclick={() => ui.toggleHelp()}
-    aria-label="Help and notation key"
-    content="Help Docs"
-    tooltipContentProps={{ align: 'end' }}
-  >
-    <CircleQuestionMark class="size-4" />
-  </ButtonWithTooltip>
+    <ButtonWithTooltip
+      variant="ghost"
+      size="icon"
+      class="hover:text-muted-foreground"
+      onclick={() => ui.toggleHelp()}
+      aria-label="Help and notation key"
+      content="Help Docs"
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
+    >
+      <CircleQuestionMark class="size-5" />
+    </ButtonWithTooltip>
+  </div>
 {/snippet}

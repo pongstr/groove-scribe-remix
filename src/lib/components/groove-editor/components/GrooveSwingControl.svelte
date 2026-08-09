@@ -5,10 +5,10 @@
   import { getDataContext } from '$lib/utils/context'
   import { isTripletDivision } from '$lib/utils/music-math'
 
-  const data = getDataContext()
-
-  const disabled = $derived(isTripletDivision($data.groove.division))
   const STEP = 5
+
+  let data = getDataContext()
+  let disabled = $derived(isTripletDivision($data.groove.division))
 
   function clamp(value: number) {
     return Math.min(100, Math.max(0, value))

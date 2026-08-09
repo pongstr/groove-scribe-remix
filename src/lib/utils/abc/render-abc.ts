@@ -290,7 +290,9 @@ export function renderGrooveToSvg(
   abc.tosvg('SOURCE', abcSource)
 
   return {
-    svg: remapStickingFont(callback.abc_svg_output),
+    svg: fixMalformedJetBrainsFont(
+      remapAnnotationFont(remapStickingFont(callback.abc_svg_output)),
+    ),
     errorHtml: callback.abc_error_output,
     noteMapping,
   }
@@ -298,12 +300,27 @@ export function renderGrooveToSvg(
 
 /**
  * abc2svg's %%xxxfont parser splits on whitespace, so multi-word families are
- * unusable. Stickings use a single-token sentinel (`AbcSticking`); rewrite the
- * emitted SVG CSS to the real JetBrains Mono face.
+ * unusable. Stickings and notation-key labels use single-token sentinels;
+ * rewrite the emitted SVG CSS to the real JetBrains Mono face.
  */
 function remapStickingFont(svg: string): string {
   return svg.replace(
     /\{font:([\d.]+)px AbcSticking\}/g,
+    '{font:$1px "JetBrains Mono",monospace}',
+  )
+}
+
+function remapAnnotationFont(svg: string): string {
+  return svg.replace(
+    /\{font:([\d.]+)px AbcAnnotation\}/g,
+    '{font:$1px "JetBrains Mono",monospace}',
+  )
+}
+
+/** Remaining %%xxxfont "JetBrains Mono" directives (title, text, etc.) truncate to `"JetBrains}`. */
+function fixMalformedJetBrainsFont(svg: string): string {
+  return svg.replace(
+    /\{font:([\d.]+)px "JetBrains\}/g,
     '{font:$1px "JetBrains Mono",monospace}',
   )
 }

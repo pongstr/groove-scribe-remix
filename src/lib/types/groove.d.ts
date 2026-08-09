@@ -129,6 +129,8 @@ declare global {
         loop: LoopMode
         countInEnabled: boolean
         naturalEndCount: number
+        /** AudioContext time when the last slot of a once-loop groove finishes. */
+        naturalEndAt: number | null
         loadProgress: LoadProgress
       }
 
@@ -201,7 +203,7 @@ declare global {
         load: (
           data: GrooveData,
           sourceLabel: string,
-          options?: { clearHistory?: boolean },
+          options?: { clearHistory?: boolean; keepTransport?: boolean },
         ) => void
         markSaved: (sourceLabel: string) => void
         applySavedRecord: (record: { id: string; name: string }) => void
@@ -212,7 +214,15 @@ declare global {
         toggleLoop: () => void
         setCountInEnabled: (enabled: boolean) => void
         toggleCountIn: () => void
-        play: (options?: { skipCountIn?: boolean }) => Promise<void>
+        play: (options?: {
+          skipCountIn?: boolean
+          startAt?: number
+        }) => Promise<void>
+        chainPlay: (
+          data: GrooveData,
+          sourceLabel: string,
+          chainAt: number,
+        ) => void
         pause: () => void
         stop: () => void
         togglePlay: () => Promise<void>

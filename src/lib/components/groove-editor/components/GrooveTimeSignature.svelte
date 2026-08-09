@@ -17,8 +17,8 @@
     { beats: 7, noteValue: 8 },
   ]
 
-  const data = getDataContext()
-  const initialTs = $derived<App.Groove.Data['timeSignature']>(
+  let data = getDataContext()
+  let initialTs = $derived<App.Groove.Data['timeSignature']>(
     $data.groove.timeSignature,
   )
 
@@ -27,7 +27,7 @@
     initialTs.noteValue,
   )
 
-  const label = $derived(
+  let label = $derived(
     [
       $data.groove.timeSignature.beats,
       $data.groove.timeSignature.noteValue,

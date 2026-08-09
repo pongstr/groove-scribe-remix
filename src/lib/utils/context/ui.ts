@@ -2,6 +2,7 @@ import { getContext, setContext } from 'svelte'
 import { get, writable } from 'svelte/store'
 
 import { browser } from '$app/environment'
+import * as db from '$lib/utils/storage/db'
 import { defaultPracticeQueue } from '$lib/utils/storage/seed-grooves'
 
 export const UI_CONTEXT = 'app.ui'
@@ -9,7 +10,7 @@ export const UI_CONTEXT = 'app.ui'
 // NOTE:
 // Whenever changes are made in the UI Context, bump the version
 // (patch/minor/major) so that `initUIContext` can migrate via `migrate` below.
-const UI_CONTEXT_VERSION = '0.3.2'
+const UI_CONTEXT_VERSION = '0.3.3'
 
 const STICKING_MODES: App.Groove.StickingMode[] = ['off', 'visible', 'reverse']
 const CLICK_SUBDIVISIONS: App.Groove.ClickSubdivision[] = [0, 4, 8, 16]
@@ -106,6 +107,30 @@ const migrate: Record<string, MigrateFunction> = {
       permutationsOpen: false,
       shortcutsOpen: false,
       version: '0.3.2',
+    }
+  },
+  '0.3.3': (update, local) => {
+    const practiceMode = practiceModeFromLocal(local, update.practiceMode)
+    const queue =
+      practiceMode && practiceMode.queue && practiceMode.queue?.length > 0
+        ? practiceMode.queue
+        : defaultPracticeQueue()
+
+    return {
+      ...update,
+      ...local,
+      practiceMode: { ...practiceMode, queue },
+      previewMode: local.previewMode ?? false,
+      stickingMode: local.stickingMode ?? update.stickingMode ?? 'off',
+      showToms: local.showToms ?? update.showToms ?? false,
+      showLegend: local.showLegend ?? update.showLegend ?? false,
+      clickSubdivision: local.clickSubdivision ?? update.clickSubdivision ?? 0,
+      editorVisible: local.editorVisible ?? update.editorVisible ?? true,
+      queueOpen: local.queueOpen ?? update.queueOpen ?? true,
+      helpOpen: false,
+      permutationsOpen: false,
+      shortcutsOpen: false,
+      version: '0.3.3',
     }
   },
 }
@@ -235,10 +260,13 @@ function initUIContext(init: App.UI.ContextInput = {}): App.UI.Context {
 function updateStorage(input: App.UI.Context): void {
   if (!canUseLocalStorage()) return
   try {
+    const { practiceMode, ...rest } = input
+    const { queue: _queue, ...practiceMeta } = practiceMode
     localStorage.setItem(
       UI_CONTEXT,
       JSON.stringify({
-        ...input,
+        ...rest,
+        practiceMode: practiceMeta,
         helpOpen: false,
         permutationsOpen: false,
         shortcutsOpen: false,
@@ -247,6 +275,13 @@ function updateStorage(input: App.UI.Context): void {
   } catch (err) {
     console.error('Failed to persist UI context to localStorage', err)
   }
+}
+
+function persistPracticeQueue(queue: App.UI.PracticeQueueItem[]): void {
+  if (!browser) return
+  void db.savePracticeQueue(queue).catch((err) => {
+    console.error('Failed to persist practice queue to IndexedDB', err)
+  })
 }
 
 export function createUIContextStore(
@@ -262,6 +297,10 @@ export function createUIContextStore(
   applyTheme(base.theme)
 
   let savedLoop: App.Groove.LoopMode | null = null
+  let savedBeforePractice: {
+    groove: App.Groove.Data
+    sourceLabel: string
+  } | null = null
 
   // Persist on every store update (skip the immediate subscribe emission so we
   // never overwrite localStorage with a stale in-memory snapshot).
@@ -272,6 +311,28 @@ export function createUIContextStore(
   })
 
   persistReady = true
+
+  // Load practice queue from IndexedDB (migrates legacy localStorage queue on first run).
+  if (browser) {
+    void (async () => {
+      try {
+        const stored = await db.loadPracticeQueue()
+        if (stored && stored.length > 0) {
+          rawUpdate((store) => ({
+            ...store,
+            practiceMode: { ...store.practiceMode, queue: stored },
+          }))
+          return
+        }
+        const { queue } = base.practiceMode
+        if (queue.length > 0) {
+          await db.savePracticeQueue(queue)
+        }
+      } catch (err) {
+        console.error('Failed to load practice queue from IndexedDB', err)
+      }
+    })()
+  }
 
   // Resume Practice Mode side-effects when the session was left active.
   if (base.practiceMode.active) {
@@ -321,9 +382,22 @@ export function createUIContextStore(
       data.setLoop(savedLoop)
       savedLoop = null
     }
+    data.stop()
+    if (savedBeforePractice) {
+      data.load(savedBeforePractice.groove, savedBeforePractice.sourceLabel, {
+        clearHistory: false,
+      })
+      savedBeforePractice = null
+    }
+    syncDisplayFromUi()
   }
 
   function enterPracticeMode(): void {
+    const current = get(data)
+    savedBeforePractice = {
+      groove: cloneGroove(current.groove),
+      sourceLabel: current.sourceLabel,
+    }
     update((store) => {
       let currentIndex = store.practiceMode.currentIndex
       if (store.practiceMode.queue.length > 0) {
@@ -382,6 +456,7 @@ export function createUIContextStore(
         queue: [...store.practiceMode.queue, item],
       },
     }))
+    persistPracticeQueue([...snapshot().practiceMode.queue, item])
     return item
   }
 
@@ -400,6 +475,7 @@ export function createUIContextStore(
         practiceMode: { ...store.practiceMode, queue, currentIndex },
       }
     })
+    persistPracticeQueue(snapshot().practiceMode.queue)
   }
 
   function selectQueueIndex(index: number): App.UI.PracticeQueueItem | null {
@@ -445,6 +521,7 @@ export function createUIContextStore(
         practiceMode: { ...store.practiceMode, queue, currentIndex },
       }
     })
+    persistPracticeQueue(snapshot().practiceMode.queue)
   }
 
   function syncQueueGroove(
@@ -473,6 +550,7 @@ export function createUIContextStore(
         practiceMode: { ...store.practiceMode, queue },
       }
     })
+    persistPracticeQueue(snapshot().practiceMode.queue)
   }
 
   function updateQueueItem(
@@ -495,6 +573,7 @@ export function createUIContextStore(
         practiceMode: { ...store.practiceMode, queue },
       }
     })
+    persistPracticeQueue(snapshot().practiceMode.queue)
   }
 
   const store: App.UI.ContextStore = {
@@ -522,11 +601,13 @@ export function createUIContextStore(
         ...s,
         practiceMode: { ...s.practiceMode, autoAdvance: value },
       })),
-    clearQueue: () =>
+    clearQueue: () => {
       update((s) => ({
         ...s,
         practiceMode: { ...s.practiceMode, queue: [], currentIndex: 0 },
-      })),
+      }))
+      persistPracticeQueue([])
+    },
 
     // TODO: prefer `selectedTab`
     showDrawer: (tab: string = 'mine') =>

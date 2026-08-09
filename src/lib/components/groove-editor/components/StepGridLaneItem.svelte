@@ -145,18 +145,6 @@
       <div
         class="bg-background flex aspect-square w-11 touch-manipulation snap-end items-center justify-center select-none"
       >
-        <!-- class={cn( -->
-        <!--   'relative box-border flex aspect-square w-full items-center justify-center', -->
-        <!--   'cursor-pointer border border-transparent bg-secondary/20 transition-colors duration-75 focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600 dark:hover:bg-accent/60', -->
-        <!--   isBeatStart && !isMeasureStart && 'border-primary/40', -->
-
-        <!--   isMeasureStart && 'border-muted/40', -->
-        <!--   value && -->
-        <!--     'bg-[color-mix(in_srgb,var(--lane-color)_18%,white)] hover:bg-[color-mix(in_srgb,var(--lane-color)_28%,white)]', -->
-        <!--   isPlayhead && -->
-        <!--     'bg-[color-mix(in_srgb,var(--lane-color)_45%,white)] ring-2 ring-[color-mix(in_srgb,var(--lane-color)_80%,black)] ring-inset', -->
-        <!--   className -->
-        <!-- )} -->
         <button
           {...props}
           type="button"
@@ -165,7 +153,7 @@
           aria-pressed={value !== null}
           aria-label={ariaLabel}
           class={cn(
-            'group bg-secondary/40 relative box-border flex aspect-square w-full items-center justify-center rounded-[8px] p-0.5 transition-colors',
+            'group relative box-border flex aspect-square w-full touch-manipulation items-center justify-center bg-neutral-800 p-0.5 transition-colors hover:bg-(--lane-primary)',
             isBeatStart && !isMeasureStart && 'bg-(--lane-primary)',
             isMeasureStart && 'bg-(--lane-secondary)',
             isPlayhead && 'border-yellow-500! bg-yellow-500/20!',
@@ -183,12 +171,14 @@
         >
           <div
             class={cn(
-              'bg-background flex aspect-square size-full items-center justify-center rounded-[8px]',
+              'bg-background flex aspect-square size-full items-center justify-center transition-colors',
               isPlayhead
                 ? 'bg-radial from-yellow-300 from-10% to-yellow-400 text-amber-900'
                 : isMeasureStart
                   ? 'bg-background text-(--lane-color)'
-                  : 'bg-gray-900/5 text-(--lane-color)',
+                  : isBeatStart
+                    ? 'bg-background text-(--lane-color)'
+                    : 'bg-neutral-900 text-(--lane-color) hover:bg-neutral-800/10',
             )}
           >
             {#if beatNumber !== null}

@@ -6,8 +6,6 @@
   import HelpDocs from '$lib/components/help-docs/HelpDocs.svelte'
   import KeyboardShortcutsHost from '$lib/components/keyboard-shortcuts/KeyboardShortcutsHost.svelte'
   import KeyboardShortcutsModal from '$lib/components/keyboard-shortcuts/KeyboardShortcutsModal.svelte'
-  // TODO: do not forget this feature exists
-  // import PermutationsPanel from '$lib/components/PermutationsPanel/PermutationsPanel.svelte';
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { applyUiPrefsToGroove } from '$lib/utils/shortcuts'
   import {
@@ -57,12 +55,10 @@
 </script>
 
 <svelte:head>
-  <title>Groove Studio</title>
+  <title>GrooveScribe Remix</title>
 </svelte:head>
 
-<main
-  class="relative flex h-screen max-h-screen w-screen flex-col items-stretch justify-end overflow-hidden"
->
+<main class="relative h-screen max-h-screen w-screen overflow-hidden">
   {@render props.children?.()}
 </main>
 

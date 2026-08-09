@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { HTMLAttributes } from 'svelte/elements'
-
   import { cn, type WithElementRef } from '$lib/utils.js'
+  import type { HTMLAttributes } from 'svelte/elements'
 
   let {
     ref = $bindable(null),
@@ -19,7 +18,7 @@
   data-slot="dropdown-menu-label"
   data-inset={inset}
   class={cn(
-    'text-muted-foreground px-2 py-1 text-xs data-inset:pl-7 data-[inset]:pl-8',
+    'text-muted-foreground px-3 py-2 text-xs font-semibold tracking-wider uppercase data-inset:pl-9.5 data-[inset]:pl-8',
     className,
   )}
   {...restProps}
