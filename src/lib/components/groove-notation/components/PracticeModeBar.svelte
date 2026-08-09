@@ -13,7 +13,6 @@
   import { hydrateQueueItem } from '$lib/components/groove-notation/components/queue-hydrate'
   import Button from '$lib/components/ui/button/button.svelte'
   import Toggle from '$lib/components/ui/toggle/toggle.svelte'
-  import type { PracticeQueueItem } from '$lib/components/utils/context/types'
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { applyUiPrefsToGroove } from '$lib/utils/shortcuts'
 
@@ -28,7 +27,7 @@
   let wasPracticeActive = $state(false)
 
   async function loadQueueItem(
-    item: PracticeQueueItem | null,
+    item: App.UI.PracticeQueueItem | null,
     autoPlay = false,
   ) {
     if (!item) return

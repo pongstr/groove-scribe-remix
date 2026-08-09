@@ -18,8 +18,10 @@
 
 <div
   class={cn(
-    'groove-notation h-screen flex-1 shrink overflow-x-hidden transition-[height,min-height,flex-grow] duration-300 ease-out',
-    !$ui.practiceMode.active && 'overflow-y-auto pt-[8vh] select-none',
+    // 'flex h-screen flex-1 items-center justify-center  transition-[height,min-height,flex-grow] duration-300 ease-out',
+    'h-full w-full overflow-y-auto pt-[10vh]',
+    !$ui.practiceMode.active && $ui.editorVisible && 'pb-135',
+    // !$ui.practiceMode.active && 'overflow-y-auto py-30 select-none',
   )}
 >
   {#if $ui.practiceMode.active}
@@ -34,11 +36,13 @@
 
   {#if !$ui.practiceMode.active}
     <div
-      class="mx-auto flex w-full max-w-7xl flex-col pt-10 pb-22"
+      class="bg-background/50 border-border/40 flex w-auto flex-col rounded-lg border py-24 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl"
       in:fly={{ duration: 250, y: 150, delay: 140, easing: quadOut }}
       out:fade={{ duration: 250, easing: quadOut }}
     >
-      <div class="text-muted-foreground/90 mx-auto w-6xl font-sans text-lg">
+      <div
+        class="text-muted-foreground/90 mx-auto w-auto max-w-5xl font-sans text-lg"
+      >
         {#if $data.groove.name.length}
           <span>{$data.groove.name}</span>
         {/if}

@@ -3,29 +3,27 @@
   import { getDataContext } from '$lib/utils/context'
   import { calcNotesPerMeasure } from '$lib/utils/music-math'
 
-  const data = getDataContext()
-  const playhead = data.playhead
+  let data = getDataContext()
+  let playhead = data.playhead
 
   let rootEl = $state<HTMLDivElement | null>(null)
   /** 1-based measure most visible / under edit focus while scrolling. */
   let viewingMeasure = $state(1)
 
-  const notesPerMeasure = $derived(
+  let notesPerMeasure = $derived(
     calcNotesPerMeasure($data.groove.division, $data.groove.timeSignature),
   )
-  const measureCount = $derived($data.groove.measures)
-  const slotCount = $derived(notesPerMeasure * measureCount)
-  const measures = $derived(
-    Array.from({ length: measureCount }, (_, i) => i + 1),
-  )
+  let measureCount = $derived($data.groove.measures)
+  let slotCount = $derived(notesPerMeasure * measureCount)
+  let measures = $derived(Array.from({ length: measureCount }, (_, i) => i + 1))
 
-  const playheadMeasure = $derived.by(() => {
+  let playheadMeasure = $derived.by(() => {
     const slot = $playhead.currentSlot
     if (slot < 0 || notesPerMeasure <= 0) return -1
     return Math.floor(slot / notesPerMeasure) + 1
   })
 
-  const highlightedMeasure = $derived(
+  let highlightedMeasure = $derived(
     playheadMeasure > 0 ? playheadMeasure : viewingMeasure,
   )
 
@@ -37,7 +35,7 @@
       root.closest('[data-step-grid-scroll]') ?? root.parentElement
     if (!(scroller instanceof HTMLElement)) return
 
-    const gutter = 136
+    const gutter = 188
     const pad = 12
     const edge = scroller.getBoundingClientRect().left + gutter + pad
 
@@ -82,11 +80,11 @@
 
 <div
   bind:this={rootEl}
-  class="bg-background flex w-max min-w-full items-stretch gap-1.5"
+  class="bg-background flex w-max min-w-full items-stretch gap-0"
   aria-label="Measure {highlightedMeasure} of {measureCount}"
 >
   <div
-    class="bg-background sticky left-0 z-10 flex w-40 shrink-0 items-center border-r border-b px-2 py-1 text-[0.7rem] font-bold tracking-wide text-slate-500 uppercase md:w-50"
+    class="bg-background/60 sticky left-0 z-10 flex w-40 shrink-0 items-center border-r border-b px-2 py-1 text-[0.7rem] font-bold tracking-wide text-slate-500 uppercase backdrop-blur-sm md:w-50"
   >
     <span class="truncate">
       {#if measureCount > 1}
@@ -119,7 +117,7 @@
       >
         <span
           class={cn(
-            'inline-block  px-1.5 py-0.5 text-amber-950',
+            'sticky left-50 inline-block px-1.5 py-0.5 text-amber-950',
             active
               ? 'bg-yellow-500 text-amber-950'
               : 'bg-muted/80 text-muted-foreground',

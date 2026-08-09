@@ -180,7 +180,7 @@
 
   /* Staff lines & beams: softer than noteheads. */
   .abc-host :global(path.stroke) {
-    stroke-opacity: 0.5;
+    stroke-opacity: 0.3;
   }
 
   /* Custom drum heads (X/Triangle) keep full weight. */

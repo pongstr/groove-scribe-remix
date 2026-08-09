@@ -73,50 +73,52 @@
 </script>
 
 <Tooltip.Provider>
-  <div class="flex flex-1 items-center gap-2">
-    <ButtonGroup.Root class="bg-background h-9">
+  <div class="flex flex-1 items-center gap-3">
+    <ButtonGroup.Root class="bg-background/70">
       <ButtonWithTooltip
+        size="icon"
         variant="outline"
+        class="text-muted-foreground/70"
         content="Add Bar"
-        class="aspect-square h-9"
-        tooltipContentProps={{ align: 'start' }}
+        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
         onclick={() => data.setMeasures($data.groove.measures + 1)}
       >
         <PanelRightClose class="size-5" />
       </ButtonWithTooltip>
 
       <ButtonWithTooltip
+        size="icon"
         variant="outline"
         content="Remove Bar"
-        class="aspect-square h-9"
+        class="text-muted-foreground/70"
         onclick={() => data.setMeasures($data.groove.measures - 1)}
-        tooltipContentProps={{ align: 'start' }}
+        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
       >
         <PanelRightOpen class="size-5" />
       </ButtonWithTooltip>
     </ButtonGroup.Root>
 
-    <ButtonGroup.Root class="bg-background">
+    <ButtonGroup.Root class="bg-background/70">
       <ToggleWithTooltip
-        class="aria-pressed:bg-primary aria-pressed:text-primary-foreground h-9"
+        size="icon"
         pressed={$ui.showToms}
         onPressedChange={(pressed) => setShowToms(ui, data, pressed)}
         variant="outline"
-        size="default"
         content="Toggle Toms [Q]"
-        tooltipContentProps={{ align: 'start' }}
+        class="text-muted-foreground/70 aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
       >
         <Drum class="size-5" />
       </ToggleWithTooltip>
 
       <ToggleWithTooltip
         variant="outline"
-        size="sm"
-        class="aria-pressed:bg-primary aria-pressed:text-primary-foreground h-9 text-xs font-semibold"
+        size="icon"
+        class="text-muted-foreground/70 aria-pressed:bg-primary aria-pressed:text-primary-foreground"
         pressed={$ui.showLegend}
         onPressedChange={(pressed) => setShowLegend(ui, data, pressed)}
-        content="Notation Keys [E]"
-        tooltipContentProps={{ align: 'start' }}
+        content="Toggle Notation Keys [E]"
+        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
       >
         <Component class="size-5" />
       </ToggleWithTooltip>
@@ -125,29 +127,29 @@
     <RadioGroup.Root
       bind:value={stickingMode.value}
       onValueChange={handleValueChange}
-      class="flex items-center justify-start"
     >
-      <ButtonGroup.Root class="bg-background">
+      <ButtonGroup.Root class="bg-background/70">
         {#each stickingModes as opt (opt)}
           {@render StickingRadioButton(opt)}
         {/each}
       </ButtonGroup.Root>
     </RadioGroup.Root>
 
-    <ButtonGroup.Root class="bg-background ml-auto">
+    <ButtonGroup.Root class="bg-background/70 ml-auto">
       <ButtonWithTooltip
         variant="outline"
-        class="bg-background h-9 text-xs font-semibold"
+        size="icon"
         onclick={() => data.undo()}
         disabled={!$history.canUndo}
         content="Undo last action (U)"
+        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
       >
         <Undo2 class="size-5" />
       </ButtonWithTooltip>
 
       <ButtonWithTooltip
         variant="outline"
-        class="bg-background h-9"
+        size="icon"
         onclick={() => data.redo()}
         disabled={!$history.canRedo}
         content="Redo last action (Y)"
@@ -156,12 +158,12 @@
       </ButtonWithTooltip>
 
       <ButtonWithTooltip
+        size="icon"
         variant="outline"
-        class="h-9 text-xs font-semibold"
         onclick={() => data.clearHistory()}
         disabled={!hasHistory}
         content="Clear Undo & Redo history"
-        tooltipContentProps={{ align: 'end' }}
+        tooltipContentProps={{ align: 'end', sideOffset: 10 }}
       >
         <ListX class="size-5" />
       </ButtonWithTooltip>
@@ -170,12 +172,11 @@
     <div class="bg-border mx-0.5 h-full w-px">&nbsp;</div>
 
     <ButtonWithTooltip
+      size="icon"
       variant="destructive"
-      size="sm"
-      class="h-9 text-xs font-semibold"
       onclick={() => data.clearAll()}
       content="Clear All Lanes"
-      tooltipContentProps={{ align: 'end' }}
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
     >
       <BrushCleaning class="size-5" />
     </ButtonWithTooltip>
@@ -186,22 +187,35 @@
   {@const id = ['sticking', opt.value].join('.')}
   <Tooltip.Root>
     <Tooltip.Trigger
-      class={cn(buttonVariants({ variant: 'outline' }), 'h-9 gap-2.5')}
+      class={cn(
+        buttonVariants({ variant: 'outline', size: 'icon' }),
+        'text-muted-foreground/70 gap-2.5',
+      )}
     >
-      <RadioGroup.Item value={opt.value} {id} class="rounded-[8px]" />
-      {#if opt.value !== 'off'}
-        <Hand
-          class={cn(
-            'size-5',
-            opt.value === 'off' && 'text-muted-foreground/20',
-            opt.value === 'reverse' && '-scale-x-100 transform',
-          )}
-        />
-      {:else}
-        <Label for={id} class="font-sans text-xs">{opt.label}</Label>
-      {/if}
+      <Label for={id} class="font-sans">
+        <RadioGroup.Item value={opt.value} {id} class="hidden rounded-[8px]" />
+        {#if opt.value !== 'off'}
+          <Hand
+            class={cn(
+              'size-5',
+              opt.value === 'off' && 'text-muted-foreground/20',
+              opt.value === 'reverse' && '-scale-x-100 transform',
+              opt.value == $ui.stickingMode && 'text-green-600',
+            )}
+          />
+        {:else}
+          <span>Off</span>
+        {/if}
+      </Label>
     </Tooltip.Trigger>
-    <Tooltip.Content align={opt.value !== 'reverse' ? 'end' : 'start'}>
+    <Tooltip.Content
+      sideOffset={10}
+      align={opt.value === 'off'
+        ? 'start'
+        : opt.value === 'reverse'
+          ? 'center'
+          : 'end'}
+    >
       {opt.label}
     </Tooltip.Content>
   </Tooltip.Root>

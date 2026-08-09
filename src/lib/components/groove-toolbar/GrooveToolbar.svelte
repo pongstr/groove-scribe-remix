@@ -19,18 +19,18 @@
     out:fly={{ y: 20, easing: cubicOut, duration: 300 }}
     class={cn(
       'no-print fixed top-0 left-0 flex h-16 w-full items-center justify-between gap-2 px-4 select-none',
-      'bg-background/80 bottom-10 backdrop-blur-xs',
+      'bottom-10',
     )}
   >
-    <div class="flex w-60 items-center justify-start gap-3">
+    <div class="flex w-60 items-center justify-start gap-1">
       {@render LeftSection()}
     </div>
 
-    <div class="flex items-center justify-start gap-3">
+    <div class="flex items-center justify-center gap-1">
       <PlaybackControls />
     </div>
 
-    <div class="flex w-60 items-center justify-end gap-3">
+    <div class="flex w-60 items-center justify-end gap-1">
       {@render RightSection()}
     </div>
   </div>
@@ -53,27 +53,29 @@
 {/snippet}
 
 {#snippet RightSection()}
-  <ButtonWithTooltip
-    variant="outline"
-    size="icon"
-    class="text-muted-foreground hover:text-foreground ml-auto size-9"
-    onclick={() => ui.openShortcuts()}
-    aria-label="Keyboard shortcuts"
-    content="Hotkeys (H)"
-    tooltipContentProps={{ align: 'end' }}
-  >
-    <Keyboard class="size-4" />
-  </ButtonWithTooltip>
+  <div class="ml-auto flex items-center justify-end">
+    <ButtonWithTooltip
+      variant="ghost"
+      size="icon"
+      class="hover:text-muted-foreground"
+      onclick={() => ui.openShortcuts()}
+      aria-label="Keyboard shortcuts"
+      content="Hotkeys (H)"
+      tooltipContentProps={{ align: 'end', sideOffset: 14 }}
+    >
+      <Keyboard class="size-4" />
+    </ButtonWithTooltip>
 
-  <ButtonWithTooltip
-    variant="outline"
-    size="icon"
-    class="text-muted-foreground hover:text-foreground size-9"
-    onclick={() => ui.toggleHelp()}
-    aria-label="Help and notation key"
-    content="Help Docs"
-    tooltipContentProps={{ align: 'end' }}
-  >
-    <CircleQuestionMark class="size-4" />
-  </ButtonWithTooltip>
+    <ButtonWithTooltip
+      variant="ghost"
+      size="icon"
+      class="hover:text-muted-foreground"
+      onclick={() => ui.toggleHelp()}
+      aria-label="Help and notation key"
+      content="Help Docs"
+      tooltipContentProps={{ align: 'end', sideOffset: 14 }}
+    >
+      <CircleQuestionMark class="size-4" />
+    </ButtonWithTooltip>
+  </div>
 {/snippet}

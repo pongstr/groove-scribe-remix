@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { slide } from 'svelte/transition'
   import {
-    Drum,
-    Fullscreen,
+    CircleParking,
     Pause,
     Play,
     RotateCw,
@@ -13,6 +13,7 @@
   import PlaybackClickControl from '$lib/components/groove-toolbar/components/PlaybackClickControl.svelte'
   import { Button } from '$lib/components/ui/button'
   import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
+  import * as ButtonGroup from '$lib/components/ui/button-group/index'
   import ToggleWithTooltip from '$lib/components/ui/toggle/toggle-with-tooltip.svelte'
   import { getDataContext, getUIContext } from '$lib/utils/context'
 
@@ -84,89 +85,90 @@
   let ui = getUIContext()
 </script>
 
-<Button
-  variant="outline"
-  size="icon"
-  onclick={handleStop}
-  disabled={!canStop}
-  aria-label="Stop"
-  class="text-muted-foreground hover:text-foreground"
->
-  <Square class="size-4" />
-</Button>
-
-<Button
-  variant="default"
-  size="icon-lg"
-  class="border-primary size-9 rounded-xl border transition-transform hover:scale-105 active:scale-95"
-  onclick={handlePlayPause}
-  disabled={isPreparing}
-  aria-label={$data.playback.isPlaying ? 'Pause' : 'Play'}
->
-  {#if isPreparing}
-    <span
-      class="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2"
-      aria-hidden="true"
-    ></span>
-  {:else if $data.playback.isPlaying}
-    <Pause class="size-4" />
-  {:else}
-    <Play class="size-4" />
+<ButtonGroup.Root class="bg-neutral-900/80 backdrop-blur-sm">
+  {#if $data.playback.isPlaying}
+    <div in:slide={{ axis: 'x' }} out:slide={{ axis: 'x' }}>
+      <ButtonWithTooltip
+        variant="outline"
+        size="icon"
+        onclick={handleStop}
+        disabled={!canStop}
+        aria-label="Stop"
+        class="text-muted-foreground hover:text-foreground"
+        content="Stop [D] (Reset Playhead)"
+        tooltipContentProps={{ align: 'start' }}
+        tooltipRootProps={{ triggerId: 'playback-stop' }}
+      >
+        <Square class="size-4" />
+      </ButtonWithTooltip>
+    </div>
   {/if}
-</Button>
 
-<ToggleWithTooltip
-  variant="outline"
-  size="sm"
-  class="aria-pressed:bg-primary aria-pressed:text-primary-foreground over:text-foreground aspect-square size-9"
-  pressed={loopOn}
-  onPressedChange={() => toggleLoop()}
-  aria-label="Toggle loop"
-  content="Loop [C]"
->
-  <RotateCw class="size-4" />
-</ToggleWithTooltip>
+  <ButtonWithTooltip
+    variant="outline"
+    size="icon"
+    class="aria-pressed:bg-primary aria-pressed:text-primary-foreground over:text-foreground"
+    onclick={handlePlayPause}
+    disabled={isPreparing}
+    aria-label={$data.playback.isPlaying ? 'Pause' : 'Play'}
+    content={[$data.playback.isPlaying ? 'Pause' : 'Play', ' [Space]'].join('')}
+    tooltipContentProps={{ align: 'start' }}
+  >
+    {#if isPreparing}
+      <span
+        class="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2"
+        aria-hidden="true"
+      ></span>
+    {:else if $data.playback.isPlaying}
+      <Pause class="size-4" />
+    {:else}
+      <Play class="size-4" />
+    {/if}
+  </ButtonWithTooltip>
 
-<ToggleWithTooltip
-  variant="outline"
-  size="sm"
-  class="aria-pressed:bg-primary aria-pressed:text-primary-foreground hover:text-foreground size-9"
-  pressed={countInOn}
-  onPressedChange={() => toggleCountIn()}
-  content="Count-in one bar of {countInLabel}"
->
-  <Timer class="size-4" />
-</ToggleWithTooltip>
+  <ToggleWithTooltip
+    variant="outline"
+    size="icon"
+    class="aria-pressed:bg-primary aria-pressed:text-primary-foreground over:text-foreground"
+    pressed={loopOn}
+    onPressedChange={() => toggleLoop()}
+    aria-label="Toggle loop"
+    content="Loop [C]"
+  >
+    <RotateCw class="size-4" />
+  </ToggleWithTooltip>
 
-<div class="bg-secondary h-9 w-px">&nbsp;</div>
+  <ToggleWithTooltip
+    variant="outline"
+    size="icon"
+    class="aria-pressed:bg-primary aria-pressed:text-primary-foreground hover:text-foreground"
+    pressed={countInOn}
+    onPressedChange={() => toggleCountIn()}
+    content="Count-in one bar of {countInLabel}"
+  >
+    <Timer class="size-4" />
+  </ToggleWithTooltip>
+</ButtonGroup.Root>
+
+<div class="bg-secondary mx-2 h-10 w-px">&nbsp;</div>
 
 <PlaybackClick />
 <PlaybackClickControl />
 
 {#if !$ui.practiceMode.active}
-  <div class="bg-secondary h-9 w-px">&nbsp;</div>
+  <div class="bg-secondary mx-2 h-10 w-px">&nbsp;</div>
 
-  <ButtonWithTooltip
-    variant="outline"
-    size="icon"
-    class="text-muted-foreground hover:text-foreground h-9"
-    onclick={() => ui.togglePreviewMode()}
-    content="Preview mode (V)"
-    aria-label="Toggle preview mode"
-    aria-pressed={$ui.previewMode}
-  >
-    <Fullscreen class="size-4" />
-  </ButtonWithTooltip>
-
-  <Button
-    variant="outline"
-    size="icon"
-    class="text-muted-foreground hover:text-foreground h-9"
-    onclick={() => ui.togglePracticeMode()}
-    title="Practice mode (P)"
-    aria-label="Toggle Practice mode"
-    aria-pressed={$ui.previewMode}
-  >
-    <Drum class="size-4" />
-  </Button>
+  <div class="flex items-center justify-center bg-neutral-900/80">
+    <Button
+      variant="outline"
+      size="icon"
+      class="text-muted-foreground hover:text-foreground"
+      onclick={() => ui.togglePracticeMode()}
+      title="Practice mode (P)"
+      aria-label="Toggle Practice mode"
+      aria-pressed={$ui.previewMode}
+    >
+      <CircleParking class="size-5" />
+    </Button>
+  </div>
 {/if}

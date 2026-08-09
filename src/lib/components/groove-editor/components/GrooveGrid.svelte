@@ -14,6 +14,91 @@
   /** Previous playhead slot — used to detect groove loop wrap (end → start). */
   let prevScrollSlot = $state(-1)
 
+  const MOUSE_DRAG_THRESHOLD_PX = 5
+
+  let mouseDragPointerId = $state<number | null>(null)
+  let mouseDragStartX = 0
+  let mouseDragStartScrollLeft = 0
+  let isMouseDragging = $state(false)
+  let suppressClick = false
+
+  function canMouseDragScroll(): boolean {
+    return !$data.playback.isPlaying
+  }
+
+  function onPointerDown(e: PointerEvent) {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || !canMouseDragScroll()) return
+
+    const el = scrollEl
+    if (!el) return
+
+    mouseDragPointerId = e.pointerId
+    mouseDragStartX = e.clientX
+    mouseDragStartScrollLeft = el.scrollLeft
+    isMouseDragging = false
+    el.setPointerCapture(e.pointerId)
+  }
+
+  function onPointerMove(e: PointerEvent) {
+    if (e.pointerType !== 'mouse' || mouseDragPointerId !== e.pointerId) return
+    if (!canMouseDragScroll()) {
+      endMouseDrag(e)
+      return
+    }
+
+    const el = scrollEl
+    if (!el) return
+
+    const dx = e.clientX - mouseDragStartX
+    if (!isMouseDragging && Math.abs(dx) < MOUSE_DRAG_THRESHOLD_PX) return
+
+    if (!isMouseDragging) {
+      isMouseDragging = true
+      suppressClick = true
+    }
+
+    el.scrollLeft = mouseDragStartScrollLeft - dx
+    e.preventDefault()
+  }
+
+  function endMouseDrag(e: PointerEvent) {
+    if (e.pointerType !== 'mouse' || mouseDragPointerId !== e.pointerId) return
+
+    const el = scrollEl
+    if (el?.hasPointerCapture(e.pointerId)) {
+      el.releasePointerCapture(e.pointerId)
+    }
+
+    mouseDragPointerId = null
+    isMouseDragging = false
+
+    if (suppressClick) {
+      requestAnimationFrame(() => {
+        suppressClick = false
+      })
+    }
+  }
+
+  function onClickCapture(e: MouseEvent) {
+    if (suppressClick) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
+  $effect(() => {
+    if (!$data.playback.isPlaying || mouseDragPointerId === null) return
+
+    const el = scrollEl
+    const pointerId = mouseDragPointerId
+    isMouseDragging = false
+    mouseDragPointerId = null
+
+    if (el?.hasPointerCapture(pointerId)) {
+      el.releasePointerCapture(pointerId)
+    }
+  })
+
   function gutterWidth(el: HTMLElement): number {
     const gutterEl = el.querySelector('.sticky.left-0')
     return gutterEl instanceof HTMLElement
@@ -46,6 +131,7 @@
 
     const pageForward = cellRect.right > rightLimit
     const pageBack = wrapped || cellRect.right < visibleLeft
+
     if (!pageForward && !pageBack) return
 
     // After paging, park the playhead near the left so the next stretch is visible.
@@ -61,6 +147,7 @@
     // Depend on playhead only — use get(data) so groove edits do not re-scroll.
     const slot = $playhead.currentSlot
     const el = scrollEl
+
     if (slot < 0 || !el) {
       prevScrollSlot = slot
       return
@@ -76,11 +163,26 @@
 <div
   bind:this={scrollEl}
   data-step-grid-scroll
+  role="region"
+  aria-label="Groove step grid"
   class={cn(
-    'w-full max-w-full min-w-0 shrink-0 scrollbar-none overflow-x-auto overflow-y-hidden overscroll-none [&::-webkit-scrollbar]:hidden',
+    'w-full max-w-full min-w-0 shrink-0 scrollbar-none overflow-x-auto overflow-y-hidden overscroll-x-contain [-webkit-overflow-scrolling:touch]',
     // Snap fights programmatic follow during playback (esp. 1/32 / fast tempos).
-    !$data.playback.isPlaying && 'snap-x snap-mandatory',
+    !$data.playback.isPlaying &&
+      !isMouseDragging &&
+      'snap-x snap-mandatory touch-pan-x',
+    canMouseDragScroll() && !isMouseDragging && 'cursor-grab',
+    isMouseDragging && 'cursor-grabbing select-none',
+    $data.playback.isPlaying && 'touch-none',
   )}
+  onpointerdown={onPointerDown}
+  onpointermove={onPointerMove}
+  onpointerup={endMouseDrag}
+  onpointercancel={endMouseDrag}
+  onclickcapture={onClickCapture}
+  onwheel={(e) => {
+    if ($data.playback.isPlaying) e.preventDefault()
+  }}
 >
   <StepGrid />
 </div>

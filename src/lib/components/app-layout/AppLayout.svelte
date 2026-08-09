@@ -60,9 +60,7 @@
   <title>GrooveScribe Remix</title>
 </svelte:head>
 
-<main
-  class="relative flex h-screen max-h-screen w-screen flex-col items-stretch justify-end overflow-hidden"
->
+<main class="relative h-screen max-h-screen w-screen overflow-hidden">
   {@render props.children?.()}
 </main>
 

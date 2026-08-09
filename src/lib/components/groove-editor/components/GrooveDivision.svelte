@@ -3,9 +3,9 @@
   import { DIVISIONS } from '$lib/utils/config'
   import { getDataContext } from '$lib/utils/context'
 
-  const data = getDataContext()
+  let data = getDataContext()
 
-  const label = $derived(
+  let label = $derived(
     DIVISIONS.find((d) => d.value === $data.groove.division)?.label ??
       'Division',
   )

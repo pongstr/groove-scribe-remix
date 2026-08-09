@@ -56,11 +56,13 @@
   }
 </script>
 
-<div class="border-secondary flex h-9 items-center gap-0">
+<div
+  class="border-secondary ml-2 flex items-center gap-0 bg-neutral-900/80 backdrop-blur-sm"
+>
   <ButtonWithTooltip
     variant="outline"
-    size="icon-sm"
-    class="text-muted-foreground hover:bg-background size-9"
+    size="icon"
+    class="text-muted-foreground hover:bg-background"
     disabled={$data.groove.tempo <= MIN_TEMPO}
     onclick={() => bump(-1)}
     aria-label="Decrease tempo"
@@ -70,24 +72,33 @@
     <Minus class="size-5" />
   </ButtonWithTooltip>
 
-  <Input
-    type="number"
-    min={MIN_TEMPO}
-    max={MAX_TEMPO}
-    step={1}
-    value={draft ?? String($data.groove.tempo)}
-    onfocus={handleFocus}
-    oninput={handleInput}
-    onblur={handleBlur}
-    onkeydown={handleKeydown}
-    class="border-border bg-background h-9 w-16 rounded-md border-x-transparent px-1 text-center text-sm font-semibold"
-    aria-label="Tempo in BPM"
-  />
+  <div
+    class="border-border flex h-10 flex-col items-stretch justify-start border-t border-b"
+  >
+    <Input
+      type="number"
+      min={MIN_TEMPO}
+      max={MAX_TEMPO}
+      step={1}
+      value={draft ?? String($data.groove.tempo)}
+      onfocus={handleFocus}
+      oninput={handleInput}
+      onblur={handleBlur}
+      onkeydown={handleKeydown}
+      class="h-7 w-16 cursor-default appearance-none! rounded-md border-x-transparent px-1 text-center text-sm font-semibold focus-visible:border-none focus-visible:ring-0"
+      aria-label="Tempo in BPM"
+    />
+    <span
+      class="text-muted-foreground inline-block w-full px-4 text-left font-mono text-[9px] leading-0.5"
+    >
+      BPM
+    </span>
+  </div>
 
   <ButtonWithTooltip
     variant="outline"
-    size="icon-sm"
-    class="text-muted-foreground hover:bg-background size-9"
+    size="icon"
+    class="text-muted-foreground hover:bg-background"
     disabled={$data.groove.tempo >= MAX_TEMPO}
     onclick={() => bump(1)}
     aria-label="Increase tempo"

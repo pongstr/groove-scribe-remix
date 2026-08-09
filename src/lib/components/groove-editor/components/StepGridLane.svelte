@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { CircleX } from '@lucide/svelte'
+  import { BrushCleaning } from '@lucide/svelte'
 
   import StepGridLaneItem from '$lib/components/groove-editor/components/StepGridLaneItem.svelte'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import { cn } from '$lib/utils'
   import { LANE_META } from '$lib/utils/config'
   import { getDataContext } from '$lib/utils/context'
@@ -15,15 +16,14 @@
   }
 
   let { lane, onClear, class: className }: Props = $props()
+  let data = getDataContext()
 
-  const data = getDataContext()
-
-  const meta = $derived(LANE_META[lane])
-  const notesPerMeasure = $derived(
+  let meta = $derived(LANE_META[lane])
+  let notesPerMeasure = $derived(
     calcNotesPerMeasure($data.groove.division, $data.groove.timeSignature),
   )
-  const slotCount = $derived(notesPerMeasure * $data.groove.measures)
-  const groupSize = $derived(
+  let slotCount = $derived(notesPerMeasure * $data.groove.measures)
+  let groupSize = $derived(
     Math.max(
       1,
       Math.round(noteGroupingSize(notesPerMeasure, $data.groove.timeSignature)),
@@ -32,41 +32,37 @@
   const indices = $derived(Array.from({ length: slotCount }, (_, i) => i))
 </script>
 
-<div class={cn('group flex w-max min-w-full items-stretch gap-x-2', className)}>
+<div class={cn('group flex w-max min-w-full items-stretch gap-x-1', className)}>
   <div
-    class="bg-background/95 sticky left-0 z-20 flex h-14 w-40 shrink-0 cursor-default items-center gap-2 overflow-hidden border-r border-b pr-2 text-[0.8rem] font-semibold text-(--lane-color) backdrop-blur-xs md:w-50"
+    class="bg-background/95 sticky left-0 z-20 flex h-14 w-40 shrink-0 cursor-default flex-row-reverse items-center gap-2 overflow-hidden px-2 text-[0.8rem] font-semibold text-(--lane-color) backdrop-blur-xs transition-colors select-none hover:bg-neutral-800/40 md:w-50"
     style="--lane-color: var({meta.color}); --lane-bg: var({meta.bgSecondary})"
   >
     <div
-      style="--offset-position: 24px;"
-      class="absolute -top-[calc(var(--offset-position)/2)] -left-[calc(var(--offset-position)/2)] h-6 w-6 rotate-45 bg-(--lane-bg)"
       aria-hidden="true"
+      class="absolute right-4 bottom-6.5 size-2 bg-(--lane-bg)"
     ></div>
 
-    <!-- <span -->
-    <!--   class="ml-px h-[calc(100%-2px)] w-1 shrink-0 bg-(--lane-bg)" -->
-    <!--   aria-hidden="true" -->
-    <!-- ></span> -->
-
-    <span class="block min-w-0 flex-1 truncate px-4 whitespace-nowrap"
-      >{meta.label}</span
-    >
+    <span class="block min-w-0 flex-1 truncate whitespace-nowrap">
+      {meta.label}
+    </span>
 
     {#if onClear}
-      <button
-        type="button"
-        class="size-4 text-slate-400 hover:bg-transparent hover:text-red-500"
+      <ButtonWithTooltip
+        variant="ghost"
+        size="icon"
+        class="hover:text-foreground text-muted-foreground/70 aspect-square size-5 transition-colors hover:bg-transparent!"
         onclick={onClear}
-        title="Clear {meta.label} lane"
+        content="Clear {meta.label} lane"
         aria-label="Clear {meta.label} lane"
+        tooltipContentProps={{ side: 'right', align: 'center' }}
       >
-        <CircleX class="size-4" />
-      </button>
+        <BrushCleaning class="size-4" />
+      </ButtonWithTooltip>
     {/if}
   </div>
 
   <div
-    class="relative z-10 grid flex-1 gap-2 p-1"
+    class="relative z-10 grid flex-1 gap-x-0.5 gap-y-0 p-1"
     style:grid-template-columns="repeat({slotCount}, minmax(2.5rem, 1fr))"
     style:width="max(100%, calc({slotCount} * 2.5rem + {Math.max(
       0,

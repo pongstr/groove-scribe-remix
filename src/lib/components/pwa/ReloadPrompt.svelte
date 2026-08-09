@@ -44,7 +44,7 @@
       {#if $needRefresh}
         A new version of GrooveScribe Remix is available.
       {:else}
-      GrooveScribe Remix is ready to work offline.
+        GrooveScribe Remix is ready to work offline.
       {/if}
     </p>
 
