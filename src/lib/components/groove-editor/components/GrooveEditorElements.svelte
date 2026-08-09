@@ -73,114 +73,112 @@
 </script>
 
 <Tooltip.Provider>
-  <div class="flex flex-1 items-center gap-3">
-    <ButtonGroup.Root class="bg-background/70">
-      <ButtonWithTooltip
-        size="icon"
-        variant="outline"
-        class="text-muted-foreground/70"
-        content="Add Bar"
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-        onclick={() => data.setMeasures($data.groove.measures + 1)}
-      >
-        <PanelRightClose class="size-5" />
-      </ButtonWithTooltip>
-
-      <ButtonWithTooltip
-        size="icon"
-        variant="outline"
-        content="Remove Bar"
-        class="text-muted-foreground/70"
-        onclick={() => data.setMeasures($data.groove.measures - 1)}
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-      >
-        <PanelRightOpen class="size-5" />
-      </ButtonWithTooltip>
-    </ButtonGroup.Root>
-
-    <ButtonGroup.Root class="bg-background/70">
-      <ToggleWithTooltip
-        size="icon"
-        pressed={$ui.showToms}
-        onPressedChange={(pressed) => setShowToms(ui, data, pressed)}
-        variant="outline"
-        content="Toggle Toms [Q]"
-        class="text-muted-foreground/70 aria-pressed:bg-primary aria-pressed:text-primary-foreground"
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-      >
-        <Drum class="size-5" />
-      </ToggleWithTooltip>
-
-      <ToggleWithTooltip
-        variant="outline"
-        size="icon"
-        class="text-muted-foreground/70 aria-pressed:bg-primary aria-pressed:text-primary-foreground"
-        pressed={$ui.showLegend}
-        onPressedChange={(pressed) => setShowLegend(ui, data, pressed)}
-        content="Toggle Notation Keys [E]"
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-      >
-        <Component class="size-5" />
-      </ToggleWithTooltip>
-    </ButtonGroup.Root>
-
-    <RadioGroup.Root
-      bind:value={stickingMode.value}
-      onValueChange={handleValueChange}
+  <ButtonGroup.Root class="bg-background/70">
+    <ButtonWithTooltip
+      size="icon"
+      variant="outline"
+      class="text-muted-foreground/70"
+      content="Add Bar"
+      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+      onclick={() => data.setMeasures($data.groove.measures + 1)}
     >
-      <ButtonGroup.Root class="bg-background/70">
-        {#each stickingModes as opt (opt)}
-          {@render StickingRadioButton(opt)}
-        {/each}
-      </ButtonGroup.Root>
-    </RadioGroup.Root>
-
-    <ButtonGroup.Root class="bg-background/70 ml-auto">
-      <ButtonWithTooltip
-        variant="outline"
-        size="icon"
-        onclick={() => data.undo()}
-        disabled={!$history.canUndo}
-        content="Undo last action (U)"
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-      >
-        <Undo2 class="size-5" />
-      </ButtonWithTooltip>
-
-      <ButtonWithTooltip
-        variant="outline"
-        size="icon"
-        onclick={() => data.redo()}
-        disabled={!$history.canRedo}
-        content="Redo last action (Y)"
-      >
-        <Redo2 class="size-5" />
-      </ButtonWithTooltip>
-
-      <ButtonWithTooltip
-        size="icon"
-        variant="outline"
-        onclick={() => data.clearHistory()}
-        disabled={!hasHistory}
-        content="Clear Undo & Redo history"
-        tooltipContentProps={{ align: 'end', sideOffset: 10 }}
-      >
-        <ListX class="size-5" />
-      </ButtonWithTooltip>
-    </ButtonGroup.Root>
-
-    <div class="bg-border mx-0.5 h-full w-px">&nbsp;</div>
+      <PanelRightClose class="size-5" />
+    </ButtonWithTooltip>
 
     <ButtonWithTooltip
       size="icon"
-      variant="destructive"
-      onclick={() => data.clearAll()}
-      content="Clear All Lanes"
+      variant="outline"
+      content="Remove Bar"
+      class="text-muted-foreground/70"
+      onclick={() => data.setMeasures($data.groove.measures - 1)}
+      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+    >
+      <PanelRightOpen class="size-5" />
+    </ButtonWithTooltip>
+  </ButtonGroup.Root>
+
+  <ButtonGroup.Root class="bg-background/70">
+    <ToggleWithTooltip
+      size="icon"
+      pressed={$ui.showToms}
+      onPressedChange={(pressed) => setShowToms(ui, data, pressed)}
+      variant="outline"
+      content="Toggle Toms [Q]"
+      class="text-muted-foreground/70 aria-pressed:bg-transparent aria-pressed:text-green-500"
+      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+    >
+      <Drum class="size-5" />
+    </ToggleWithTooltip>
+
+    <ToggleWithTooltip
+      variant="outline"
+      size="icon"
+      class="text-muted-foreground/70 aria-pressed:bg-transparent aria-pressed:text-green-500"
+      pressed={$ui.showLegend}
+      onPressedChange={(pressed) => setShowLegend(ui, data, pressed)}
+      content="Toggle Notation Keys [E]"
+      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+    >
+      <Component class="size-5" />
+    </ToggleWithTooltip>
+  </ButtonGroup.Root>
+
+  <RadioGroup.Root
+    bind:value={stickingMode.value}
+    onValueChange={handleValueChange}
+  >
+    <ButtonGroup.Root class="bg-background/70">
+      {#each stickingModes as opt (opt)}
+        {@render StickingRadioButton(opt)}
+      {/each}
+    </ButtonGroup.Root>
+  </RadioGroup.Root>
+
+  <ButtonGroup.Root class="bg-background/70 ml-auto">
+    <ButtonWithTooltip
+      variant="outline"
+      size="icon"
+      onclick={() => data.undo()}
+      disabled={!$history.canUndo}
+      content="Undo last action (U)"
+      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+    >
+      <Undo2 class="size-5" />
+    </ButtonWithTooltip>
+
+    <ButtonWithTooltip
+      variant="outline"
+      size="icon"
+      onclick={() => data.redo()}
+      disabled={!$history.canRedo}
+      content="Redo last action (Y)"
+    >
+      <Redo2 class="size-5" />
+    </ButtonWithTooltip>
+
+    <ButtonWithTooltip
+      size="icon"
+      variant="outline"
+      onclick={() => data.clearHistory()}
+      disabled={!hasHistory}
+      content="Clear Undo & Redo history"
       tooltipContentProps={{ align: 'end', sideOffset: 10 }}
     >
-      <BrushCleaning class="size-5" />
+      <ListX class="size-5" />
     </ButtonWithTooltip>
-  </div>
+  </ButtonGroup.Root>
+
+  <div class="bg-border mx-0.5 h-full w-px">&nbsp;</div>
+
+  <ButtonWithTooltip
+    size="icon"
+    variant="destructive"
+    onclick={() => data.clearAll()}
+    content="Clear All Lanes"
+    tooltipContentProps={{ align: 'end', sideOffset: 10 }}
+  >
+    <BrushCleaning class="size-5" />
+  </ButtonWithTooltip>
 </Tooltip.Provider>
 
 {#snippet StickingRadioButton(opt: StickingModeType)}

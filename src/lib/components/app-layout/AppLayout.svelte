@@ -6,8 +6,6 @@
   import HelpDocs from '$lib/components/help-docs/HelpDocs.svelte'
   import KeyboardShortcutsHost from '$lib/components/keyboard-shortcuts/KeyboardShortcutsHost.svelte'
   import KeyboardShortcutsModal from '$lib/components/keyboard-shortcuts/KeyboardShortcutsModal.svelte'
-  // TODO: do not forget this feature exists
-  // import PermutationsPanel from '$lib/components/PermutationsPanel/PermutationsPanel.svelte';
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { applyUiPrefsToGroove } from '$lib/utils/shortcuts'
   import {

@@ -36,7 +36,7 @@
     mouseDragStartX = e.clientX
     mouseDragStartScrollLeft = el.scrollLeft
     isMouseDragging = false
-    el.setPointerCapture(e.pointerId)
+    // Capture only after drag threshold — immediate capture blocks button clicks.
   }
 
   function onPointerMove(e: PointerEvent) {
@@ -55,6 +55,7 @@
     if (!isMouseDragging) {
       isMouseDragging = true
       suppressClick = true
+      el.setPointerCapture(e.pointerId)
     }
 
     el.scrollLeft = mouseDragStartScrollLeft - dx
@@ -65,6 +66,8 @@
     if (e.pointerType !== 'mouse' || mouseDragPointerId !== e.pointerId) return
 
     const el = scrollEl
+    const didDrag = isMouseDragging
+
     if (el?.hasPointerCapture(e.pointerId)) {
       el.releasePointerCapture(e.pointerId)
     }
@@ -72,7 +75,8 @@
     mouseDragPointerId = null
     isMouseDragging = false
 
-    if (suppressClick) {
+    if (didDrag) {
+      suppressClick = true
       requestAnimationFrame(() => {
         suppressClick = false
       })

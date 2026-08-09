@@ -143,7 +143,7 @@
   <ContextMenu.Trigger>
     {#snippet child({ props })}
       <div
-        class="bg-background flex aspect-square w-11 touch-pan-x snap-end items-center justify-center select-none"
+        class="bg-background flex aspect-square w-11 touch-manipulation snap-end items-center justify-center select-none"
       >
         <button
           {...props}
@@ -153,7 +153,7 @@
           aria-pressed={value !== null}
           aria-label={ariaLabel}
           class={cn(
-            'group relative box-border flex aspect-square w-full touch-pan-x items-center justify-center bg-neutral-800 p-0.5 transition-colors hover:bg-(--lane-primary)',
+            'group relative box-border flex aspect-square w-full touch-manipulation items-center justify-center bg-neutral-800 p-0.5 transition-colors hover:bg-(--lane-primary)',
             isBeatStart && !isMeasureStart && 'bg-(--lane-primary)',
             isMeasureStart && 'bg-(--lane-secondary)',
             isPlayhead && 'border-yellow-500! bg-yellow-500/20!',

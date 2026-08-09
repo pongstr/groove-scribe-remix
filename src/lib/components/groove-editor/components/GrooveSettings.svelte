@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { quintOut } from 'svelte/easing'
+  import { fly } from 'svelte/transition'
   import { SlidersHorizontal } from '@lucide/svelte'
 
   import GrooveDivision from '$lib/components/groove-editor/components/GrooveDivision.svelte'
@@ -13,35 +15,22 @@
   import { getUIContext } from '$lib/utils/context'
 
   let ui = getUIContext()
-
-  type Props = { disabled: boolean }
-  let { disabled = true }: Props = $props()
 </script>
 
-{#if !disabled}
-  <div
-    class="absolute -top-11 left-0 flex w-full items-center justify-between gap-2 px-2"
-  >
-    <div class="flex items-center justify-start">
-      <ButtonGroup.Root class="bg-background/80">
-        {@render GrooveDrawer()}
-      </ButtonGroup.Root>
-    </div>
-
-    {#if !$ui.previewMode && $ui.editorVisible}
-      <GrooveEditorElements />
-    {/if}
-  </div>
-{/if}
-
 <div class="absolute -top-12 w-full">
-  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4">
+  <div class="mx-auto flex max-w-6xl items-center justify-start gap-4 px-4">
     <ButtonGroup.Root class="bg-background/40">
       {@render GrooveDrawer()}
     </ButtonGroup.Root>
 
     {#if !$ui.previewMode && $ui.editorVisible}
-      <GrooveEditorElements />
+      <div
+        class="flex flex-1 items-center justify-between gap-4"
+        in:fly={{ y: -40, easing: quintOut, duration: 400, delay: 400 }}
+        out:fly={{ y: 40, easing: quintOut, duration: 300 }}
+      >
+        <GrooveEditorElements />
+      </div>
     {/if}
   </div>
 </div>

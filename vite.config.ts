@@ -34,8 +34,8 @@ export default defineConfig({
         name: 'GrooveScribe Remix',
         short_name: 'Groovy',
         description: 'Browser-based drum groove editor and practice tool',
-        theme_color: '#1a1520',
-        background_color: '#1a1520',
+        theme_color: '#171717',
+        background_color: '#171717',
         display: 'standalone',
         start_url: '/',
         icons: [

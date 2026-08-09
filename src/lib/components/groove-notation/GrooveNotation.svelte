@@ -18,10 +18,8 @@
 
 <div
   class={cn(
-    // 'flex h-screen flex-1 items-center justify-center  transition-[height,min-height,flex-grow] duration-300 ease-out',
     'h-full w-full overflow-y-auto pt-[10vh]',
     !$ui.practiceMode.active && $ui.editorVisible && 'pb-135',
-    // !$ui.practiceMode.active && 'overflow-y-auto py-30 select-none',
   )}
 >
   {#if $ui.practiceMode.active}
@@ -49,7 +47,9 @@
         {tempoMarking.symbol} = {$data.groove.tempo}
       </div>
 
-      <NotationStaff />
+      <div class="groove-notation">
+        <NotationStaff />
+      </div>
     </div>
   {/if}
 </div>
