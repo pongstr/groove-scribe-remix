@@ -43,7 +43,7 @@
 
 <div
   bind:this={stackEl}
-  class="flex flex-col items-stretch justify-start gap-8 px-4 py-4"
+  class="flex flex-col items-stretch justify-start gap-8"
 >
   {#if $ui.practiceMode.queue.length === 0}
     <p class="text-muted-foreground px-1 text-sm">

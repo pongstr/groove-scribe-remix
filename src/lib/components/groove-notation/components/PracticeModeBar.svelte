@@ -142,7 +142,7 @@
         variant="outline"
         content="Exit Practice Mode"
         onclick={ui.exitPracticeMode}
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+        tooltipContentProps={{ align: 'center', sideOffset: 10 }}
       >
         <X class="size-5" />
       </ButtonWithTooltip>
@@ -157,9 +157,9 @@
       onclick={() => ui.openShortcuts()}
       aria-label="Keyboard shortcuts"
       content="Hotkeys (H)"
-      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
     >
-      <Keyboard class="size-4" />
+      <Keyboard class="size-5" />
     </ButtonWithTooltip>
 
     <ButtonWithTooltip
@@ -169,9 +169,9 @@
       onclick={() => ui.toggleHelp()}
       aria-label="Help and notation key"
       content="Help Docs"
-      tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
     >
-      <CircleQuestionMark class="size-4" />
+      <CircleQuestionMark class="size-5" />
     </ButtonWithTooltip>
   </div>
 </div>

@@ -61,9 +61,9 @@
       onclick={() => ui.openShortcuts()}
       aria-label="Keyboard shortcuts"
       content="Hotkeys (H)"
-      tooltipContentProps={{ align: 'end', sideOffset: 14 }}
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
     >
-      <Keyboard class="size-4" />
+      <Keyboard class="size-5" />
     </ButtonWithTooltip>
 
     <ButtonWithTooltip
@@ -73,9 +73,9 @@
       onclick={() => ui.toggleHelp()}
       aria-label="Help and notation key"
       content="Help Docs"
-      tooltipContentProps={{ align: 'end', sideOffset: 14 }}
+      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
     >
-      <CircleQuestionMark class="size-4" />
+      <CircleQuestionMark class="size-5" />
     </ButtonWithTooltip>
   </div>
 {/snippet}

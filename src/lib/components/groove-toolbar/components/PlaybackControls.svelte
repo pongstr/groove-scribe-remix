@@ -11,7 +11,6 @@
 
   import PlaybackClick from '$lib/components/groove-toolbar/components/PlaybackClick.svelte'
   import PlaybackClickControl from '$lib/components/groove-toolbar/components/PlaybackClickControl.svelte'
-  import { Button } from '$lib/components/ui/button'
   import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import * as ButtonGroup from '$lib/components/ui/button-group/index'
   import ToggleWithTooltip from '$lib/components/ui/toggle/toggle-with-tooltip.svelte'
@@ -120,9 +119,9 @@
         aria-hidden="true"
       ></span>
     {:else if $data.playback.isPlaying}
-      <Pause class="size-4" />
+      <Pause class="size-5" />
     {:else}
-      <Play class="size-4" />
+      <Play class="size-5" />
     {/if}
   </ButtonWithTooltip>
 
@@ -159,16 +158,17 @@
   <div class="bg-secondary mx-2 h-10 w-px">&nbsp;</div>
 
   <div class="flex items-center justify-center bg-neutral-900/80">
-    <Button
+    <ButtonWithTooltip
       variant="outline"
       size="icon"
       class="text-muted-foreground hover:text-foreground"
       onclick={() => ui.togglePracticeMode()}
-      title="Practice mode (P)"
+      content="Practice mode (P)"
       aria-label="Toggle Practice mode"
       aria-pressed={$ui.previewMode}
+      tooltipContentProps={{ sideOffset: 10 }}
     >
       <CircleParking class="size-5" />
-    </Button>
+    </ButtonWithTooltip>
   </div>
 {/if}
