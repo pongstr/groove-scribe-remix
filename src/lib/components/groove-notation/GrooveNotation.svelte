@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { quadIn, quadOut } from 'svelte/easing'
+  import { quadOut, quintOut } from 'svelte/easing'
   import { fade, fly } from 'svelte/transition'
 
   import NotationQueue from '$lib/components/groove-notation/components/NotationQueue.svelte'
@@ -24,8 +24,8 @@
 >
   {#if $ui.practiceMode.active}
     <div
-      in:fly={{ duration: 250, delay: 200, y: -150, easing: quadIn }}
-      out:fly={{ duration: 250, y: -50, easing: quadOut }}
+      in:fly={{ duration: 250, y: -150, easing: quintOut }}
+      out:fly={{ duration: 250, y: -50, easing: quintOut }}
       class="mx-auto h-full w-full max-w-6xl pt-[10vh] select-none"
     >
       <NotationQueue />

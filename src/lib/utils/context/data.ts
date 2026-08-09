@@ -1,29 +1,7 @@
 import { getContext, setContext } from 'svelte'
 import { get, type Readable, writable } from 'svelte/store'
 
-import { createScheduler } from '../audio/scheduler'
-import { MAX_MEASURES, MAX_TEMPO, MIN_TEMPO } from '../config'
-import { lanes, resampleArray } from '../groove-lanes'
-import {
-  cloneGroove,
-  emptyHistory,
-  type HistoryStacks,
-  pushHistory,
-  redoHistory,
-  undoHistory,
-} from '../history'
-import {
-  calcNotesPerMeasure,
-  noteGroupingSize,
-  slotDurationMs,
-} from '../music-math'
 import * as db from '../storage/db'
-import { createEmptyGrooveData } from '../tab-notation'
-import {
-  clampTupletGroups,
-  removeTupletAt,
-  upsertTupletAt,
-} from '../tuplet-timing'
 import type {
   Division,
   GrooveData,
@@ -32,19 +10,40 @@ import type {
   TimeSignature,
   TupletKind,
 } from '../types'
-import type { App, LoopMode } from './types'
+import { createScheduler } from '$lib/utils/audio/scheduler'
+import { MAX_MEASURES, MAX_TEMPO, MIN_TEMPO } from '$lib/utils/config'
+import { lanes, resampleArray } from '$lib/utils/groove-lanes'
+import {
+  cloneGroove,
+  emptyHistory,
+  type HistoryStacks,
+  pushHistory,
+  redoHistory,
+  undoHistory,
+} from '$lib/utils/history'
+import {
+  calcNotesPerMeasure,
+  noteGroupingSize,
+  slotDurationMs,
+} from '$lib/utils/music-math'
+import { createEmptyGrooveData } from '$lib/utils/tab-notation'
+import {
+  clampTupletGroups,
+  removeTupletAt,
+  upsertTupletAt,
+} from '$lib/utils/tuplet-timing'
 
 export const DATA_CONTEXT = 'app.data'
 
 const HISTORY_PERSIST_MS = 250
 
-const INITIAL_PLAYHEAD: App.Data.PlayheadState = {
+const INITIAL_PLAYHEAD: App.Groove.PlayheadState = {
   currentSlot: -1,
   isCountingIn: false,
   countInBeat: 0,
 }
 
-function initDataContext(init: App.Data.ContextInput = {}): App.Data.Context {
+function initDataContext(init: App.Groove.ContextInput = {}): App.Groove.Context {
   return {
     groove: init.groove ?? createEmptyGrooveData(),
     dirty: init.dirty ?? false,
@@ -62,15 +61,15 @@ function initDataContext(init: App.Data.ContextInput = {}): App.Data.Context {
 }
 
 export function createDataContextStore(
-  init: App.Data.ContextInput = {},
-): App.Data.ContextStore {
-  const { subscribe, set, update } = writable<App.Data.Context>(
+  init: App.Groove.ContextInput = {},
+): App.Groove.ContextStore {
+  const { subscribe, set, update } = writable<App.Groove.Context>(
     initDataContext(init),
   )
-  const playheadStore = writable<App.Data.PlayheadState>({
+  const playheadStore = writable<App.Groove.PlayheadState>({
     ...INITIAL_PLAYHEAD,
   })
-  const historyUiStore = writable<App.Data.HistoryState>({
+  const historyUiStore = writable<App.Groove.HistoryState>({
     canUndo: false,
     canRedo: false,
   })
@@ -81,11 +80,11 @@ export function createDataContextStore(
   /** When true, groove updates must not push a new history entry (undo/redo/load). */
   let suppressHistory = false
 
-  function playheadSnapshot(): App.Data.PlayheadState {
+  function playheadSnapshot(): App.Groove.PlayheadState {
     return get(playheadStore)
   }
 
-  function snapshot(): App.Data.Context {
+  function snapshot(): App.Groove.Context {
     return get({ subscribe })
   }
 
@@ -125,14 +124,14 @@ export function createDataContextStore(
     persistHistoryNow()
   }
 
-  function patchPlayback(partial: Partial<App.Data.PlaybackState>): void {
+  function patchPlayback(partial: Partial<App.Groove.PlaybackState>): void {
     update((store) => ({
       ...store,
       playback: { ...store.playback, ...partial },
     }))
   }
 
-  function patchPlayhead(partial: Partial<App.Data.PlayheadState>): void {
+  function patchPlayhead(partial: Partial<App.Groove.PlayheadState>): void {
     playheadStore.update((state) => ({ ...state, ...partial }))
   }
 
@@ -487,15 +486,15 @@ export function createDataContextStore(
     await db.saveDraft(snapshot().groove)
   }
 
-  const playhead: Readable<App.Data.PlayheadState> = {
+  const playhead: Readable<App.Groove.PlayheadState> = {
     subscribe: playheadStore.subscribe,
   }
 
-  const history: Readable<App.Data.HistoryState> = {
+  const history: Readable<App.Groove.HistoryState> = {
     subscribe: historyUiStore.subscribe,
   }
 
-  const store: App.Data.ContextStore = {
+  const store: App.Groove.ContextStore = {
     subscribe,
     set,
     update,
@@ -624,7 +623,7 @@ export function createDataContextStore(
     newGroove: () => load(createEmptyGrooveData(), 'Untitled Groove'),
     setDirty: (dirty) => update((s) => ({ ...s, dirty })),
     setSourceLabel: (label) => update((s) => ({ ...s, sourceLabel: label })),
-    setLoop: (loop: LoopMode) => patchPlayback({ loop }),
+    setLoop: (loop: App.Groove.LoopMode) => patchPlayback({ loop }),
     toggleLoop: () =>
       patchPlayback({
         loop: snapshot().playback.loop === 'loop' ? 'once' : 'loop',
@@ -652,11 +651,11 @@ export function createDataContextStore(
 }
 
 export function setDataContext(
-  init: App.Data.ContextInput = {},
-): App.Data.ContextStore {
+  init: App.Groove.ContextInput = {},
+): App.Groove.ContextStore {
   return setContext(DATA_CONTEXT, createDataContextStore(init))
 }
 
-export function getDataContext(): App.Data.ContextStore {
-  return getContext<App.Data.ContextStore>(DATA_CONTEXT)
+export function getDataContext(): App.Groove.ContextStore {
+  return getContext<App.Groove.ContextStore>(DATA_CONTEXT)
 }

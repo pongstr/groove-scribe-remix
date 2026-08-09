@@ -9,11 +9,10 @@
   } from '@lucide/svelte'
 
   import { hydrateQueueItem } from '$lib/components/groove-notation/components/queue-hydrate'
-  import { buttonVariants } from '$lib/components/ui/button'
   import Button from '$lib/components/ui/button/button.svelte'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import * as Drawer from '$lib/components/ui/drawer/index'
   import * as Tabs from '$lib/components/ui/tabs/index'
-  import { cn } from '$lib/utils'
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { PRESET_CATEGORIES, presetsByCategory } from '$lib/utils/presets'
   import * as db from '$lib/utils/storage/db'
@@ -67,14 +66,18 @@
 </script>
 
 <Drawer.Root direction="left">
-  <Drawer.Trigger
-    class={cn(
-      buttonVariants({ variant: 'outline' }),
-      'text-muted-foreground hover:text-foreground h-9',
-    )}
-  >
-    <ListOrdered class="size-4" />
-    <span class="font-sans text-sm">Queue</span>
+  <Drawer.Trigger>
+    {#snippet child({ props })}
+      <ButtonWithTooltip
+        size="icon"
+        variant="outline"
+        content="Open Practice Queue"
+        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+        {...props}
+      >
+        <ListOrdered class="size-5" />
+      </ButtonWithTooltip>
+    {/snippet}
   </Drawer.Trigger>
   <Drawer.Content>
     <Tabs.Root value={selectedTab} class="w-full" onValueChange={onTabSwitch}>

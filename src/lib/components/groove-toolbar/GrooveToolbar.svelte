@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { cubicIn, cubicOut } from 'svelte/easing'
+  import { quintOut } from 'svelte/easing'
   import { fly } from 'svelte/transition'
   import { CircleQuestionMark, Keyboard } from '@lucide/svelte'
 
@@ -15,14 +15,14 @@
 
 {#if !$ui.practiceMode.active}
   <div
-    in:fly={{ y: 20, easing: cubicIn, duration: 300 }}
-    out:fly={{ y: 20, easing: cubicOut, duration: 300 }}
+    in:fly={{ duration: 600, easing: quintOut, y: 40 }}
+    out:fly={{ duration: 300, easing: quintOut, y: -40 }}
     class={cn(
       'no-print fixed top-0 left-0 flex h-16 w-full items-center justify-between gap-2 px-4 select-none',
       'bottom-10',
     )}
   >
-    <div class="flex w-60 items-center justify-start gap-1">
+    <div class="flex w-72 items-center justify-start gap-1">
       {@render LeftSection()}
     </div>
 
@@ -30,7 +30,7 @@
       <PlaybackControls />
     </div>
 
-    <div class="flex w-60 items-center justify-end gap-1">
+    <div class="flex w-72 items-center justify-end gap-1">
       {@render RightSection()}
     </div>
   </div>
@@ -38,9 +38,9 @@
 
 {#if $ui.practiceMode.active}
   <div
-    in:fly={{ y: 20, easing: cubicIn, duration: 300 }}
-    out:fly={{ y: 20, easing: cubicOut, duration: 300 }}
-    class="no-print bg-background fixed top-0 left-0 z-20 flex h-16 w-full items-center select-none"
+    in:fly={{ duration: 600, easing: quintOut, y: 40 }}
+    out:fly={{ duration: 300, easing: quintOut, y: -40 }}
+    class="no-print fixed top-0 left-0 z-20 flex h-16 w-full items-center select-none"
   >
     <PracticeModeBar>
       <PlaybackControls />
