@@ -7,17 +7,14 @@
     class: className,
     children,
     ...restProps
-  }: WithElementRef<HTMLAttributes<HTMLSpanElement>> = $props()
+  }: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props()
 </script>
 
-<span
+<div
   bind:this={ref}
-  data-slot="context-menu-shortcut"
-  class={cn(
-    'text-muted-foreground group-focus/context-menu-item:text-accent-foreground ml-auto text-xs tracking-widest',
-    className,
-  )}
+  data-slot="popover-description"
+  class={cn('text-muted-foreground mt-0.5 text-sm leading-relaxed', className)}
   {...restProps}
 >
   {@render children?.()}
-</span>
+</div>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Dialog as DialogPrimitive } from 'bits-ui'
-
   import { cn } from '$lib/utils.js'
 
   let {
@@ -13,6 +12,9 @@
 <DialogPrimitive.Title
   bind:ref
   data-slot="dialog-title"
-  class={cn('cn-font-heading text-base leading-none font-medium', className)}
+  class={cn(
+    'font-heading text-lg leading-none font-semibold tracking-wider uppercase',
+    className,
+  )}
   {...restProps}
 />
