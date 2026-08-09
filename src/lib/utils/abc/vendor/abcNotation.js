@@ -968,11 +968,11 @@ export function get_top_ABC_BoilerPlate(
     '%%topspace 10px\n' +
     '%%titlefont "JetBrains Mono" 12\n' +
     '%%partsfont "JetBrains Mono" 12\n' +
-    // Single-token name: abc2svg splits %%xxxfont on whitespace, so
-    // multi-word families like "JetBrains Mono Variable" break both name and size.
-    // render-abc.ts remaps AbcSticking → JetBrains Mono Variable in the SVG CSS.
-    '%%gchordfont "JetBrains Mono" 12\n' +
-    '%%annotationfont "JetBrains Mono" 12\n' +
+    // Single-token names: abc2svg splits %%xxxfont on whitespace, so
+    // multi-word families like "JetBrains Mono" break both name and size.
+    // render-abc.ts remaps AbcSticking / AbcAnnotation → JetBrains Mono in SVG CSS.
+    '%%gchordfont "JetBrains Mono" 11\n' +
+    '%%annotationfont AbcAnnotation 11\n' +
     '%%infofont "JetBrains Mono" 12\n' +
     '%%textfont "JetBrains Mono" 12\n' +
     '%%deco (. 0 a 5 1 1 "@-8,-3("\n' +

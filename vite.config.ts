@@ -21,6 +21,13 @@ export default defineConfig({
       },
     }),
     SvelteKitPWA({
+      mode:
+        process.env.NODE_ENV === 'production' ? 'production' : 'development',
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html',
+      },
       registerType: 'prompt',
       includeAssets: ['pongstr-dark.svg', 'pongstr-light.svg', 'robots.txt'],
       manifest: {
@@ -92,9 +99,6 @@ export default defineConfig({
             options: { cacheName: 'groove-vendor' },
           },
         ],
-      },
-      devOptions: {
-        enabled: true,
       },
     }),
   ],
