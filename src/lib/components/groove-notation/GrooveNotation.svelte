@@ -4,6 +4,7 @@
 
   import NotationQueue from '$lib/components/groove-notation/components/NotationQueue.svelte'
   import NotationStaff from '$lib/components/groove-notation/components/NotationStaff.svelte'
+  import { cn } from '$lib/utils'
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { tempoMarkingForTimeSignature } from '$lib/utils/music-math'
 
@@ -15,7 +16,7 @@
   )
 </script>
 
-<div class="h-full w-full overflow-y-auto pt-[10vh]">
+<div class="h-full max-h-full w-full overflow-y-auto pt-[10vh]">
   {#if $ui.practiceMode.active}
     <div
       class="flex w-auto flex-col rounded-lg py-24 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl"
@@ -40,7 +41,11 @@
 
   {#if !$ui.practiceMode.active}
     <div
-      class="bg-background/50 border-border/40 flex w-auto flex-col rounded-lg border py-24 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl"
+      class={cn(
+        'bg-background/50 border-border/40  h-auto w-auto rounded-lg border py-24 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl',
+        $ui.editorVisible && !$ui.showToms && 'pb-96',
+        $ui.editorVisible && $ui.showToms && 'pb-155',
+      )}
       in:fly={{
         y: 100,
         opacity: 1,

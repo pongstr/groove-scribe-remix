@@ -10,6 +10,9 @@
 
   dayjs.extend(relativeTime)
 
+  const ReloadPromptComponent =
+    import('../lib/components/pwa/ReloadPrompt.svelte')
+
   let defaultGroove = defaultEditorGroove()
   let data = setDataContext({
     groove: defaultGroove,
@@ -53,6 +56,6 @@
 
 {@render children()}
 
-{#await import('$lib/components/pwa/ReloadPrompt.svelte') then { default: ReloadPrompt }}
+{#await ReloadPromptComponent then { default: ReloadPrompt }}
   <ReloadPrompt />
 {/await}
