@@ -210,11 +210,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
-    @apply h-screen w-screen overflow-hidden font-sans;
+    @apply font-sans;
   }
 
   body {

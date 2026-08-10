@@ -61,10 +61,10 @@
   <section
     data-queue-index={index}
     class={[
-      'border-border/60 relative border p-4 transition-colors',
+      'relative mx-5 border  px-5 transition-colors',
       isCurrent
-        ? 'border-primary bg-background/80 shadow-sm'
-        : 'bg-background/50 hover:border-border',
+        ? 'bg-primary/5 border-primary'
+        : 'hover:border-border border-transparent',
     ]}
   >
     <button

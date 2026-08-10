@@ -127,11 +127,8 @@
   })
 </script>
 
-<div
-  class="notation-staff text-card-foreground flex min-h-full w-full max-w-full items-start justify-center overflow-x-hidden"
-  bind:this={hostEl}
->
-  <div class="w-8xl mx-16">
+<div class="notation-staff text-card-foreground" bind:this={hostEl}>
+  <div>
     {#if showHeader}
       <div class="print-header text-foreground">
         {#if source.name}

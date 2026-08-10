@@ -16,53 +16,25 @@
   )
 </script>
 
-<div class="h-full max-h-full w-full overflow-y-auto pt-[10vh]">
-  {#if $ui.practiceMode.active}
-    <div
-      class="flex w-auto flex-col rounded-lg py-24 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl"
-      in:fly={{
-        y: 100,
-        opacity: 1,
-        delay: 100,
-        duration: 450,
-        easing: quadOut,
-      }}
-      out:fly={{
-        y: -100,
-        delay: 50,
-        opacity: 0,
-        duration: 450,
-        easing: quadOut,
-      }}
-    >
-      <NotationQueue />
-    </div>
-  {/if}
-
-  {#if !$ui.practiceMode.active}
-    <div
-      class={cn(
-        'bg-background/50 border-border/40  h-auto w-auto rounded-lg border py-24 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl',
-        $ui.editorVisible && !$ui.showToms && 'pb-96',
-        $ui.editorVisible && $ui.showToms && 'pb-155',
-      )}
-      in:fly={{
-        y: 100,
-        opacity: 1,
-        delay: 100,
-        duration: 450,
-        easing: quadOut,
-      }}
-      out:fly={{
-        y: -100,
-        delay: 50,
-        opacity: 0,
-        duration: 450,
-        easing: quadOut,
-      }}
-    >
+<div
+  class={cn(
+    'w-full py-[10vh]',
+    $ui.editorVisible && !$ui.showToms && !$ui.practiceMode.active && 'pb-75',
+    $ui.editorVisible && $ui.showToms && !$ui.practiceMode.active && 'pb-155',
+  )}
+>
+  <div
+    class={cn(
+      'bg-background/50 border-border/40  w-auto rounded-lg border py-14 lg:mx-4 xl:mx-auto xl:w-full xl:max-w-6xl',
+    )}
+  >
+    {#if !$ui.practiceMode.active}
       <div
-        class="text-muted-foreground/90 mx-auto w-auto max-w-5xl font-sans text-lg"
+        in:fly={{ y: 0, easing: quadOut }}
+        out:fly={{ y: -20, easing: quadOut }}
+        class={cn(
+          'text-muted-foreground/90 mx-auto w-auto max-w-5xl font-sans text-lg',
+        )}
       >
         {#if $data.groove.name.length}
           <span>{$data.groove.name}</span>
@@ -70,9 +42,21 @@
         {tempoMarking.symbol} = {$data.groove.tempo}
       </div>
 
-      <div class="groove-notation">
+      <div class="groove-notation mx-10">
         <NotationStaff />
       </div>
-    </div>
-  {/if}
+    {/if}
+
+    {#if $ui.practiceMode.active}
+      <div
+        in:fly={{ y: 0, easing: quadOut }}
+        out:fly={{ y: -20, easing: quadOut }}
+        class={cn('text-muted-foreground/90  w-auto font-sans text-lg')}
+      >
+        <div class="groove-notation">
+          <NotationQueue />
+        </div>
+      </div>
+    {/if}
+  </div>
 </div>
