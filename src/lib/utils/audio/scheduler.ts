@@ -75,6 +75,14 @@ export function createScheduler(host: SchedulerHost) {
   let uiEvents: UiEvent[] = []
   /** Slot to resume from after pause; null means start from the beginning. */
   let resumeSlot: number | null = null
+  let naturalEndTimer: ReturnType<typeof setTimeout> | null = null
+
+  function clearNaturalEndTimer(): void {
+    if (naturalEndTimer !== null) {
+      clearTimeout(naturalEndTimer)
+      naturalEndTimer = null
+    }
+  }
 
   function ensureContext(): AudioContext {
     if (!ctx) {
@@ -107,6 +115,7 @@ export function createScheduler(host: SchedulerHost) {
       cancelAnimationFrame(rafId)
       rafId = null
     }
+    clearNaturalEndTimer()
   }
 
   function playBuffer(
@@ -288,10 +297,15 @@ export function createScheduler(host: SchedulerHost) {
           const chainAt = nextNoteTime
           const notifyDelayMs = Math.max(
             0,
-            (chainAt - audio.currentTime) * 1000,
+            (chainAt - audio.currentTime) * 1000 + 30,
           )
-          setTimeout(() => {
+          clearNaturalEndTimer()
+          naturalEndTimer = setTimeout(() => {
+            naturalEndTimer = null
             host.notifyNaturalEnd(chainAt)
+            // Stop transport after the last note; practice mode chains in the
+            // naturalEnd effect before the user sees a stuck playing state.
+            stop()
           }, notifyDelayMs)
         }
       }

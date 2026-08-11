@@ -22,15 +22,16 @@
 
 <div class="flex flex-col gap-3">
   <div class="flex items-center justify-between gap-2">
-    <span class="text-sm font-semibold">Swing</span>
+    <span class="text-sm font-semibold">Shuffle Amount</span>
   </div>
 
   <div
-    class="bg-background/50 flex h-9 items-center justify-between border p-0.5"
+    class="bg-background/50 flex items-center justify-between border p-1"
     class:opacity-40={disabled}
   >
     <Button
       variant="ghost"
+      size="lg"
       class="text-muted-foreground hover:bg-background rounded-md"
       disabled={disabled || $data.groove.swingPercent <= 0}
       onclick={() => bump(-STEP)}

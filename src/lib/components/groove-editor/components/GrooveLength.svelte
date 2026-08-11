@@ -10,15 +10,16 @@
 
 <div class="flex flex-col gap-2 py-3">
   <div class="flex items-center justify-between gap-2">
-    <span class="text-sm font-semibold">Length</span>
+    <span class="text-sm font-semibold">Measure Count</span>
   </div>
 
   <div
-    class="bg-background/40 flex items-center justify-between gap-3 border p-0.5"
+    class="bg-background/40 flex items-center justify-between gap-3 border p-1"
   >
     <Button
       variant="ghost"
-      class="text-muted-foreground hover:bg-background h-9 rounded-md"
+      size="lg"
+      class="text-muted-foreground hover:bg-background rounded-md"
       disabled={$data.groove.measures <= 1}
       onclick={() => data.setMeasures($data.groove.measures - 1)}
       aria-label="Remove measure"
@@ -32,7 +33,8 @@
 
     <Button
       variant="ghost"
-      class="text-muted-foreground hover:bg-background h-9"
+      size="lg"
+      class="text-muted-foreground hover:bg-background"
       disabled={$data.groove.measures >= MAX_MEASURES}
       onclick={() => data.setMeasures($data.groove.measures + 1)}
       aria-label="Add measure"

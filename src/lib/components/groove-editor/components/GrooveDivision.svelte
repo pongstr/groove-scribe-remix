@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
+  import { cn } from '$lib/utils'
   import { DIVISIONS } from '$lib/utils/config'
   import { getDataContext } from '$lib/utils/context'
 
@@ -21,14 +22,14 @@
     <span>{label}</span>
   </div>
 
-  <div class="grid grid-cols-3 gap-2">
-    {#each DIVISIONS as d (d.value)}
+  <div class="grid grid-cols-2 gap-2">
+    {#each DIVISIONS as div, idx (div.value)}
       <Button
-        variant={$data.groove.division === d.value ? 'default' : 'secondary'}
-        class="justify-start text-xs font-semibold"
-        onclick={() => selectDivision(d.value)}
+        class={cn(idx === DIVISIONS.length - 1 && 'col-span-2')}
+        variant={$data.groove.division === div.value ? 'default' : 'secondary'}
+        onclick={() => selectDivision(div.value)}
       >
-        {d.label}
+        {div.label}
       </Button>
     {/each}
   </div>

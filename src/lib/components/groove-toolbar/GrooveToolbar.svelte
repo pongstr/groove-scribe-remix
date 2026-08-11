@@ -1,12 +1,11 @@
 <script lang="ts">
   import { quintOut } from 'svelte/easing'
   import { fly } from 'svelte/transition'
-  import { CircleQuestionMark, Keyboard } from '@lucide/svelte'
 
   import PracticeModeBar from '$lib/components/groove-notation/components/PracticeModeBar.svelte'
   import PlaybackControls from '$lib/components/groove-toolbar/components/PlaybackControls.svelte'
   import PlaybackFile from '$lib/components/groove-toolbar/components/PlaybackFile.svelte'
-  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
+  import ToolbarAssistButtons from '$lib/components/groove-toolbar/components/ToolbarAssistButtons.svelte'
   import { getUIContext } from '$lib/utils/context'
 
   let ui = getUIContext()
@@ -49,29 +48,5 @@
 {/snippet}
 
 {#snippet RightSection()}
-  <div class="ml-auto flex items-center justify-end">
-    <ButtonWithTooltip
-      variant="ghost"
-      size="icon"
-      class="hover:text-muted-foreground"
-      onclick={() => ui.openShortcuts()}
-      aria-label="Keyboard shortcuts"
-      content="Hotkeys (H)"
-      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
-    >
-      <Keyboard class="size-5" />
-    </ButtonWithTooltip>
-
-    <ButtonWithTooltip
-      variant="ghost"
-      size="icon"
-      class="hover:text-muted-foreground"
-      onclick={() => ui.toggleHelp()}
-      aria-label="Help and notation key"
-      content="Help Docs"
-      tooltipContentProps={{ align: 'end', sideOffset: 10 }}
-    >
-      <CircleQuestionMark class="size-5" />
-    </ButtonWithTooltip>
-  </div>
+  <ToolbarAssistButtons class="ml-auto" />
 {/snippet}

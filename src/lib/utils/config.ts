@@ -31,10 +31,10 @@ type DivisionsType = {
 
 export const DIVISIONS: Array<DivisionsType> = [
   { value: 8, label: '1/8 Notes', group: 'straight' },
-  { value: 16, label: '1/16 Notes', group: 'straight' },
   { value: 32, label: '1/32 Notes', group: 'straight' },
   { value: 12, label: '1/8 Triplets', group: 'triplet' },
   { value: 24, label: '1/16 Triplets', group: 'triplet' },
+  { value: 16, label: '1/16 Notes', group: 'straight' },
 ]
 
 export interface ArticulationMeta {
