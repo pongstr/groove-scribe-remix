@@ -1,7 +1,19 @@
 <script lang="ts">
   import dayjs from 'dayjs'
+  import {
+    Copy,
+    FileDown,
+    FileInput,
+    FileUp,
+    Save,
+    SquarePen,
+    Trash2,
+    X,
+  } from '@lucide/svelte'
 
   import { Button } from '$lib/components/ui/button'
+  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
+  import * as ButtonGroup from '$lib/components/ui/button-group/index'
   import { Input } from '$lib/components/ui/input'
   import { cn } from '$lib/utils'
   import { getDataContext, getUIContext } from '$lib/utils/context'
@@ -12,6 +24,8 @@
   } from '$lib/utils/storage/share'
   import type { SavedGroove } from '$lib/utils/types'
 
+  const SHOWS_FILTER_INPUT_COUNT = 20
+
   let data: App.Groove.ContextStore = getDataContext()
   let ui = getUIContext()
 
@@ -20,7 +34,7 @@
   let search = $state('')
   let renamingId = $state<string | null>(null)
   let renameValue = $state('')
-  let saveNameValue = $state('')
+
   let fileInput: HTMLInputElement | undefined = $state()
   let errorMessage = $state<string | null>(null)
 
@@ -38,26 +52,6 @@
     } finally {
       loading = false
     }
-  }
-
-  async function handleSave() {
-    const name = saveNameValue.trim() ?? 'Untitled Groove'
-    const record = await db.saveGroove(name, $data.groove, $data.groove.id)
-
-    data.applySavedRecord(record)
-    ui.syncQueueGroove(record.id, record.name, record.data)
-
-    await refresh()
-  }
-
-  async function handleSaveAsNew() {
-    const name = saveNameValue.trim() ?? 'Untitled Groove'
-    const record = await db.saveGroove(name, $data.groove, null)
-
-    data.applySavedRecord(record)
-    ui.syncQueueGroove(record.id, record.name, record.data)
-
-    await refresh()
   }
 
   function handleLoad(record: SavedGroove) {
@@ -122,7 +116,7 @@
     try {
       errorMessage = null
       const imported = await parseGrooveJsonFile(file)
-      data.load(imported, imported.name || 'Imported Groove')
+      data.load(imported, imported.name ?? 'Imported Groove')
       ui.closeDrawer()
     } catch (err) {
       errorMessage =
@@ -139,43 +133,34 @@
   $effect(() => {
     if ($ui.drawer.open) {
       void refresh()
-      saveNameValue = $data.groove.name || ''
       errorMessage = null
     }
   })
 </script>
 
-<div class="bg-muted/40 mb-2.5 flex flex-col gap-1.5 rounded-xl p-2.5">
-  <Input type="text" bind:value={saveNameValue} placeholder="Groove name" />
-  <div class="flex gap-1.5">
-    <Button type="button" class="flex-1" size="sm" onclick={handleSave}>
-      {$data.groove.id ? 'Save' : 'Save to My Grooves'}
-    </Button>
-    {#if $data.groove.id}
-      <Button
-        type="button"
-        variant="secondary"
-        size="sm"
-        onclick={handleSaveAsNew}
-      >
-        Save as new
-      </Button>
-    {/if}
-  </div>
-</div>
-
-<div class="mb-2.5 flex gap-1.5">
-  <Button type="button" variant="secondary" size="sm" onclick={triggerImport}>
-    Import JSON
+<ButtonGroup.Root class="w-full">
+  <Button
+    size="sm"
+    type="button"
+    class="flex-1 gap-3"
+    variant="secondary"
+    onclick={triggerImport}
+  >
+    <FileUp class="size-4" />
+    <span>Import JSON</span>
   </Button>
+
   <Button
     type="button"
-    variant="secondary"
     size="sm"
+    variant="secondary"
+    class="flex-1 gap-3"
     onclick={() => downloadGrooveAsJson($data.groove)}
   >
-    Export current
+    <FileDown class="size-4" />
+    <span>Export JSON</span>
   </Button>
+
   <input
     bind:this={fileInput}
     type="file"
@@ -183,17 +168,20 @@
     class="hidden"
     onchange={handleImportFile}
   />
-</div>
+</ButtonGroup.Root>
+
 {#if errorMessage}
   <p class="text-destructive mb-2 text-xs">{errorMessage}</p>
 {/if}
 
-<Input
-  type="search"
-  bind:value={search}
-  placeholder="Search my grooves…"
-  class="mb-2.5"
-/>
+{#if savedGrooves.length >= SHOWS_FILTER_INPUT_COUNT}
+  <Input
+    type="search"
+    bind:value={search}
+    placeholder="Search my grooves…"
+    class="mb-2.5"
+  />
+{/if}
 
 <div class="flex flex-col gap-1.5">
   {#if loading}
@@ -204,79 +192,120 @@
         ? "You haven't saved any grooves yet. Build one and hit Save above!"
         : 'No grooves match your search.'}
     </p>
-  {:else}
+  {/if}
+
+  {#if !loading}
     {#each filteredGrooves as record (record.id)}
       <div
         class={cn(
-          'border-border flex items-center gap-1 rounded-xl border',
+          'border-border flex items-center gap-1 rounded-xl border p-1',
           $data.groove.id === record.id && 'border-primary/40 bg-primary/5',
         )}
       >
         {#if renamingId === record.id}
-          <form
-            class="flex w-full items-center gap-1.5 p-1.5"
-            onsubmit={(e) => {
-              e.preventDefault()
-              commitRename()
-            }}
-          >
-            <Input type="text" bind:value={renameValue} class="flex-1" />
-            <Button type="submit" size="xs">Save</Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="xs"
-              onclick={() => (renamingId = null)}>Cancel</Button
-            >
-          </form>
-        {:else}
-          <button
-            type="button"
-            class="flex min-w-0 flex-1 cursor-pointer flex-col items-start gap-0.5 border-none bg-transparent px-2.5 py-2 text-left"
-            onclick={() => handleLoad(record)}
-          >
-            <span class="text-foreground w-full truncate text-sm font-bold"
-              >{record.name}</span
-            >
-            <span class="text-muted-foreground text-xs"
-              >{formatRelativeTime(record.updatedAt)}</span
-            >
-          </button>
-          <div class="flex shrink-0 gap-0.5 pr-1.5">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onclick={() => startRename(record)}
-              title="Rename">✎</Button
-            >
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onclick={() => handleDuplicate(record)}
-              title="Duplicate">⧉</Button
-            >
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onclick={() => handleExportSaved(record)}
-              title="Export JSON">⭳</Button
-            >
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              class="hover:text-destructive"
-              onclick={() => handleDelete(record)}
-              title="Delete"
-            >
-              🗑
-            </Button>
-          </div>
+          {@render GrooveRenameForm()}
+        {/if}
+
+        {#if renamingId !== record.id}
+          {@render GrooveItem(record)}
         {/if}
       </div>
     {/each}
   {/if}
 </div>
+
+{#snippet GrooveRenameForm()}
+  <form
+    class="flex w-full items-center gap-1.5 p-1.5"
+    onsubmit={(e) => {
+      e.preventDefault()
+      commitRename()
+    }}
+  >
+    <Input
+      type="text"
+      bind:value={renameValue}
+      class="border-secondary flex-1 border px-2"
+    />
+
+    <div class="flex items-center justify-end gap-1">
+      <Button type="submit" size="icon">
+        <Save class="size-4" />
+      </Button>
+
+      <ButtonWithTooltip
+        size="icon"
+        type="button"
+        content="Cancel"
+        variant="secondary"
+        onclick={() => (renamingId = null)}
+        tooltipContentProps={{ side: 'top', sideOffset: 8, align: 'end' }}
+      >
+        <X class="size-4" />
+      </ButtonWithTooltip>
+    </div>
+  </form>
+{/snippet}
+
+{#snippet GrooveItem(item: SavedGroove)}
+  <button
+    type="button"
+    class="flex min-w-0 flex-1 cursor-pointer flex-col items-start gap-0.5 border-none bg-transparent px-2.5 py-2 text-left"
+    onclick={() => handleLoad(item)}
+  >
+    <span class="text-foreground w-full truncate text-sm font-bold">
+      {item.name}
+    </span>
+
+    <span class="text-muted-foreground text-xs">
+      {formatRelativeTime(item.updatedAt)}
+    </span>
+  </button>
+
+  <div class="flex shrink-0 items-center justify-end">
+    <ButtonWithTooltip
+      size="icon"
+      type="button"
+      variant="ghost"
+      content="Rename"
+      onclick={() => startRename(item)}
+      tooltipContentProps={{ side: 'top', sideOffset: 8, align: 'end' }}
+    >
+      <SquarePen class="size-4" />
+    </ButtonWithTooltip>
+
+    <ButtonWithTooltip
+      size="icon"
+      type="button"
+      variant="ghost"
+      content="Duplicate"
+      onclick={() => handleDuplicate(item)}
+      tooltipContentProps={{ side: 'top', sideOffset: 8, align: 'end' }}
+    >
+      <Copy class="size-4" />
+    </ButtonWithTooltip>
+
+    <ButtonWithTooltip
+      type="button"
+      variant="ghost"
+      size="icon"
+      content="Export JSON"
+      onclick={() => handleExportSaved(item)}
+      tooltipContentProps={{ side: 'top', sideOffset: 8, align: 'end' }}
+    >
+      <FileInput class="size-4" />
+    </ButtonWithTooltip>
+
+    <ButtonWithTooltip
+      size="icon"
+      type="button"
+      variant="ghost"
+      content="Delete"
+      class="hover:text-destructive"
+      onclick={() => handleDelete(item)}
+      tooltipContentProps={{ side: 'top', sideOffset: 8, align: 'end' }}
+    >
+      <Trash2 class="size-4" />
+    </ButtonWithTooltip>
+  </div>
+{/snippet}

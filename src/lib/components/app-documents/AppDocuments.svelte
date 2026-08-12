@@ -30,10 +30,18 @@
         <Tabs.Trigger value="mine">My Grooves</Tabs.Trigger>
         <Tabs.Trigger value="presets">Presets</Tabs.Trigger>
       </Tabs.List>
-      <Tabs.Content value="mine">
+
+      <Tabs.Content
+        value="mine"
+        class="max-h-full scrollbar-gutter-stable space-y-4 overflow-y-auto"
+      >
         <AppGrooves />
       </Tabs.Content>
-      <Tabs.Content value="presets" class="max-h-full overflow-y-auto">
+
+      <Tabs.Content
+        value="presets"
+        class="max-h-full scrollbar-gutter-stable space-y-4 overflow-y-auto"
+      >
         <AppPresets />
       </Tabs.Content>
     </Tabs.Root>
