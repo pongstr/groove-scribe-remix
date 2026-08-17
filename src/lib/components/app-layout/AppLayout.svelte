@@ -2,10 +2,9 @@
   import { onMount, type Snippet } from 'svelte'
 
   import AppDocuments from '$lib/components/app-documents/AppDocuments.svelte'
+  import AppHotkeysHost from '$lib/components/app-hotkeys/HotkeysHost.svelte'
   import CountInOverlay from '$lib/components/groove-notation/components/CountInOverlay.svelte'
-  import HelpDocs from '$lib/components/help-docs/HelpDocs.svelte'
-  import KeyboardShortcutsHost from '$lib/components/keyboard-shortcuts/KeyboardShortcutsHost.svelte'
-  import KeyboardShortcutsModal from '$lib/components/keyboard-shortcuts/KeyboardShortcutsModal.svelte'
+  import * as Help from '$lib/components/help-docs/index'
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { applyUiPrefsToGroove } from '$lib/utils/shortcuts'
   import {
@@ -63,9 +62,11 @@
 </main>
 
 <div class="no-print">
-  <KeyboardShortcutsHost />
-  <HelpDocs />
+  <AppHotkeysHost />
   <AppDocuments />
-  <KeyboardShortcutsModal />
   <CountInOverlay />
+
+  <Help.DialogAbout />
+  <Help.DialogDocSupport />
+  <Help.DialogHotkeySupport />
 </div>

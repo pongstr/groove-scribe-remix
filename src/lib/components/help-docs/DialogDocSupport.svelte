@@ -1,5 +1,6 @@
 <script lang="ts">
   import Articulations from '$lib/components/groove-editor/components/Articulations.svelte'
+  import DialogAbout from '$lib/components/help-docs/DialogAbout.svelte'
   import * as Dialog from '$lib/components/ui/dialog'
   import {
     LANE_ARTICULATION_META,
@@ -17,20 +18,23 @@
     const color = LANE_META[lane].color
     return color.startsWith('--') ? `var(${color})` : color
   }
+
+  function onOpenChange(value: boolean) {
+    if (!value) {
+      ui.toggleHelp(value)
+    }
+  }
 </script>
 
-<Dialog.Root
-  open={$ui.helpOpen}
-  onOpenChange={(open) => {
-    if (!open) ui.closeHelp()
-  }}
->
+<DialogAbout />
+
+<Dialog.Root open={$ui.helpOpen} {onOpenChange}>
   <Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-xl">
     <Dialog.Header>
-      <Dialog.Title>How Groove Studio works</Dialog.Title>
-      <Dialog.Description class="sr-only"
-        >Notation key and controls help</Dialog.Description
-      >
+      <Dialog.Title>How GrooveScribe Remix works</Dialog.Title>
+      <Dialog.Description class="sr-only">
+        Notation key and controls help
+      </Dialog.Description>
     </Dialog.Header>
 
     <section class="mb-5">

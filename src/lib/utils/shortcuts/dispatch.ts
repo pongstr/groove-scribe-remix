@@ -65,10 +65,13 @@ export function createShortcutKeydownHandler(
 
     if (event.metaKey || event.ctrlKey || event.altKey) {
       const def = matchShortcut(event, defs)
+
       if (!def) return
       if (isTextEditableTarget(event.target)) return
+
       claim(event)
       void def.run()
+
       return
     }
 

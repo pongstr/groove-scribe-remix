@@ -10,7 +10,7 @@ export const UI_CONTEXT = 'app.ui'
 // NOTE:
 // Whenever changes are made in the UI Context, bump the version
 // (patch/minor/major) so that `initUIContext` can migrate via `migrate` below.
-const UI_CONTEXT_VERSION = '0.3.3'
+const UI_CONTEXT_VERSION = '0.3.4'
 
 const STICKING_MODES: App.Groove.StickingMode[] = ['off', 'visible', 'reverse']
 const CLICK_SUBDIVISIONS: App.Groove.ClickSubdivision[] = [0, 4, 8, 16]
@@ -31,6 +31,7 @@ export const uiDefaults: App.UI.ContextInput = {
     open: false,
     tab: 'mine',
   },
+  aboutOpen: false,
   helpOpen: false,
   permutationsOpen: false,
   settings: {
@@ -133,6 +134,13 @@ const migrate: Record<string, MigrateFunction> = {
       version: '0.3.3',
     }
   },
+  '0.3.4': (update, local) => {
+    return {
+      ...update,
+      ...local,
+      aboutOpen: local.aboutOpen ?? update.aboutOpen ?? false
+    }
+  }
 }
 
 function cloneGroove(data: App.Groove.Data): App.Groove.Data {
@@ -173,9 +181,9 @@ function toContext(input: App.UI.ContextInput): App.UI.Context {
     queue.length === 0
       ? 0
       : Math.min(
-          Math.max(0, practiceSource?.currentIndex ?? 0),
-          queue.length - 1,
-        )
+        Math.max(0, practiceSource?.currentIndex ?? 0),
+        queue.length - 1,
+      )
 
   return {
     version: UI_CONTEXT_VERSION,
@@ -192,6 +200,7 @@ function toContext(input: App.UI.ContextInput): App.UI.Context {
       open: Boolean(input.drawer?.open),
       tab: input.drawer?.tab === 'presets' ? 'presets' : 'mine',
     },
+    aboutOpen: false,
     // Ephemeral overlays — never restore open from storage (stuck true
     // previously blocked all letter shortcuts while Space still worked).
     helpOpen: false,
@@ -305,6 +314,7 @@ export function createUIContextStore(
   // Persist on every store update (skip the immediate subscribe emission so we
   // never overwrite localStorage with a stale in-memory snapshot).
   let persistReady = false
+
   subscribe((value) => {
     if (!persistReady) return
     updateStorage(value)
@@ -562,10 +572,10 @@ export function createUIContextStore(
       const queue = store.practiceMode.queue.map((item) =>
         item.id === entryId
           ? {
-              ...item,
-              name: name.trim() || item.name,
-              data: cloneGroove(groove),
-            }
+            ...item,
+            name: name.trim() || item.name,
+            data: cloneGroove(groove),
+          }
           : item,
       )
       return {
@@ -626,12 +636,12 @@ export function createUIContextStore(
         drawer: { ...s.drawer, open: !s.drawer.open },
       })),
     setDrawerTab: (tab) =>
-      update((s) => ({
-        ...s,
-        drawer: { ...s.drawer, tab },
+      void update((store) => ({
+        ...store,
+        drawer: { ...store.drawer, tab },
       })),
-    toggleHelp: () => update((s) => ({ ...s, helpOpen: !s.helpOpen })),
-    closeHelp: () => update((s) => ({ ...s, helpOpen: false })),
+    toggleAbout: (value: boolean) => void update((store) => ({ ...store, aboutOpen: value })),
+    toggleHelp: (value: boolean) => void update((store) => ({ ...store, helpOpen: value })),
     togglePermutations: () =>
       update((s) => ({ ...s, permutationsOpen: !s.permutationsOpen })),
     closePermutations: () => update((s) => ({ ...s, permutationsOpen: false })),
@@ -670,10 +680,10 @@ export function createUIContextStore(
       update((s) => ({ ...s, editorVisible: value })),
     toggleQueueOpen: () => update((s) => ({ ...s, queueOpen: !s.queueOpen })),
     setQueueOpen: (value) => update((s) => ({ ...s, queueOpen: value })),
-    toggleShortcuts: () =>
-      update((s) => ({ ...s, shortcutsOpen: !s.shortcutsOpen })),
-    openShortcuts: () => update((s) => ({ ...s, shortcutsOpen: true })),
-    closeShortcuts: () => update((s) => ({ ...s, shortcutsOpen: false })),
+    toggleShortcuts: (value: boolean) =>
+      update((store) => ({ ...store, shortcutsOpen: value })),
+    // openShortcuts: () => update((s) => ({ ...s, shortcutsOpen: true })),
+    // closeShortcuts: () => update((s) => ({ ...s, shortcutsOpen: false })),
   }
 
   return store

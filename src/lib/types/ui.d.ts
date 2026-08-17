@@ -35,6 +35,7 @@ declare global {
         /** Edit-mode notation preview: Groove Editor chrome hidden. */
         previewMode: boolean
         drawer: DrawerState
+        aboutOpen: boolean
         helpOpen: boolean
         permutationsOpen: boolean
         settings: Settings
@@ -53,6 +54,7 @@ declare global {
         practiceMode: Partial<PracticeModeState>
         previewMode: boolean
         drawer: Partial<DrawerState>
+        aboutOpen: boolean
         helpOpen: boolean
         permutationsOpen: boolean
         settings: Partial<Settings>
@@ -94,8 +96,8 @@ declare global {
         closeDrawer: () => void
         toggleDrawer: () => void
         setDrawerTab: (tab: DrawerTab) => void
-        toggleHelp: () => void
-        closeHelp: () => void
+        toggleAbout: (value: boolean) => void
+        toggleHelp: (value: boolean) => void
         togglePermutations: () => void
         closePermutations: () => void
         setTheme: (theme: Theme) => void
@@ -115,12 +117,13 @@ declare global {
         setEditorVisible: (value: boolean) => void
         toggleQueueOpen: () => void
         setQueueOpen: (value: boolean) => void
-        toggleShortcuts: () => void
-        openShortcuts: () => void
-        closeShortcuts: () => void
+        toggleShortcuts: (value: boolean) => void
+        /* @deprecated: openShortcuts, closeShortcuts - use toggleShortcuts instead  */
+        // openShortcuts: () => void
+        // closeShortcuts: () => void
       }
     }
   }
 }
 
-export {}
+export { }

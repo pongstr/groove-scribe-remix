@@ -5,14 +5,15 @@
 
   let ui = getUIContext()
   let groups = shortcutsByGroup()
+
+  function onOpenChange(value: boolean) {
+    if (!value) {
+      ui.toggleShortcuts(value)
+    }
+  }
 </script>
 
-<Dialog.Root
-  open={$ui.shortcutsOpen}
-  onOpenChange={(open) => {
-    if (!open) ui.closeShortcuts()
-  }}
->
+<Dialog.Root open={$ui.shortcutsOpen} {onOpenChange}>
   <Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-lg">
     <Dialog.Header>
       <Dialog.Title>Keyboard shortcuts</Dialog.Title>

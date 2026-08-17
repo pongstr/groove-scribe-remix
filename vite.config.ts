@@ -31,7 +31,7 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['pongstr-dark.svg', 'pongstr-light.svg', 'robots.txt'],
       manifest: {
-        name: 'GrooveScribe Remix',
+        name: process.env.NODE_ENV === 'production' ? 'GrooveScribe Remix' : 'GrooveScribe Remix [Dev]',
         short_name: 'Groovy',
         description: 'Browser-based drum groove editor and practice tool',
         theme_color: '#171717',

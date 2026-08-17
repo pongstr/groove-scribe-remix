@@ -84,7 +84,7 @@ export function createShortcutHandlers(ui: UI, data: Data): ShortcutHandlers {
     },
 
     openShortcuts: () => {
-      ui.toggleShortcuts()
+      ui.toggleShortcuts(!get(ui).shortcutsOpen)
     },
 
     hydrateFromUi: (options) => applyUiPrefsToGroove(ui, data, options),

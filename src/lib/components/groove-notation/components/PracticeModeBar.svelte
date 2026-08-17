@@ -154,7 +154,7 @@
       variant="ghost"
       size="icon"
       class="hover:text-muted-foreground"
-      onclick={() => ui.openShortcuts()}
+      onclick={() => ui.toggleShortcuts(!$ui.shortcutsOpen)}
       aria-label="Keyboard shortcuts"
       content="Hotkeys (H)"
       tooltipContentProps={{ align: 'end', sideOffset: 10 }}
@@ -166,7 +166,7 @@
       variant="ghost"
       size="icon"
       class="hover:text-muted-foreground"
-      onclick={() => ui.toggleHelp()}
+      onclick={() => ui.toggleHelp(!$ui.helpOpen)}
       aria-label="Help and notation key"
       content="Help Docs"
       tooltipContentProps={{ align: 'end', sideOffset: 10 }}

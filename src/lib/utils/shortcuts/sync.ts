@@ -1,9 +1,7 @@
 import { get } from 'svelte/store'
 
-import type { App, ClickSubdivision } from '../context/types'
-
 type UI = App.UI.ContextStore
-type Data = App.Data.ContextStore
+type Data = App.Groove.ContextStore
 
 /** Mirror persisted UI display prefs onto the live groove so renderers stay in sync. */
 export function applyUiPrefsToGroove(
@@ -11,12 +9,13 @@ export function applyUiPrefsToGroove(
   data: Data,
   options?: { quiet?: boolean },
 ): void {
-  const prefs = get(ui)
+  const $data = get(data)
+  const $prefs = get(ui)
   const payload = {
-    showToms: prefs.showToms,
-    showLegend: prefs.showLegend,
-    showStickings: prefs.stickingMode !== 'off',
-    metronomeSubdivision: prefs.clickSubdivision,
+    showToms: $prefs.showToms,
+    showLegend: $prefs.showLegend,
+    showStickings: $prefs.stickingMode !== 'off',
+    metronomeSubdivision: $prefs.clickSubdivision,
   }
 
   if (options?.quiet) {
@@ -27,7 +26,8 @@ export function applyUiPrefsToGroove(
   data.setShowToms(payload.showToms)
   data.setShowLegend(payload.showLegend)
   data.setShowStickings(payload.showStickings)
-  if (get(data).groove.metronomeSubdivision !== payload.metronomeSubdivision) {
+
+  if ($data.groove.metronomeSubdivision !== payload.metronomeSubdivision) {
     data.setMetronomeSubdivision(payload.metronomeSubdivision)
   }
 }
@@ -49,11 +49,15 @@ export function cycleStickings(ui: UI, data: Data): void {
 
 export function setStickingVisible(ui: UI, data: Data, visible: boolean): void {
   const current = get(ui).stickingMode
+
   if (visible) {
     ui.setStickingMode(current === 'reverse' ? 'reverse' : 'visible')
-  } else {
+  }
+
+  if (!visible) {
     ui.setStickingMode('off')
   }
+
   applyUiPrefsToGroove(ui, data)
 }
 
@@ -70,7 +74,7 @@ export function toggleLegend(ui: UI, data: Data): void {
 export function setClickSubdivision(
   ui: UI,
   data: Data,
-  value: ClickSubdivision,
+  value: App.Groove.ClickSubdivision,
 ): void {
   ui.setClickSubdivision(value)
   applyUiPrefsToGroove(ui, data)

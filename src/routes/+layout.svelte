@@ -5,13 +5,11 @@
   import relativeTime from 'dayjs/plugin/relativeTime'
   import { pwaInfo } from 'virtual:pwa-info'
 
+  import { Toaster } from '$lib/components/ui/sonner/index'
   import { setDataContext, setUIContext, uiDefaults } from '$lib/utils/context'
   import { defaultEditorGroove } from '$lib/utils/storage/seed-grooves'
 
   dayjs.extend(relativeTime)
-
-  const ReloadPromptComponent =
-    import('../lib/components/pwa/ReloadPrompt.svelte')
 
   let defaultGroove = defaultEditorGroove()
   let data = setDataContext({
@@ -36,6 +34,7 @@
     type="image/svg+xml"
     sizes="any"
   />
+
   <link
     rel="icon"
     href="/pongstr-dark.svg"
@@ -43,11 +42,13 @@
     type="image/svg+xml"
     sizes="any"
   />
+
   <link
     rel="preconnect"
     href="https://fonts.gstatic.com"
     crossorigin="anonymous"
   />
+
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
     rel="stylesheet"
@@ -56,6 +57,4 @@
 
 {@render children()}
 
-{#await ReloadPromptComponent then { default: ReloadPrompt }}
-  <ReloadPrompt />
-{/await}
+<Toaster />
