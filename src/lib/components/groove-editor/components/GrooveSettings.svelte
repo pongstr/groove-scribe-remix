@@ -38,15 +38,18 @@
 {#snippet GrooveDrawer()}
   <Drawer.Root direction="left">
     <Drawer.Trigger>
-      <ButtonWithTooltip
-        variant="outline"
-        size="icon"
-        content="Groove Settings"
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-      >
-        <SlidersHorizontal class="size-5" />
-        <span class="sr-only">Groove Settings</span>
-      </ButtonWithTooltip>
+      {#snippet child({ props })}
+        <ButtonWithTooltip
+          {...props}
+          variant="outline"
+          size="icon"
+          content="Groove Settings"
+          tooltipContentProps={{ align: 'start', sideOffset: 10 }}
+        >
+          <SlidersHorizontal class="size-5" />
+          <span class="sr-only">Groove Settings</span>
+        </ButtonWithTooltip>
+      {/snippet}
     </Drawer.Trigger>
 
     <Drawer.Content class={cn('min-w-80 overflow-y-auto font-sans text-sm ')}>

@@ -7,10 +7,9 @@
   import { LANE_META } from '$lib/utils/config'
   import { getDataContext } from '$lib/utils/context'
   import { calcNotesPerMeasure, noteGroupingSize } from '$lib/utils/music-math'
-  import type { LaneId } from '$lib/utils/types'
 
   interface Props {
-    lane: LaneId
+    lane: App.Groove.LaneId
     onClear?: () => void
     class?: string
   }

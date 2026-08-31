@@ -1,19 +1,16 @@
 // Maps our typed articulations to the ABC tokens GrooveScribe's engraver expects.
 // Token strings match `js/constants.js` in the GrooveScribe source.
 
-import type {
-  GrooveData,
-  HiHatArticulation,
-  KickArticulation,
-  SnareArticulation,
-  StickingArticulation,
-  TomArticulation,
-} from '../types'
+import {
+  nextOccupiedSnare,
+  SNARE_ABC_TIE_MARK,
+  snareArticulationHasInherentAccent,
+} from '../snare-modifiers'
 
 /** ABC token or `false` for a rest — the shape abcNotation.js consumes. */
 export type AbcSlot = string | false
 
-const HH: Record<HiHatArticulation, string> = {
+const HH: Record<App.Groove.HiHatArticulation, string> = {
   normal: '^g',
   accent: '!accent!^g',
   open: '!open!^g',
@@ -25,29 +22,44 @@ const HH: Record<HiHatArticulation, string> = {
   cowbell: "^D'",
 }
 
-const SN: Record<SnareArticulation, string> = {
+const SN: Record<App.Groove.SnareArticulation, string> = {
   normal: 'c',
   accent: '!accent!c',
   ghost: '!(.!!).!c',
   xstick: '^c',
-  buzz: '!///!c',
+  buzz: '!/!c',
+  buzz2: '!//!c',
+  buzz3: '!///!c',
   flam: '!accent!{/c}c',
   drag: '{/cc}c',
 }
 
-const KI: Record<KickArticulation, string> = {
+function composeSnareToken(
+  art: App.Groove.SnareArticulation,
+  accentOverlay: boolean,
+  tieOut: boolean,
+): string {
+  let token = SN[art]
+  if (accentOverlay && !snareArticulationHasInherentAccent(art)) {
+    token = `!accent!${token}`
+  }
+  if (tieOut) token += SNARE_ABC_TIE_MARK
+  return token
+}
+
+const KI: Record<App.Groove.KickArticulation, string> = {
   normal: 'F',
   splash: '^d,',
   kickAndSplash: '[F^d,]',
 }
 
-const TOM: Record<TomArticulation, string> = {
+const TOM: Record<App.Groove.TomArticulation, string> = {
   normal: 'e', // overridden per tom index below
 }
 
 const TOM_BY_INDEX = ['e', 'd', 'B', 'A'] as const
 
-const ST: Record<StickingArticulation, string> = {
+const ST: Record<App.Groove.StickingArticulation, string> = {
   R: '"R"x',
   L: '"L"x',
   both: '"R/L"x',
@@ -62,7 +74,7 @@ function mapLane<A extends string>(
 }
 
 /** Convert our GrooveData lanes into the ABC-token arrays GrooveScribe's generator expects. */
-export function grooveDataToAbcArrays(data: GrooveData): {
+export function grooveDataToAbcArrays(data: App.Groove.Data): {
   sticking: AbcSlot[]
   hh: AbcSlot[]
   snare: AbcSlot[]
@@ -78,7 +90,13 @@ export function grooveDataToAbcArrays(data: GrooveData): {
       ? mapLane(data.sticking, ST)
       : data.sticking.map(() => false),
     hh: mapLane(data.hiHat, HH),
-    snare: mapLane(data.snare, SN),
+    snare: data.snare.map((slot, i) => {
+      if (!slot) return false
+      const accent = Boolean(data.snareAccent?.[i])
+      const tieOut =
+        Boolean(data.snareTies?.[i]) && nextOccupiedSnare(data.snare, i) >= 0
+      return composeSnareToken(slot, accent, tieOut)
+    }),
     kick: mapLane(data.kick, KI),
     toms: toms as AbcSlot[][],
   }

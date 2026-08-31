@@ -138,9 +138,9 @@ const migrate: Record<string, MigrateFunction> = {
     return {
       ...update,
       ...local,
-      aboutOpen: local.aboutOpen ?? update.aboutOpen ?? false
+      aboutOpen: local.aboutOpen ?? update.aboutOpen ?? false,
     }
-  }
+  },
 }
 
 function cloneGroove(data: App.Groove.Data): App.Groove.Data {
@@ -181,9 +181,9 @@ function toContext(input: App.UI.ContextInput): App.UI.Context {
     queue.length === 0
       ? 0
       : Math.min(
-        Math.max(0, practiceSource?.currentIndex ?? 0),
-        queue.length - 1,
-      )
+          Math.max(0, practiceSource?.currentIndex ?? 0),
+          queue.length - 1,
+        )
 
   return {
     version: UI_CONTEXT_VERSION,
@@ -572,10 +572,10 @@ export function createUIContextStore(
       const queue = store.practiceMode.queue.map((item) =>
         item.id === entryId
           ? {
-            ...item,
-            name: name.trim() || item.name,
-            data: cloneGroove(groove),
-          }
+              ...item,
+              name: name.trim() || item.name,
+              data: cloneGroove(groove),
+            }
           : item,
       )
       return {
@@ -620,7 +620,7 @@ export function createUIContextStore(
     },
 
     // TODO: prefer `selectedTab`
-    showDrawer: (tab: string = 'mine') =>
+    showDrawer: (tab: App.UI.DrawerTab = 'mine') =>
       update((s) => ({
         ...s,
         drawer: { open: true, tab },
@@ -640,8 +640,10 @@ export function createUIContextStore(
         ...store,
         drawer: { ...store.drawer, tab },
       })),
-    toggleAbout: (value: boolean) => void update((store) => ({ ...store, aboutOpen: value })),
-    toggleHelp: (value: boolean) => void update((store) => ({ ...store, helpOpen: value })),
+    toggleAbout: (value: boolean) =>
+      void update((store) => ({ ...store, aboutOpen: value })),
+    toggleHelp: (value: boolean) =>
+      void update((store) => ({ ...store, helpOpen: value })),
     togglePermutations: () =>
       update((s) => ({ ...s, permutationsOpen: !s.permutationsOpen })),
     closePermutations: () => update((s) => ({ ...s, permutationsOpen: false })),

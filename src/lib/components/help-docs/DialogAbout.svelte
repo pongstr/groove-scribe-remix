@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { version } from '../../../../package.json' with { type: 'json' }
   import * as Dialog from '$lib/components/ui/dialog/index'
   import { getUIContext } from '$lib/utils/context'
 
@@ -17,8 +18,7 @@
     <Dialog.Header>
       <Dialog.Title>About GrooveScribe Remix</Dialog.Title>
       <Dialog.Description>
-        This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.
+        Version {version}
       </Dialog.Description>
     </Dialog.Header>
   </Dialog.Content>

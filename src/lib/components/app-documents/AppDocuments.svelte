@@ -24,7 +24,7 @@
     <Tabs.Root
       class="max-h-full w-full"
       bind:value={$ui.drawer.tab}
-      onValueChange={(value: string) => ui.setDrawerTab(value)}
+      onValueChange={(value) => ui.setDrawerTab(value as App.UI.DrawerTab)}
     >
       <Tabs.List class="w-full group-data-horizontal/tabs:h-10">
         <Tabs.Trigger value="mine">My Grooves</Tabs.Trigger>

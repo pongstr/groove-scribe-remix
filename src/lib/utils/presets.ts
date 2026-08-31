@@ -4,7 +4,6 @@
 // Triplet, World, and Foot Ostinato categories.
 
 import { parseGrooveTabString } from './tab-notation'
-import type { PresetGroove } from './types'
 
 const RAW_PRESETS: { category: string; name: string; tab: string }[] = [
   // Rock grooves
@@ -96,9 +95,15 @@ const RAW_PRESETS: { category: string; name: string; tab: string }[] = [
     name: 'Baiao Ostinato',
     tab: 'TimeSig=4/4&Div=16&Title=Baiao%20Ostinato&Tempo=60&Measures=1&H=|----------------|&S=|----------------|&K=|o-xo--X-o-xo--X-|',
   },
+  // Snare examples (ties / 2-slash rolls)
+  {
+    category: 'Snare Examples',
+    name: 'Tied 2-Slash Rolls',
+    tab: 'TimeSig=4/4&Div=16&Title=Roll%20it%20out&Tempo=80&Measures=1&H=|----------------|&S=|O-oof-ooz-z-z-z-|&K=|----------------|&SnareAccent=|--------1---1---|&SnareTies=|--------1---1---|',
+  },
 ]
 
-export const PRESETS: PresetGroove[] = RAW_PRESETS.map((p, i) => {
+export const PRESETS: App.Groove.PresetGroove[] = RAW_PRESETS.map((p, i) => {
   const data = parseGrooveTabString(p.tab)
   data.name = p.name
   return {
@@ -113,6 +118,6 @@ export const PRESET_CATEGORIES: string[] = [
   ...new Set(PRESETS.map((p) => p.category)),
 ]
 
-export function presetsByCategory(category: string): PresetGroove[] {
+export function presetsByCategory(category: string): App.Groove.PresetGroove[] {
   return PRESETS.filter((p) => p.category === category)
 }

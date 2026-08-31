@@ -1,12 +1,10 @@
-import type { PracticeQueueItem } from '$lib/utils/context/types'
-import type { App } from '$lib/utils/context/types'
 import * as db from '$lib/utils/storage/db'
 
 /** Prefer the latest IndexedDB record when a queue item points at a saved groove. */
 export async function hydrateQueueItem(
   ui: App.UI.ContextStore,
-  item: PracticeQueueItem,
-): Promise<PracticeQueueItem> {
+  item: App.UI.PracticeQueueItem,
+): Promise<App.UI.PracticeQueueItem> {
   const grooveId = item.data.id
   if (!grooveId) return item
   try {

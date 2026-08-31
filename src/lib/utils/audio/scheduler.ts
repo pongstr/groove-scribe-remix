@@ -5,14 +5,18 @@ import {
   METRONOME_SAMPLE,
   TOM_SAMPLES,
 } from '../config'
-import type { App, LoopMode } from '../context/types'
 import {
   calcNotesPerMeasure,
   isUpbeatSlot,
   swingDelaySeconds,
 } from '../music-math'
+import {
+  isSnareBuzz,
+  isSnareTieContinuation,
+  snarePlaybackMeta,
+  snareSustainSeconds,
+} from '../snare-modifiers'
 import { slotAbsoluteMs } from '../tuplet-timing'
-import type { GrooveData, LaneId, Slot } from '../types'
 import { sampleLibrary } from './sample-library'
 
 const LOOKAHEAD_MS = 25
@@ -21,7 +25,7 @@ const START_DELAY_SECONDS = 0.08
 const CLICK_DOWNBEAT_RATE = 1.25
 const CLICK_OTHER_RATE = 0.82
 const MASTER_GAIN = 0.9
-const NOTE_LANES: LaneId[] = [
+const NOTE_LANES: App.Groove.LaneId[] = [
   'hihat',
   'snare',
   'kick',
@@ -38,18 +42,18 @@ interface UiEvent {
 }
 
 export interface SchedulerHost {
-  getGroove: () => GrooveData
+  getGroove: () => App.Groove.Data
   getSlotMs: () => number
   getTotalSlots: () => number
-  getCell: (lane: LaneId, index: number) => Slot
-  getLoop: () => LoopMode
+  getCell: (lane: App.Groove.LaneId, index: number) => App.Groove.Slot
+  getLoop: () => App.Groove.LoopMode
   getCountInEnabled: () => boolean
   getIsPlaying: () => boolean
   getLoadReady: () => boolean
   getCurrentSlot: () => number
   getIsCountingIn: () => boolean
-  patchPlayback: (partial: Partial<App.Data.PlaybackState>) => void
-  patchPlayhead: (partial: Partial<App.Data.PlayheadState>) => void
+  patchPlayback: (partial: Partial<App.Groove.PlaybackState>) => void
+  patchPlayhead: (partial: Partial<App.Groove.PlayheadState>) => void
   notifyNaturalEnd: (chainAt: number) => void
   onStopped: () => void
 }
@@ -124,6 +128,7 @@ export function createScheduler(host: SchedulerHost) {
     time: number,
     playbackRate = 1,
     output?: GainNode | null,
+    durationSeconds?: number,
   ): void {
     if (!sample) return
     const audio = ensureContext()
@@ -138,7 +143,19 @@ export function createScheduler(host: SchedulerHost) {
     gainNode.gain.value = gain
     source.connect(gainNode)
     gainNode.connect(dest)
-    source.start(Math.max(time, audio.currentTime))
+    const startAt = Math.max(time, audio.currentTime)
+    source.start(startAt)
+    if (durationSeconds && durationSeconds > 0) {
+      const stopAt = time + durationSeconds
+      if (stopAt <= startAt) return
+      if (buffer.duration + 0.001 < durationSeconds) source.loop = true
+      const fade = Math.min(0.018, durationSeconds * 0.2)
+      const fadeStart = Math.max(startAt, stopAt - fade)
+      gainNode.gain.setValueAtTime(gain, startAt)
+      gainNode.gain.setValueAtTime(gain, fadeStart)
+      gainNode.gain.linearRampToValueAtTime(0.0001, stopAt)
+      source.stop(stopAt)
+    }
   }
 
   async function prepare(): Promise<void> {
@@ -155,7 +172,7 @@ export function createScheduler(host: SchedulerHost) {
     })
   }
 
-  function metronomeTickForSlot(groove: GrooveData, slot: number): number {
+  function metronomeTickForSlot(groove: App.Groove.Data, slot: number): number {
     const npm = calcNotesPerMeasure(groove.division, groove.timeSignature)
     const ticksPerBeat = groove.metronomeSubdivision / 4
     const slotsPerBeat = npm / groove.timeSignature.beats
@@ -163,7 +180,7 @@ export function createScheduler(host: SchedulerHost) {
   }
 
   function syncMetronomeToSlot(
-    groove: GrooveData,
+    groove: App.Groove.Data,
     slot: number,
     nextClickTime: number,
   ): void {
@@ -270,11 +287,20 @@ export function createScheduler(host: SchedulerHost) {
       if (lane.startsWith('tom') && !groove.showToms) continue
       const value = host.getCell(lane, index)
       if (!value) continue
-      const meta = LANE_ARTICULATION_META[lane][value]
+      if (lane === 'snare' && isSnareTieContinuation(groove, index)) continue
+      const meta =
+        lane === 'snare'
+          ? snarePlaybackMeta(groove, index)
+          : LANE_ARTICULATION_META[lane][value]
+      if (!meta) continue
       const sample = lane.startsWith('tom')
         ? TOM_SAMPLES[Number(lane.slice(3)) - 1]
         : meta.sample
-      playBuffer(sample, meta.gain, swungTime)
+      const duration =
+        lane === 'snare' && isSnareBuzz(value as App.Groove.SnareArticulation)
+          ? snareSustainSeconds(groove, index, slotDurationSeconds)
+          : undefined
+      playBuffer(sample, meta.gain, swungTime, 1, undefined, duration)
     }
   }
 

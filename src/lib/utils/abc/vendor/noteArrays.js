@@ -22,6 +22,8 @@ import {
   constant_ABC_OFF,
   constant_ABC_SN_Accent,
   constant_ABC_SN_Buzz,
+  constant_ABC_SN_Buzz2,
+  constant_ABC_SN_Buzz3,
   constant_ABC_SN_Drag,
   constant_ABC_SN_Flam,
   constant_ABC_SN_Ghost,
@@ -40,13 +42,20 @@ import {
 } from './constants.js'
 import { calc_notes_per_measure, isTripletDivision } from './musicMath.js'
 
+// @ts-ignore
 function tablatureToABCNotationPerNote(drumType, tablatureChar) {
   switch (tablatureChar) {
     case 'b':
     case 'B':
       if (drumType == 'Stickings') return constant_ABC_STICK_BOTH
       else if (drumType == 'H') return constant_ABC_HH_Ride_Bell
-      else if (drumType == 'S') return constant_ABC_SN_Buzz
+      else if (drumType == 'S') return constant_ABC_SN_Buzz3
+      break
+    case '1':
+      if (drumType == 'S') return constant_ABC_SN_Buzz
+      break
+    case 'z':
+      if (drumType == 'S') return constant_ABC_SN_Buzz2
       break
     case 'c':
       if (drumType == 'Stickings') return constant_ABC_STICK_COUNT
@@ -169,14 +178,15 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
 
   console.log(
     'Bad tablature note found in tablatureToABCNotationPerNote.  Tab: ' +
-      tablatureChar +
-      ' for drum type: ' +
-      drumType,
+    tablatureChar +
+    ' for drum type: ' +
+    drumType,
   )
   return false
 }
 
-function abcNotationToTablaturePerNote(drumType, abcChar) {
+// @ts-ignore
+function abcNotationToTablaturePerNote(_drumType, abcChar) {
   var tabChar = '-'
 
   switch (abcChar) {
@@ -226,6 +236,12 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
       tabChar = 'O'
       break
     case constant_ABC_SN_Buzz:
+      tabChar = '1'
+      break
+    case constant_ABC_SN_Buzz2:
+      tabChar = 'z'
+      break
+    case constant_ABC_SN_Buzz3:
       tabChar = 'b'
       break
     case constant_ABC_HH_Normal:
@@ -268,9 +284,13 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
 }
 
 export function noteArraysFromURLData(
+  // @ts-ignore
   drumType,
+  // @ts-ignore
   noteString,
+  // @ts-ignore
   notesPerMeasure,
+  // @ts-ignore
   numberOfMeasures,
 ) {
   var retArray = []
@@ -313,11 +333,17 @@ export function noteArraysFromURLData(
 }
 
 export function tabLineFromAbcNoteArray(
+  // @ts-ignore
   drumType,
+  // @ts-ignore
   noteArray,
+  // @ts-ignore
   getAccents,
+  // @ts-ignore
   getOthers,
+  // @ts-ignore
   maxLength,
+  // @ts-ignore
   separatorDistance,
 ) {
   var returnTabLine = ''
@@ -355,6 +381,7 @@ export function tabLineFromAbcNoteArray(
   return returnTabLine
 }
 
+// @ts-ignore
 export function mergeDrumTabLines(dominateLine, subordinateLine) {
   var maxLength =
     dominateLine.length > subordinateLine.length
@@ -375,6 +402,7 @@ export function mergeDrumTabLines(dominateLine, subordinateLine) {
   return newLine
 }
 
+// @ts-ignore
 export function GetEmptyGroove(notes_per_measure, numMeasures) {
   var retString = ''
   var oneMeasureString = '|'
@@ -390,18 +418,26 @@ export function GetEmptyGroove(notes_per_measure, numMeasures) {
 }
 
 export function GetDefaultStickingsGroove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   return GetEmptyGroove(notes_per_measure, numMeasures)
 }
 
 export function GetDefaultHHGroove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   var retString = ''
@@ -419,27 +455,39 @@ export function GetDefaultHHGroove(
 }
 
 export function GetDefaultTom1Groove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   return GetEmptyGroove(notes_per_measure, numMeasures)
 }
 
 export function GetDefaultTom4Groove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   return GetEmptyGroove(notes_per_measure, numMeasures)
 }
 
 export function GetDefaultSnareGroove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   var retString = ''
@@ -461,9 +509,13 @@ export function GetDefaultSnareGroove(
 }
 
 export function GetDefaultKickGroove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   var retString = ''
@@ -485,19 +537,28 @@ export function GetDefaultKickGroove(
 }
 
 export function GetDefaultTomGroove(
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
+  /* @ts-ignore */
   numMeasures,
 ) {
   return GetEmptyGroove(notes_per_measure, numMeasures)
 }
 
 export function create_note_mapping_array_for_highlighting(
+  /* @ts-ignore */
   HH_array,
+  /* @ts-ignore */
   snare_array,
+  /* @ts-ignore */
   kick_array,
+  /* @ts-ignore */
   toms_array,
+  /* @ts-ignore */
   num_notes,
 ) {
   var mapping_array = new Array(num_notes) // create large empty array
@@ -526,9 +587,13 @@ export function create_note_mapping_array_for_highlighting(
 }
 
 export function figure_out_sticking_count_for_index(
+  /* @ts-ignore */
   index,
+  /* @ts-ignore */
   notes_per_measure,
+  /* @ts-ignore */
   sub_division,
+  /* @ts-ignore */
   time_sig_bottom,
 ) {
   // figure out the count state by looking at the id and the subdivision
@@ -544,24 +609,31 @@ export function figure_out_sticking_count_for_index(
     case 8:
       if (note_index % 2 === 0)
         new_state = Math.floor(note_index / 2) + 1 // 1,2,3,4,5, etc.
+      /* @ts-ignore */
       else new_state = '&'
       break
     case 12: // 8th triplets
       if (note_index % 3 === 0)
         new_state = Math.floor(note_index / 3) + 1 // 1,2,3,4,5, etc.
+      /* @ts-ignore */
       else if (note_index % 3 == 1) new_state = '&'
+      /* @ts-ignore */
       else new_state = 'a'
       break
     case 24: // 16th triplets
       if (note_index % 3 === 0)
         new_state = Math.floor(note_index / 6) + 1 // 1,2,3,4,5, etc.
+      /* @ts-ignore */
       else if (note_index % 3 == 1) new_state = '&'
+      /* @ts-ignore */
       else new_state = 'a'
       break
     case 48: // 32nd triplets
       if (note_index % 3 === 0)
         new_state = Math.floor(note_index / 12) + 1 // 1,2,3,4,5, etc.
+      /* @ts-ignore */
       else if (note_index % 3 == 1) new_state = '&'
+      /* @ts-ignore */
       else new_state = 'a'
       break
     case 16:
@@ -570,8 +642,11 @@ export function figure_out_sticking_count_for_index(
       var whole_note_interval = implied_sub_division / 4
       if (note_index % 4 === 0)
         new_state = Math.floor(note_index / whole_note_interval) + 1 // 1,1,2,2,3,3,4,4,5,5, etc.
+      /* @ts-ignore */
       else if (note_index % 4 === 1) new_state = 'e'
+      /* @ts-ignore */
       else if (note_index % 4 === 2) new_state = '&'
+      /* @ts-ignore */
       else new_state = 'a'
       break
   }
@@ -580,9 +655,13 @@ export function figure_out_sticking_count_for_index(
 }
 
 export function convert_sticking_counts_to_actual_counts(
+  /* @ts-ignore */
   sticking_array,
+  /* @ts-ignore */
   time_division,
+  /* @ts-ignore */
   timeSigTop,
+  /* @ts-ignore */
   timeSigBottom,
 ) {
   var cur_div_of_array = 32
@@ -603,9 +682,10 @@ export function convert_sticking_counts_to_actual_counts(
       // convert the COUNT into an actual letter or number
       // convert the index into what it would have been if the array was "notes_per_measure" sized
       var adjusted_index = Math.floor(
+        /* @ts-ignore */
         i /
-          (actual_notes_per_measure_in_this_array /
-            notes_per_measure_in_time_division),
+        (actual_notes_per_measure_in_this_array /
+          notes_per_measure_in_time_division),
       )
       var new_count = figure_out_sticking_count_for_index(
         adjusted_index,

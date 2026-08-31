@@ -4,6 +4,7 @@ declare global {
   namespace App {
     namespace UI {
       type Theme = 'light' | 'dark'
+      type DrawerTab = 'mine' | 'presets'
       type PracticeQueueItem = {
         id: string
         name: string
@@ -39,10 +40,10 @@ declare global {
         helpOpen: boolean
         permutationsOpen: boolean
         settings: Settings
-        stickingMode: StickingMode
+        stickingMode: App.Groove.StickingMode
         showToms: boolean
         showLegend: boolean
-        clickSubdivision: ClickSubdivision
+        clickSubdivision: App.Groove.ClickSubdivision
         editorVisible: boolean
         queueOpen: boolean
         shortcutsOpen: boolean
@@ -58,10 +59,10 @@ declare global {
         helpOpen: boolean
         permutationsOpen: boolean
         settings: Partial<Settings>
-        stickingMode: StickingMode
+        stickingMode: App.Groove.StickingMode
         showToms: boolean
         showLegend: boolean
-        clickSubdivision: ClickSubdivision
+        clickSubdivision: App.Groove.ClickSubdivision
         editorVisible: boolean
         queueOpen: boolean
         shortcutsOpen: boolean
@@ -83,7 +84,7 @@ declare global {
         syncQueueGroove: (
           grooveId: string,
           name: string,
-          data: GrooveData,
+          data: App.Groove.Data,
         ) => void
         updateQueueItem: (
           entryId: string,
@@ -105,13 +106,13 @@ declare global {
           key: K,
           value: Settings[K],
         ) => void
-        setStickingMode: (mode: StickingMode) => void
+        setStickingMode: (mode: App.Groove.StickingMode) => void
         cycleStickingMode: () => void
         toggleShowTomsPref: () => void
         setShowTomsPref: (value: boolean) => void
         toggleShowLegendPref: () => void
         setShowLegendPref: (value: boolean) => void
-        setClickSubdivision: (value: ClickSubdivision) => void
+        setClickSubdivision: (value: App.Groove.ClickSubdivision) => void
         cycleClickSubdivision: () => void
         toggleEditorVisible: () => void
         setEditorVisible: (value: boolean) => void
@@ -126,4 +127,4 @@ declare global {
   }
 }
 
-export { }
+export {}

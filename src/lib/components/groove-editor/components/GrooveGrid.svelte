@@ -27,7 +27,8 @@
   }
 
   function onPointerDown(e: PointerEvent) {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || !canMouseDragScroll()) return
+    if (e.pointerType !== 'mouse' || e.button !== 0 || !canMouseDragScroll())
+      return
 
     const el = scrollEl
     if (!el) return
@@ -174,7 +175,7 @@
     // Snap fights programmatic follow during playback (esp. 1/32 / fast tempos).
     !$data.playback.isPlaying &&
       !isMouseDragging &&
-      'snap-x snap-mandatory touch-pan-x',
+      'touch-pan-x snap-x snap-mandatory',
     canMouseDragScroll() && !isMouseDragging && 'cursor-grab',
     isMouseDragging && 'cursor-grabbing select-none',
     $data.playback.isPlaying && 'touch-none',

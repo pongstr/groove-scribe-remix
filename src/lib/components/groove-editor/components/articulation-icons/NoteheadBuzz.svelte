@@ -12,13 +12,12 @@
   class={className}
   {...rest}
 >
-  <circle cx="12" cy="13.5" r="5" />
+  <circle cx="12" cy="14" r="4.5" />
   <path
-    d="M7.5 7.5 H16.5 L7.5 12.5 H16.5"
+    d="M8 8 L16 13"
     fill="none"
     stroke="currentColor"
     stroke-width="2"
     stroke-linecap="round"
-    stroke-linejoin="round"
   />
 </svg>

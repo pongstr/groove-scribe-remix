@@ -1,18 +1,16 @@
-import type { TupletGroup, TupletKind } from './types'
-
 /** How many grid columns a tuplet group occupies. */
-export const TUPLET_SLOT_COUNT: Record<TupletKind, number> = {
+export const TUPLET_SLOT_COUNT: Record<App.Groove.TupletKind, number> = {
   triplet: 3,
   sixtuplet: 6,
 }
 
 /** How many straight grid slots of time the group compresses into. */
-export const TUPLET_TIME_SLOTS: Record<TupletKind, number> = {
+export const TUPLET_TIME_SLOTS: Record<App.Groove.TupletKind, number> = {
   triplet: 2,
   sixtuplet: 4,
 }
 
-export function tupletSlotCount(kind: TupletKind): number {
+export function tupletSlotCount(kind: App.Groove.TupletKind): number {
   return TUPLET_SLOT_COUNT[kind]
 }
 
@@ -21,14 +19,16 @@ export function newTupletId(): string {
 }
 
 /** Sorted copy; caller should keep groups non-overlapping. */
-export function normalizeTupletGroups(groups: TupletGroup[]): TupletGroup[] {
+export function normalizeTupletGroups(
+  groups: App.Groove.TupletGroup[],
+): App.Groove.TupletGroup[] {
   return [...groups].sort((a, b) => a.startSlot - b.startSlot)
 }
 
 export function findTupletGroup(
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
   slotIndex: number,
-): (TupletGroup & { position: number }) | null {
+): (App.Groove.TupletGroup & { position: number }) | null {
   for (const group of groups) {
     const span = TUPLET_SLOT_COUNT[group.kind]
     if (slotIndex >= group.startSlot && slotIndex < group.startSlot + span) {
@@ -39,9 +39,9 @@ export function findTupletGroup(
 }
 
 function groupAtIndex(
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
   index: number,
-): TupletGroup | null {
+): App.Groove.TupletGroup | null {
   return findTupletGroup(groups, index)
 }
 
@@ -52,7 +52,7 @@ function groupAtIndex(
 export function slotAbsoluteMs(
   slotIndex: number,
   slotMs: number,
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
 ): number {
   let time = 0
   let i = 0
@@ -82,18 +82,18 @@ export function slotAbsoluteMs(
 export function totalGrooveDurationMs(
   totalSlots: number,
   slotMs: number,
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
 ): number {
   return slotAbsoluteMs(totalSlots, slotMs, groups)
 }
 
 /** Drop groups that fall outside the grid or overlap another group. */
 export function clampTupletGroups(
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
   totalSlots: number,
-): TupletGroup[] {
+): App.Groove.TupletGroup[] {
   const sorted = normalizeTupletGroups(groups)
-  const kept: TupletGroup[] = []
+  const kept: App.Groove.TupletGroup[] = []
 
   for (const group of sorted) {
     const span = TUPLET_SLOT_COUNT[group.kind]
@@ -111,26 +111,26 @@ export function clampTupletGroups(
 
 export function createTupletGroup(
   startSlot: number,
-  kind: TupletKind,
-): TupletGroup {
+  kind: App.Groove.TupletKind,
+): App.Groove.TupletGroup {
   return { id: newTupletId(), kind, startSlot }
 }
 
 export function removeTupletAt(
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
   slotIndex: number,
-): TupletGroup[] {
+): App.Groove.TupletGroup[] {
   const hit = groupAtIndex(groups, slotIndex)
   if (!hit) return groups
   return groups.filter((g) => g.id !== hit.id)
 }
 
 export function upsertTupletAt(
-  groups: TupletGroup[],
+  groups: App.Groove.TupletGroup[],
   startSlot: number,
-  kind: TupletKind,
+  kind: App.Groove.TupletKind,
   totalSlots: number,
-): TupletGroup[] {
+): App.Groove.TupletGroup[] {
   const span = TUPLET_SLOT_COUNT[kind]
   if (startSlot < 0 || startSlot + span > totalSlots) return groups
 

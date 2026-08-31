@@ -3,12 +3,11 @@
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { PRESET_CATEGORIES, presetsByCategory } from '$lib/utils/presets'
   import * as db from '$lib/utils/storage/db'
-  import type { PresetGroove, SavedGroove } from '$lib/utils/types'
 
   let data: App.Groove.ContextStore = getDataContext()
   let ui = getUIContext()
 
-  let savedGrooves = $state<SavedGroove[]>([])
+  let savedGrooves = $state<App.Groove.SavedGroove[]>([])
   let loading = $state(false)
 
   async function refresh() {
@@ -21,12 +20,12 @@
     }
   }
 
-  function handleLoadPreset(preset: PresetGroove) {
+  function handleLoadPreset(preset: App.Groove.PresetGroove) {
     data.load(preset.data, preset.name)
     ui.closeDrawer()
   }
 
-  async function handleSavePresetToMine(preset: PresetGroove) {
+  async function handleSavePresetToMine(preset: App.Groove.PresetGroove) {
     await db.saveGroove(preset.name, preset.data, null)
     await refresh()
     ui.setDrawerTab('mine')

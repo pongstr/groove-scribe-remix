@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { TooltipTriggerProps } from 'bits-ui'
   import { cn } from 'tailwind-variants'
   import { Metronome } from '@lucide/svelte'
 
@@ -46,29 +47,31 @@
       class="bg-muted p-0"
     >
       {#each OPTIONS as opt (opt.value)}
-        <ToggleGroup.Item
-          value={opt.value}
-          class="data-[state=on]:bg-background rounded-md px-2 text-xs font-semibold data-[state=on]:text-indigo-400 data-[state=on]:shadow-sm"
-        >
-          <Tooltip.Root>
-            <Tooltip.Trigger>
-              {#if opt.value === '0'}
-                <Metronome
-                  class={cn(
-                    'text-muted-foreground/80 size-4',
-                    parseInt(clickValue, 10) > 0 && 'text-foreground',
-                  )}
-                />
-              {:else}
-                <span class="text-lg font-semibold">{opt.label}</span>
-              {/if}
-            </Tooltip.Trigger>
-
-            <Tooltip.Content sideOffset={12}>
-              {opt.desc}
-            </Tooltip.Content>
-          </Tooltip.Root>
-        </ToggleGroup.Item>
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            {#snippet child({ props }: { props: TooltipTriggerProps })}
+              <ToggleGroup.Item
+                {...props}
+                value={opt.value}
+                class="data-[state=on]:bg-background rounded-md px-2 text-xs font-semibold data-[state=on]:text-indigo-400 data-[state=on]:shadow-sm"
+              >
+                {#if opt.value === '0'}
+                  <Metronome
+                    class={cn(
+                      'text-muted-foreground/80 size-4',
+                      parseInt(clickValue, 10) > 0 && 'text-foreground',
+                    )}
+                  />
+                {:else}
+                  <span class="text-lg font-semibold">{opt.label}</span>
+                {/if}
+              </ToggleGroup.Item>
+            {/snippet}
+          </Tooltip.Trigger>
+          <Tooltip.Content sideOffset={12}>
+            {opt.desc}
+          </Tooltip.Content>
+        </Tooltip.Root>
       {/each}
     </ToggleGroup.Root>
   </div>

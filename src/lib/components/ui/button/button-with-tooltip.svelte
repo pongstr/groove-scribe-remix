@@ -9,7 +9,7 @@
   import Button, {
     type ButtonProps,
   } from '$lib/components/ui/button/button.svelte'
-  import * as Tooltip from '$lib/components/ui/tooltip/index.js'
+  import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   type Props = {
     children?: Snippet

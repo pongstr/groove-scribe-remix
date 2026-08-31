@@ -11,6 +11,12 @@ import {
   SNARE_ARTICULATIONS,
 } from '$lib/utils/config'
 import { calcNotesPerMeasure, isUpbeatSlot } from '$lib/utils/music-math'
+import {
+  isSnareBuzz,
+  isSnareTieContinuation,
+  snareHasAccent,
+  snareSustainEndSlot,
+} from '$lib/utils/snare-modifiers'
 
 const PERCUSSION_CHANNEL = 9 // MIDI channel 10, 0-indexed
 const TICKS_PER_QUARTER = 480
@@ -34,6 +40,8 @@ const GM_NOTE = {
     ghost: 38,
     xstick: 37, // Side Stick
     buzz: 40, // Electric Snare (closest GM equivalent)
+    buzz2: 40,
+    buzz3: 40,
     flam: 38,
     drag: 38,
   },
@@ -99,12 +107,33 @@ export function grooveDataToMidiBytes(data: App.Groove.Data): Uint8Array {
       )
 
     const sn = data.snare[i]
-    if (sn)
-      addHit(
-        i,
-        GM_NOTE.snare[sn],
-        velocityFromGain(SNARE_ARTICULATIONS[sn].gain),
-      )
+    if (sn && !isSnareTieContinuation(data, i)) {
+      const gain = snareHasAccent(data, i)
+        ? SNARE_ARTICULATIONS.accent.gain
+        : SNARE_ARTICULATIONS[sn].gain
+      const offTicks = isSnareBuzz(sn)
+        ? Math.max(
+            8,
+            Math.round((snareSustainEndSlot(data, i) - i + 1) * slotTicks),
+          )
+        : noteOffTicks
+      const swingTicks = isUpbeatSlot(data.division, i)
+        ? slotTicks * (data.swingPercent / 100) * (1 / 3)
+        : 0
+      const tick = Math.round(i * slotTicks + swingTicks)
+      events.push({
+        tick,
+        type: 'on',
+        note: GM_NOTE.snare[sn],
+        velocity: velocityFromGain(gain),
+      })
+      events.push({
+        tick: tick + offTicks,
+        type: 'off',
+        note: GM_NOTE.snare[sn],
+        velocity: 0,
+      })
+    }
 
     const ki = data.kick[i]
     if (ki === 'normal')

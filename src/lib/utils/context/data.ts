@@ -1,15 +1,6 @@
 import { getContext, setContext } from 'svelte'
 import { get, type Readable, writable } from 'svelte/store'
 
-import * as db from '../storage/db'
-import type {
-  Division,
-  GrooveData,
-  LaneId,
-  Slot,
-  TimeSignature,
-  TupletKind,
-} from '../types'
 import { createScheduler } from '$lib/utils/audio/scheduler'
 import { MAX_MEASURES, MAX_TEMPO, MIN_TEMPO } from '$lib/utils/config'
 import { lanes, resampleArray } from '$lib/utils/groove-lanes'
@@ -26,6 +17,17 @@ import {
   noteGroupingSize,
   slotDurationMs,
 } from '$lib/utils/music-math'
+import {
+  canTieSnareToNext,
+  clearAllSnareModifiers,
+  clearSnareModifiersAt,
+  ensureSnareModifiers,
+  normalizeGrooveData,
+  padFlagArray,
+  resampleFlagArray,
+  snareArticulationHasInherentAccent,
+} from '$lib/utils/snare-modifiers'
+import * as db from '$lib/utils/storage/db'
 import { createEmptyGrooveData } from '$lib/utils/tab-notation'
 import {
   clampTupletGroups,
@@ -43,7 +45,9 @@ const INITIAL_PLAYHEAD: App.Groove.PlayheadState = {
   countInBeat: 0,
 }
 
-function initDataContext(init: App.Groove.ContextInput = {}): App.Groove.Context {
+function initDataContext(
+  init: App.Groove.ContextInput = {},
+): App.Groove.Context {
   return {
     groove: init.groove ?? createEmptyGrooveData(),
     dirty: init.dirty ?? false,
@@ -155,11 +159,11 @@ export function createDataContextStore(
     return slotDurationMs(groove.division, groove.tempo)
   }
 
-  function getLane(lane: LaneId): Slot[] {
+  function getLane(lane: App.Groove.LaneId): App.Groove.Slot[] {
     return lanes(snapshot().groove)[lane]
   }
 
-  function getCell(lane: LaneId, index: number): Slot {
+  function getCell(lane: App.Groove.LaneId, index: number): App.Groove.Slot {
     return lanes(snapshot().groove)[lane][index] ?? null
   }
 
@@ -197,21 +201,39 @@ export function createDataContextStore(
     },
   })
 
-  function resizeAllLanes(groove: GrooveData, newLength: number): void {
+  function resizeAllLanes(groove: App.Groove.Data, newLength: number): void {
     const map = lanes(groove)
     for (const lane of map.all) {
       map[lane] = resampleArray(map[lane], newLength)
     }
+    groove.snareAccent = resampleFlagArray(groove.snareAccent, newLength)
+    groove.snareTies = resampleFlagArray(groove.snareTies, newLength)
     groove.tupletGroups = clampTupletGroups(
       groove.tupletGroups ?? [],
       newLength,
     )
   }
 
-  function setCell(lane: LaneId, index: number, value: Slot): void {
+  function setCell(
+    lane: App.Groove.LaneId,
+    index: number,
+    value: App.Groove.Slot,
+  ): void {
     recordHistoryBeforeMutation()
     update((store) => {
       const groove = structuredClone(store.groove)
+      if (lane === 'snare') {
+        ensureSnareModifiers(groove)
+        if (value === null) {
+          clearSnareModifiersAt(groove, index)
+        } else if (
+          snareArticulationHasInherentAccent(
+            value as App.Groove.SnareArticulation,
+          )
+        ) {
+          if (groove.snareAccent) groove.snareAccent[index] = false
+        }
+      }
       const map = lanes(groove)
       const arr = map[lane].slice()
       arr[index] = value
@@ -220,16 +242,44 @@ export function createDataContextStore(
     })
   }
 
+  function toggleSnareAccent(index: number): void {
+    const groove = snapshot().groove
+    if (!groove.snare[index]) return
+    if (snareArticulationHasInherentAccent(groove.snare[index])) return
+    recordHistoryBeforeMutation()
+    update((store) => {
+      const next = structuredClone(store.groove)
+      ensureSnareModifiers(next)
+      next.snareAccent![index] = !next.snareAccent![index]
+      return { ...store, groove: next, dirty: true }
+    })
+  }
+
+  function toggleSnareTie(index: number): void {
+    const groove = snapshot().groove
+    if (!canTieSnareToNext(groove, index) && !groove.snareTies?.[index]) return
+    recordHistoryBeforeMutation()
+    update((store) => {
+      const next = structuredClone(store.groove)
+      ensureSnareModifiers(next)
+      next.snareTies![index] = !next.snareTies![index]
+      return { ...store, groove: next, dirty: true }
+    })
+  }
+
   function toggleCell(
-    lane: LaneId,
+    lane: App.Groove.LaneId,
     index: number,
-    articulation: NonNullable<Slot>,
+    articulation: NonNullable<App.Groove.Slot>,
   ): void {
     const current = getCell(lane, index)
     setCell(lane, index, current === articulation ? null : articulation)
   }
 
-  function setTupletAt(startSlot: number, kind: TupletKind | null): void {
+  function setTupletAt(
+    startSlot: number,
+    kind: App.Groove.TupletKind | null,
+  ): void {
     recordHistoryBeforeMutation()
     update((store) => {
       const groove = structuredClone(store.groove)
@@ -244,7 +294,7 @@ export function createDataContextStore(
     })
   }
 
-  function setDivision(division: Division): void {
+  function setDivision(division: App.Groove.Division): void {
     if (division === snapshot().groove.division) return
     recordHistoryBeforeMutation()
     update((store) => {
@@ -259,7 +309,7 @@ export function createDataContextStore(
     })
   }
 
-  function setTimeSignature(timeSignature: TimeSignature): void {
+  function setTimeSignature(timeSignature: App.Groove.TimeSignature): void {
     recordHistoryBeforeMutation()
     update((store) => {
       const groove = structuredClone(store.groove)
@@ -290,6 +340,8 @@ export function createDataContextStore(
         map[lane] = arr
       }
       groove.measures = clamped
+      groove.snareAccent = padFlagArray(groove.snareAccent, newLength)
+      groove.snareTies = padFlagArray(groove.snareTies, newLength)
       groove.tupletGroups = clampTupletGroups(
         groove.tupletGroups ?? [],
         newLength,
@@ -298,7 +350,7 @@ export function createDataContextStore(
     })
   }
 
-  function mutateGroove(mutator: (groove: GrooveData) => void): void {
+  function mutateGroove(mutator: (groove: App.Groove.Data) => void): void {
     recordHistoryBeforeMutation()
     update((store) => {
       const groove = structuredClone(store.groove)
@@ -308,14 +360,14 @@ export function createDataContextStore(
   }
 
   function load(
-    data: GrooveData,
+    data: App.Groove.Data,
     sourceLabel: string,
     options?: { clearHistory?: boolean; keepTransport?: boolean },
   ): void {
     if (!options?.keepTransport) scheduler.stop()
-    const plain = JSON.parse(JSON.stringify(data)) as GrooveData
-    if (plain.showLegend === undefined) plain.showLegend = false
-    if (plain.kickStemsUp === undefined) plain.kickStemsUp = true
+    const plain = normalizeGrooveData(
+      JSON.parse(JSON.stringify(data)) as App.Groove.Data,
+    )
     suppressHistory = true
     update((store) => ({
       ...store,
@@ -329,7 +381,7 @@ export function createDataContextStore(
   }
 
   function chainPlay(
-    grooveData: GrooveData,
+    grooveData: App.Groove.Data,
     sourceLabel: string,
     chainAt: number,
   ): void {
@@ -446,9 +498,9 @@ export function createDataContextStore(
       if (!draft) return false
       // load() clears history — restoreHistory() is called separately after boot.
       scheduler.stop()
-      const plain = JSON.parse(JSON.stringify(draft)) as GrooveData
-      if (plain.showLegend === undefined) plain.showLegend = false
-      if (plain.kickStemsUp === undefined) plain.kickStemsUp = true
+      const plain = normalizeGrooveData(
+        JSON.parse(JSON.stringify(draft)) as App.Groove.Data,
+      )
       suppressHistory = true
       update((store) => ({
         ...store,
@@ -509,6 +561,8 @@ export function createDataContextStore(
     setCell,
     toggleCell,
     setTupletAt,
+    toggleSnareAccent,
+    toggleSnareTie,
     setDivision,
     setTimeSignature,
     setMeasures,
@@ -597,6 +651,7 @@ export function createDataContextStore(
           calcNotesPerMeasure(groove.division, groove.timeSignature) *
           groove.measures
         lanes(groove)[lane] = new Array(length).fill(null)
+        if (lane === 'snare') clearAllSnareModifiers(groove)
         return { ...s, groove, dirty: true }
       })
     },
@@ -614,6 +669,11 @@ export function createDataContextStore(
           return { ...s, groove, dirty: true }
         })
       }
+      update((s) => {
+        const groove = structuredClone(s.groove)
+        clearAllSnareModifiers(groove)
+        return { ...s, groove, dirty: true }
+      })
       suppressHistory = false
     },
     load,

@@ -25,6 +25,7 @@
     await seedGroovesIfEmpty()
 
     const hasDraft = await data.restoreDraft()
+
     if (!hasDraft) {
       const groove = defaultEditorGroove()
       data.load(groove, groove.name)

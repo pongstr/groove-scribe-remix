@@ -1,4 +1,3 @@
-import type { GrooveData, LaneId, Slot } from './types'
 import { LANE_IDS } from './types'
 
 /** Resample a slot array to a new length, nearest-neighbour by position. */
@@ -23,12 +22,12 @@ const LANE_PROP = {
 
 const TOM_IDX = { tom1: 0, tom2: 1, tom3: 2, tom4: 3 } as const
 
-export type LaneMap = Record<LaneId, Slot[]> & {
-  readonly all: readonly LaneId[]
+export type LaneMap = Record<App.Groove.LaneId, App.Groove.Slot[]> & {
+  readonly all: readonly App.Groove.LaneId[]
 }
 
 /** Indexed view of a groove's lane arrays — read/write with `lanes(data)[laneId]`. */
-export function lanes(data: GrooveData): LaneMap {
+export function lanes(data: App.Groove.Data): LaneMap {
   return new Proxy({} as LaneMap, {
     get(_, lane: string | symbol) {
       if (typeof lane !== 'string') return undefined
@@ -36,18 +35,18 @@ export function lanes(data: GrooveData): LaneMap {
       if (lane in TOM_IDX)
         return data.toms[TOM_IDX[lane as keyof typeof TOM_IDX]]
       const prop = LANE_PROP[lane as keyof typeof LANE_PROP]
-      return prop ? (data[prop] as Slot[]) : undefined
+      return prop ? (data[prop] as App.Groove.Slot[]) : undefined
     },
-    set(_, lane: string | symbol, value: Slot[]) {
+    set(_, lane: string | symbol, value: App.Groove.Slot[]) {
       if (typeof lane !== 'string' || lane === 'all') return false
       if (lane in TOM_IDX) {
         data.toms[TOM_IDX[lane as keyof typeof TOM_IDX]] =
-          value as GrooveData['toms'][number]
+          value as App.Groove.Data['toms'][number]
         return true
       }
       const prop = LANE_PROP[lane as keyof typeof LANE_PROP]
       if (!prop) return false
-      ;(data as unknown as Record<string, Slot[]>)[prop] = value
+      ;(data as unknown as Record<string, App.Groove.Slot[]>)[prop] = value
       return true
     },
   })

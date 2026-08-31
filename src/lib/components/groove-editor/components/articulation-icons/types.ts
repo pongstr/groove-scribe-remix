@@ -8,6 +8,8 @@ export type ArticulationIconId =
   | 'notehead-circle-ghost'
   | 'notehead-cross'
   | 'notehead-buzz'
+  | 'notehead-buzz2'
+  | 'notehead-buzz3'
   | 'notehead-flam'
   | 'notehead-drag'
   | 'notehead-circle-x'

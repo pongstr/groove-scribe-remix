@@ -12,7 +12,6 @@ import {
 } from './vendor/abcNotation.js'
 import { calcNotesPerMeasure } from '../music-math.js'
 import { grooveDataToAbcArrays } from './tokens.js'
-import type { GrooveData } from '../types.js'
 
 export interface AbcRenderResult {
   svg: string
@@ -134,7 +133,7 @@ class AbcBridge {
     )
 }
 
-function toLegacy(data: GrooveData): LegacyGrooveData {
+function toLegacy(data: App.Groove.Data): LegacyGrooveData {
   const arrays = grooveDataToAbcArrays(data)
   const notesPerMeasure = calcNotesPerMeasure(data.division, data.timeSignature)
   return {
@@ -244,7 +243,7 @@ function adjustAbcForFit(abcSource: string, targetWidthPx: number): string {
 }
 
 export function grooveDataToAbcSource(
-  data: GrooveData,
+  data: App.Groove.Data,
   renderWidth: number,
 ): string {
   const legacy = toLegacy(data)
@@ -260,7 +259,7 @@ export function grooveDataToAbcSource(
 }
 
 export function renderGrooveToSvg(
-  data: GrooveData,
+  data: App.Groove.Data,
   renderWidth = 720,
 ): AbcRenderResult {
   if (!browser) {
