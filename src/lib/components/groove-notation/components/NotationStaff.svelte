@@ -115,12 +115,16 @@
   })
 
   $effect(() => {
-    if (!hostEl) return
+    if (!browser || !hostEl) return
+
     const idx = highlightIndex
+
     for (const el of hostEl.querySelectorAll('.abcr.highlighted')) {
       el.classList.remove('highlighted')
     }
+
     if (idx < 0) return
+
     for (const el of hostEl.querySelectorAll(`#abcNoteNum_1_${idx}`)) {
       el.classList.add('highlighted')
     }
@@ -128,6 +132,12 @@
 </script>
 
 <div class="notation-staff text-card-foreground" bind:this={hostEl}>
+  {#if browser && source}
+    {@render GrooveScore()}
+  {/if}
+</div>
+
+{#snippet GrooveScore()}
   <div>
     {#if showHeader}
       <div class="print-header text-foreground">
@@ -144,18 +154,22 @@
       id={active ? 'notation-staff-svg' : undefined}
       class="abc-host text-foreground box-border min-h-55 w-full max-w-full overflow-x-hidden"
     >
-      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-      {@html rendered.svg}
+      {#if browser}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+        {@html rendered.svg}
+      {/if}
     </div>
 
     {#if rendered.errorHtml}
       <div class="abc-warnings px-3 pt-1 pb-3 text-xs text-amber-600">
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html rendered.errorHtml}
+        {#if browser}
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+          {@html rendered.errorHtml}
+        {/if}
       </div>
     {/if}
   </div>
-</div>
+{/snippet}
 
 <style>
   .abc-host :global(svg) {

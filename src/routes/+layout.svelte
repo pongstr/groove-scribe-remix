@@ -27,6 +27,7 @@
     <link rel="manifest" href={manifestHref} />
   {/if}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+
   <link
     rel="icon"
     href="/pongstr-light.svg"

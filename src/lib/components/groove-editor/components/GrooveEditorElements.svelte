@@ -190,21 +190,27 @@
         'text-muted-foreground/70 gap-2.5',
       )}
     >
-      <Label for={id} class="font-sans">
-        <RadioGroup.Item value={opt.value} {id} class="hidden rounded-[8px]" />
-        {#if opt.value !== 'off'}
-          <Hand
-            class={cn(
-              'size-5',
-              opt.value === 'off' && 'text-muted-foreground/20',
-              opt.value === 'reverse' && '-scale-x-100 transform',
-              opt.value == $ui.stickingMode && 'text-green-600',
-            )}
+      {#snippet child({ props })}
+        <Label for={id} class="font-sans" {...props}>
+          <RadioGroup.Item
+            value={opt.value}
+            {id}
+            class="hidden rounded-[8px]"
           />
-        {:else}
-          <span>Off</span>
-        {/if}
-      </Label>
+          {#if opt.value !== 'off'}
+            <Hand
+              class={cn(
+                'size-5',
+                opt.value === 'off' && 'text-muted-foreground/20',
+                opt.value === 'reverse' && '-scale-x-100 transform',
+                opt.value == $ui.stickingMode && 'text-green-600',
+              )}
+            />
+          {:else}
+            <span>Off</span>
+          {/if}
+        </Label>
+      {/snippet}
     </Tooltip.Trigger>
     <Tooltip.Content
       sideOffset={10}
