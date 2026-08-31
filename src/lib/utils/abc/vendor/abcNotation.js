@@ -104,8 +104,17 @@ function getABCforNote(
         }
       }
 
+      var rawNote = note_array_of_arrays[which_array][start_index]
+      var tieOut = false
+      if (
+        typeof rawNote === 'string' &&
+        rawNote.charAt(rawNote.length - 1) === '~'
+      ) {
+        tieOut = true
+        rawNote = rawNote.substring(0, rawNote.length - 1)
+      }
       abcNoteStrings.notes1 +=
-        note_array_of_arrays[which_array][start_index] + scaler * nextCount
+        rawNote + scaler * nextCount + (tieOut ? '-' : '')
       num_notes_on++
     }
   }
@@ -132,6 +141,14 @@ function getABCforNote(
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(
       abcNoteStrings,
       '!///!',
+    )
+    ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(
+      abcNoteStrings,
+      '!//!',
+    )
+    ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(
+      abcNoteStrings,
+      '!/!',
     )
 
     // Look for '[' and ']'.   They are added on to the the kick and splash and could be added to other notes
@@ -1015,7 +1032,7 @@ export function get_top_ABC_BoilerPlate(
       'V:Hands stem=up \n' +
       '%%voicemap drum\n' +
       '"^Hi-Hat"^g4 "^Open"!open!^g4 ' +
-      '"^Crash"^c\'4 "^Stacker"^d\'4 "^Ride"^A\'4 "^Ride Bell"^B\'4 x2 "^Tom"e4 "^Tom"A4 "^Snare"c4 "^Buzz"!///!c4 "^Cross"^c4 "^Ghost  "!(.!!).!c4 "^Flam"{/c}c4  x10 ||\n' +
+      '"^Crash"^c\'4 "^Stacker"^d\'4 "^Ride"^A\'4 "^Ride Bell"^B\'4 x2 "^Tom"e4 "^Tom"A4 "^Snare"c4 "^1-Slash"!/!c4 "^2-Slash"!//!c4 "^Buzz"!///!c4 "^Cross"^c4 "^Ghost  "!(.!!).!c4 "^Flam"{/c}c4  x2 ||\n' +
       'V:Feet stem=down \n' +
       '%%voicemap drum\n' +
       'x52 "^Kick"F4 "^HH foot"^d,4 x4 ||\n' +

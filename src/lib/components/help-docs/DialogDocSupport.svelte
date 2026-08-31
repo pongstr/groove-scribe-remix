@@ -8,13 +8,18 @@
     LANE_META,
   } from '$lib/utils/config'
   import { getUIContext } from '$lib/utils/context'
-  import type { LaneId } from '$lib/utils/types'
 
   const ui = getUIContext()
 
-  const LEGEND_LANES: LaneId[] = ['hihat', 'snare', 'kick', 'tom1', 'sticking']
+  const LEGEND_LANES: App.Groove.LaneId[] = [
+    'hihat',
+    'snare',
+    'kick',
+    'tom1',
+    'sticking',
+  ]
 
-  function laneColor(lane: LaneId): string {
+  function laneColor(lane: App.Groove.LaneId): string {
     const color = LANE_META[lane].color
     return color.startsWith('--') ? `var(${color})` : color
   }

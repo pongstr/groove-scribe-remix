@@ -7,15 +7,6 @@
 // (constant_OUR_MIDI_VELOCITY_* in js/constants.js: normal 85, accent 120,
 // ghost 50 out of 127) translated to a 0-1 linear gain multiplier.
 
-import type {
-  Division,
-  HiHatArticulation,
-  KickArticulation,
-  LaneId,
-  SnareArticulation,
-  StickingArticulation,
-  TomArticulation,
-} from './types'
 import type { ArticulationIconId } from '$lib/components/groove-editor/components/articulation-icons/types'
 
 export const MAX_MEASURES = 20
@@ -24,7 +15,7 @@ export const MIN_TEMPO = 30
 export const MAX_TEMPO = 600
 
 type DivisionsType = {
-  value: Division
+  value: App.Groove.Division
   label: string
   group: 'straight' | 'triplet'
 }
@@ -59,7 +50,7 @@ export type LaneProperty = {
 /** Lane display metadata. `color` is a concrete hex value (not a Tailwind
  * token) so it can be used directly in inline styles without needing the
  * class to appear literally in source for Tailwind's scanner to pick up. */
-export const LANE_META: Record<LaneId, LaneProperty> = {
+export const LANE_META: Record<App.Groove.LaneId, LaneProperty> = {
   hihat: {
     label: 'Hi-Hat / Cymbal',
     shortLabel: 'HH',
@@ -126,8 +117,10 @@ export const LANE_META: Record<LaneId, LaneProperty> = {
   },
 }
 
-export const HIHAT_ARTICULATIONS: Record<HiHatArticulation, ArticulationMeta> =
-{
+export const HIHAT_ARTICULATIONS: Record<
+  App.Groove.HiHatArticulation,
+  ArticulationMeta
+> = {
   normal: {
     label: 'Normal',
     shortLabel: 'x',
@@ -203,8 +196,10 @@ export const HIHAT_ARTICULATIONS: Record<HiHatArticulation, ArticulationMeta> =
   },
 }
 
-export const SNARE_ARTICULATIONS: Record<SnareArticulation, ArticulationMeta> =
-{
+export const SNARE_ARTICULATIONS: Record<
+  App.Groove.SnareArticulation,
+  ArticulationMeta
+> = {
   normal: {
     label: 'Normal',
     shortLabel: 'o',
@@ -240,12 +235,28 @@ export const SNARE_ARTICULATIONS: Record<SnareArticulation, ArticulationMeta> =
     icon: 'notehead-cross',
   },
   buzz: {
-    label: 'Buzz',
+    label: '1-Slash Roll',
+    shortLabel: 'slash',
+    tabCode: '1',
+    sample: 'snare-buzz',
+    gain: 0.7,
+    icon: 'notehead-buzz',
+  },
+  buzz2: {
+    label: '2-Slash Roll',
+    shortLabel: 'roll',
+    tabCode: 'z',
+    sample: 'snare-buzz',
+    gain: 0.7,
+    icon: 'notehead-buzz2',
+  },
+  buzz3: {
+    label: 'Buzz (3-slash)',
     shortLabel: 'buzz',
     tabCode: 'b',
     sample: 'snare-buzz',
     gain: 0.7,
-    icon: 'notehead-buzz',
+    icon: 'notehead-buzz3',
   },
   flam: {
     label: 'Flam',
@@ -265,7 +276,10 @@ export const SNARE_ARTICULATIONS: Record<SnareArticulation, ArticulationMeta> =
   },
 }
 
-export const KICK_ARTICULATIONS: Record<KickArticulation, ArticulationMeta> = {
+export const KICK_ARTICULATIONS: Record<
+  App.Groove.KickArticulation,
+  ArticulationMeta
+> = {
   normal: {
     label: 'Normal',
     shortLabel: 'o',
@@ -293,7 +307,10 @@ export const KICK_ARTICULATIONS: Record<KickArticulation, ArticulationMeta> = {
   },
 }
 
-export const TOM_ARTICULATIONS: Record<TomArticulation, ArticulationMeta> = {
+export const TOM_ARTICULATIONS: Record<
+  App.Groove.TomArticulation,
+  ArticulationMeta
+> = {
   normal: {
     label: 'Normal',
     shortLabel: 'o',
@@ -313,7 +330,7 @@ export const TOM_SAMPLES = [
 ] as const
 
 export const STICKING_ARTICULATIONS: Record<
-  StickingArticulation,
+  App.Groove.StickingArticulation,
   ArticulationMeta
 > = {
   R: {
@@ -354,7 +371,7 @@ export const STICKING_ARTICULATIONS: Record<
 // articulations offered in the popover (order = display order, first entry
 // is the "tap" default), plus fast access to metadata by lane + articulation id.
 
-export const LANE_ARTICULATION_ORDER: Record<LaneId, string[]> = {
+export const LANE_ARTICULATION_ORDER: Record<App.Groove.LaneId, string[]> = {
   hihat: [
     'normal',
     'accent',
@@ -366,7 +383,17 @@ export const LANE_ARTICULATION_ORDER: Record<LaneId, string[]> = {
     'stacker',
     'cowbell',
   ],
-  snare: ['normal', 'accent', 'ghost', 'xstick', 'flam', 'drag', 'buzz'],
+  snare: [
+    'normal',
+    'accent',
+    'ghost',
+    'xstick',
+    'flam',
+    'drag',
+    'buzz',
+    'buzz2',
+    'buzz3',
+  ],
   kick: ['normal', 'kickAndSplash', 'splash'],
   tom1: ['normal'],
   tom2: ['normal'],
@@ -376,7 +403,7 @@ export const LANE_ARTICULATION_ORDER: Record<LaneId, string[]> = {
 }
 
 export const LANE_ARTICULATION_META: Record<
-  LaneId,
+  App.Groove.LaneId,
   Record<string, ArticulationMeta>
 > = {
   hihat: HIHAT_ARTICULATIONS,
@@ -389,7 +416,7 @@ export const LANE_ARTICULATION_META: Record<
   sticking: STICKING_ARTICULATIONS,
 }
 
-export const LANE_DEFAULT_ARTICULATION: Record<LaneId, string> = {
+export const LANE_DEFAULT_ARTICULATION: Record<App.Groove.LaneId, string> = {
   hihat: 'normal',
   snare: 'normal',
   kick: 'normal',
@@ -401,17 +428,20 @@ export const LANE_DEFAULT_ARTICULATION: Record<LaneId, string> = {
 }
 
 /** Articulation triggered by Shift-click, if the lane has one (fast accenting). */
-export const LANE_SHIFT_ARTICULATION: Partial<Record<LaneId, string>> = {
+export const LANE_SHIFT_ARTICULATION: Partial<
+  Record<App.Groove.LaneId, string>
+> = {
   hihat: 'accent',
   snare: 'accent',
   kick: 'kickAndSplash',
 }
 
 /** Articulation triggered by Alt-click, if the lane has one (fast ghosting). */
-export const LANE_ALT_ARTICULATION: Partial<Record<LaneId, string>> = {
-  snare: 'ghost',
-  hihat: 'open',
-}
+export const LANE_ALT_ARTICULATION: Partial<Record<App.Groove.LaneId, string>> =
+  {
+    snare: 'ghost',
+    hihat: 'open',
+  }
 
 export const METRONOME_SAMPLE = 'metronome-click'
 export const METRONOME_ACCENT_SAMPLE = 'metronome-count'

@@ -10,7 +10,7 @@ async function freshDbModule() {
 }
 
 describe('storage/seed-grooves', () => {
-  it('seeds both ghost-note grooves when the library is empty', async () => {
+  it('seeds built-in grooves when the library is empty', async () => {
     const db = await freshDbModule()
     const { seedGroovesIfEmpty, SEED_GROOVE_IDS } =
       await import('$lib/utils/storage/seed-grooves')
@@ -18,9 +18,13 @@ describe('storage/seed-grooves', () => {
     await seedGroovesIfEmpty()
 
     const list = await db.listGrooves()
-    expect(list).toHaveLength(2)
+    expect(list).toHaveLength(3)
     expect(list.map((g) => g.id).sort()).toEqual(
-      [SEED_GROOVE_IDS.ghostNotes1, SEED_GROOVE_IDS.ghostNotes2].sort(),
+      [
+        SEED_GROOVE_IDS.ghostNotes1,
+        SEED_GROOVE_IDS.ghostNotes2,
+        SEED_GROOVE_IDS.tied2SlashRolls,
+      ].sort(),
     )
     expect(list.find((g) => g.id === SEED_GROOVE_IDS.ghostNotes1)?.name).toBe(
       'Ghost Notes 1',
@@ -28,17 +32,26 @@ describe('storage/seed-grooves', () => {
     expect(list.find((g) => g.id === SEED_GROOVE_IDS.ghostNotes2)?.name).toBe(
       'Ghost Notes 2',
     )
+    expect(
+      list.find((g) => g.id === SEED_GROOVE_IDS.tied2SlashRolls)?.name,
+    ).toBe('Tied 2-Slash Rolls')
   })
 
-  it('does not re-seed when grooves already exist', async () => {
+  it('adds missing built-in seeds without duplicating existing grooves', async () => {
     const db = await freshDbModule()
-    const { seedGroovesIfEmpty } =
+    const { seedGroovesIfEmpty, SEED_GROOVE_IDS } =
       await import('$lib/utils/storage/seed-grooves')
 
     await db.saveGroove('Existing', createEmptyGrooveData({ name: 'Existing' }))
     await seedGroovesIfEmpty()
 
-    expect(await db.listGrooves()).toHaveLength(1)
+    const list = await db.listGrooves()
+    expect(list.some((g) => g.name === 'Existing')).toBe(true)
+    expect(list.some((g) => g.id === SEED_GROOVE_IDS.tied2SlashRolls)).toBe(
+      true,
+    )
+    await seedGroovesIfEmpty()
+    expect(await db.listGrooves()).toHaveLength(list.length)
   })
 
   it('uses ghost-notes-1 as the default editor groove', async () => {

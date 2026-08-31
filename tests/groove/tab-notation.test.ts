@@ -66,6 +66,45 @@ describe('grooveDataToTabString / parseGrooveTabString round-trip', () => {
     expect(parsed.division).toBe(original.division)
   })
 
+  it('round-trips 2-slash rolls, stacked accents, and snare ties', () => {
+    const original = createEmptyGrooveData()
+    original.snare[8] = 'buzz2'
+    original.snare[10] = 'buzz2'
+    original.snare[4] = 'buzz3'
+    original.snare[6] = 'buzz'
+    original.snareAccent = original.snare.map(() => false)
+    original.snareTies = original.snare.map(() => false)
+    original.snareAccent[8] = true
+    original.snareTies[8] = true
+    const tab = grooveDataToTabString(original)
+    expect(tab).toContain('z')
+    expect(tab).toContain('b')
+    expect(tab).toContain('1')
+    expect(tab).toContain('SnareAccent=')
+    expect(tab).toContain('SnareTies=')
+    const parsed = parseGrooveTabString(tab)
+    expect(parsed.snare[8]).toBe('buzz2')
+    expect(parsed.snare[10]).toBe('buzz2')
+    expect(parsed.snare[4]).toBe('buzz3')
+    expect(parsed.snare[6]).toBe('buzz')
+    expect(parsed.snareAccent?.[8]).toBe(true)
+    expect(parsed.snareTies?.[8]).toBe(true)
+  })
+
+  it('parses the tied 2-slash roll preset', () => {
+    const preset = PRESETS.find((p) => p.name === 'Tied 2-Slash Rolls')
+    expect(preset).toBeDefined()
+    expect(preset!.data.snare[8]).toBe('buzz2')
+    expect(preset!.data.snare[10]).toBe('buzz2')
+    expect(preset!.data.snare[12]).toBe('buzz2')
+    expect(preset!.data.snare[14]).toBe('buzz2')
+    expect(preset!.data.snareAccent?.[8]).toBe(true)
+    expect(preset!.data.snareAccent?.[12]).toBe(true)
+    expect(preset!.data.snareTies?.[8]).toBe(true)
+    expect(preset!.data.snareTies?.[12]).toBe(true)
+    expect(preset!.data.snare[4]).toBe('flam')
+  })
+
   it('round-trips every preset groove', () => {
     for (const preset of PRESETS) {
       const tab = grooveDataToTabString(preset.data)

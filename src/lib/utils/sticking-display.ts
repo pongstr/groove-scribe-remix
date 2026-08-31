@@ -1,9 +1,7 @@
-import type { GrooveData, Slot, StickingArticulation } from './types'
-
 /** Swap R↔L for display-only reverse sticking mode. */
 export function reverseStickingSlot(
-  slot: Slot<StickingArticulation>,
-): Slot<StickingArticulation> {
+  slot: App.Groove.Slot<App.Groove.StickingArticulation>,
+): App.Groove.Slot<App.Groove.StickingArticulation> {
   if (slot === 'R') return 'L'
   if (slot === 'L') return 'R'
   return slot
@@ -11,9 +9,9 @@ export function reverseStickingSlot(
 
 /** Return a groove clone with stickings swapped for notation/display (no mutation of source). */
 export function withDisplayStickings(
-  data: GrooveData,
+  data: App.Groove.Data,
   reverse: boolean,
-): GrooveData {
+): App.Groove.Data {
   if (!reverse) return data
   return {
     ...data,

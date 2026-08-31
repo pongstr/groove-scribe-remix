@@ -18,16 +18,7 @@ import {
   TOM_ARTICULATIONS,
 } from './config'
 import { calcNotesPerMeasure } from './music-math'
-import type {
-  Division,
-  GrooveData,
-  HiHatArticulation,
-  KickArticulation,
-  Slot,
-  SnareArticulation,
-  StickingArticulation,
-  TomArticulation,
-} from './types'
+import { GROOVE_SCHEMA_VERSION } from './snare-modifiers'
 
 type LaneKey = 'H' | 'S' | 'K' | 'T1' | 'T2' | 'T3' | 'T4' | 'St'
 
@@ -72,6 +63,35 @@ function stripMarkup(tab: string): string {
   return tab.replace(/[|:!()[\]]/g, '')
 }
 
+function parseFlagLane(chars: string, length: number): boolean[] {
+  const out = new Array<boolean>(length).fill(false)
+  for (let i = 0; i < length; i++) {
+    const ch = chars[i]
+    if (ch === '1' || ch === 'T' || ch === 't') out[i] = true
+  }
+  return out
+}
+
+function flagLaneToTabString(
+  flags: boolean[] | undefined,
+  measures: number,
+  notesPerMeasure: number,
+): string {
+  const src = flags ?? []
+  let out = ''
+  for (let m = 0; m < measures; m++) {
+    out += '|'
+    for (let i = 0; i < notesPerMeasure; i++) {
+      out += src[m * notesPerMeasure + i] ? '1' : '-'
+    }
+  }
+  return out + '|'
+}
+
+function anyFlag(flags: boolean[] | undefined): boolean {
+  return Boolean(flags?.some(Boolean))
+}
+
 /**
  * Parse a lane's tab characters into an array of slots. `chars` should
  * already have barline/markup punctuation stripped. Extra/missing characters
@@ -81,9 +101,9 @@ export function parseLane<A extends string>(
   laneKey: LaneKey,
   chars: string,
   length: number,
-): Slot<A>[] {
+): App.Groove.Slot<A>[] {
   const map = mapForLane(laneKey)
-  const out: Slot<A>[] = new Array(length).fill(null)
+  const out: App.Groove.Slot<A>[] = new Array(length).fill(null)
   for (let i = 0; i < length; i++) {
     const ch = chars[i]
     if (ch === undefined || REST_CHARS.has(ch)) continue
@@ -94,7 +114,7 @@ export function parseLane<A extends string>(
 }
 
 export function serializeLane<A extends string>(
-  slots: Slot<A>[],
+  slots: App.Groove.Slot<A>[],
   meta: Record<A, { tabCode: string }>,
 ): string {
   return slots
@@ -103,7 +123,7 @@ export function serializeLane<A extends string>(
 }
 
 export function laneToTabString<A extends string>(
-  slots: Slot<A>[],
+  slots: App.Groove.Slot<A>[],
   measures: number,
   notesPerMeasure: number,
   meta: Record<A, { tabCode: string }>,
@@ -122,9 +142,9 @@ export function laneToTabString<A extends string>(
 
 /** A fresh groove: 1 measure of 4/4 16th notes, no notes. */
 export function createEmptyGrooveData(
-  overrides: Partial<GrooveData> = {},
-): GrooveData {
-  const division: Division = overrides.division ?? 16
+  overrides: Partial<App.Groove.Data> = {},
+): App.Groove.Data {
+  const division: App.Groove.Division = overrides.division ?? 16
   const timeSignature = overrides.timeSignature ?? { beats: 4, noteValue: 4 }
   const measures = overrides.measures ?? 1
   const notesPerMeasure = calcNotesPerMeasure(division, timeSignature)
@@ -156,6 +176,9 @@ export function createEmptyGrooveData(
     ],
     sticking: new Array(length).fill(null),
     tupletGroups: [],
+    snareAccent: new Array(length).fill(false),
+    snareTies: new Array(length).fill(false),
+    schemaVersion: GROOVE_SCHEMA_VERSION,
     ...overrides,
   }
 }
@@ -164,7 +187,7 @@ export function createEmptyGrooveData(
  * Parse the compact `Key=value&Key=value` groove format used by the preset
  * library and by JSON-free text import/export.
  */
-export function parseGrooveTabString(input: string): GrooveData {
+export function parseGrooveTabString(input: string): App.Groove.Data {
   const qs = input.trim().replace(/^\?/, '')
   const rawParams = new Map<string, string>()
   for (const pair of qs.split('&')) {
@@ -201,7 +224,7 @@ export function parseGrooveTabString(input: string): GrooveData {
 
   const divisionRaw = Number.parseInt(params.get('Div') ?? '16', 10)
   const division = ([8, 16, 32, 12, 24] as const).includes(divisionRaw as never)
-    ? (divisionRaw as Division)
+    ? (divisionRaw as App.Groove.Division)
     : 16
 
   const measures = Math.max(
@@ -233,24 +256,27 @@ export function parseGrooveTabString(input: string): GrooveData {
     showStickings: params.has('Stickings'),
     showLegend: false,
     kickStemsUp: true,
-    hiHat: parseLane<HiHatArticulation>('H', laneChars('H'), length),
-    snare: parseLane<SnareArticulation>('S', laneChars('S'), length),
-    kick: parseLane<KickArticulation>('K', laneChars('K'), length),
+    hiHat: parseLane<App.Groove.HiHatArticulation>('H', laneChars('H'), length),
+    snare: parseLane<App.Groove.SnareArticulation>('S', laneChars('S'), length),
+    kick: parseLane<App.Groove.KickArticulation>('K', laneChars('K'), length),
     toms: [
-      parseLane<TomArticulation>('T1', laneChars('T1'), length),
-      parseLane<TomArticulation>('T2', laneChars('T2'), length),
-      parseLane<TomArticulation>('T3', laneChars('T3'), length),
-      parseLane<TomArticulation>('T4', laneChars('T4'), length),
+      parseLane<App.Groove.TomArticulation>('T1', laneChars('T1'), length),
+      parseLane<App.Groove.TomArticulation>('T2', laneChars('T2'), length),
+      parseLane<App.Groove.TomArticulation>('T3', laneChars('T3'), length),
+      parseLane<App.Groove.TomArticulation>('T4', laneChars('T4'), length),
     ],
-    sticking: parseLane<StickingArticulation>(
+    sticking: parseLane<App.Groove.StickingArticulation>(
       'St',
       laneChars('Stickings'),
       length,
     ),
+    snareAccent: parseFlagLane(laneChars('SnareAccent'), length),
+    snareTies: parseFlagLane(laneChars('SnareTies'), length),
+    schemaVersion: GROOVE_SCHEMA_VERSION,
   }
 }
 
-export function grooveDataToTabString(data: GrooveData): string {
+export function grooveDataToTabString(data: App.Groove.Data): string {
   const notesPerMeasure = calcNotesPerMeasure(data.division, data.timeSignature)
   const parts: string[] = [
     `TimeSig=${data.timeSignature.beats}/${data.timeSignature.noteValue}`,
@@ -281,6 +307,16 @@ export function grooveDataToTabString(data: GrooveData): string {
   if (data.showStickings) {
     parts.push(
       `Stickings=${laneToTabString(data.sticking, data.measures, notesPerMeasure, STICKING_ARTICULATIONS)}`,
+    )
+  }
+  if (anyFlag(data.snareAccent)) {
+    parts.push(
+      `SnareAccent=${flagLaneToTabString(data.snareAccent, data.measures, notesPerMeasure)}`,
+    )
+  }
+  if (anyFlag(data.snareTies)) {
+    parts.push(
+      `SnareTies=${flagLaneToTabString(data.snareTies, data.measures, notesPerMeasure)}`,
     )
   }
   return parts.join('&')

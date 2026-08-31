@@ -39,7 +39,15 @@ declare global {
         | 'cowbell'
 
       type SnareArticulation =
-        'normal' | 'accent' | 'ghost' | 'xstick' | 'buzz' | 'flam' | 'drag'
+        | 'normal'
+        | 'accent'
+        | 'ghost'
+        | 'xstick'
+        | 'buzz'
+        | 'buzz2'
+        | 'buzz3'
+        | 'flam'
+        | 'drag'
 
       /** `kickAndSplash` plays the kick and hi-hat foot splash together. */
       type KickArticulation = 'normal' | 'splash' | 'kickAndSplash'
@@ -113,10 +121,38 @@ declare global {
 
         /** In-bar tuplet spans on a straight grid (experiment). */
         tupletGroups?: TupletGroup[]
+
+        /** Accent overlay on snare slots whose articulation is not already accented. */
+        snareAccent?: boolean[]
+        /** `true` at slot i ties that snare note to the next occupied snare slot. */
+        snareTies?: boolean[]
+
+        /**
+         * 1+ means `buzz` is a 1-slash roll (`buzz3` is 3-slash).
+         * Absent/0 is legacy: `buzz` meant the 3-slash roll.
+         */
+        schemaVersion?: number
       }
 
       /** @deprecated Prefer `App.Groove.Data`. */
       type GrooveData = Data
+
+      /** A saved "My Grooves" record, as stored in IndexedDB. */
+      type SavedGroove = {
+        id: string
+        name: string
+        createdAt: number
+        updatedAt: number
+        data: Data
+      }
+
+      /** A read-only built-in preset groove. */
+      type PresetGroove = {
+        id: string
+        category: string
+        name: string
+        data: Data
+      }
 
       type LoadProgress = {
         loaded: number
@@ -176,6 +212,8 @@ declare global {
           articulation: NonNullable<Slot>,
         ) => void
         setTupletAt: (startSlot: number, kind: TupletKind | null) => void
+        toggleSnareAccent: (index: number) => void
+        toggleSnareTie: (index: number) => void
         setDivision: (division: GrooveData['division']) => void
         setTimeSignature: (timeSignature: GrooveData['timeSignature']) => void
         setMeasures: (measures: number) => void

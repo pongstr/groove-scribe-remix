@@ -2,16 +2,14 @@
 // app's `js/musicMath.js` (pure functions, GPL v2) to typed TypeScript for a
 // fixed set of divisions (8, 16, 32, 12, 24).
 
-import type { Division, TimeSignature } from './types'
-
-export function isTripletDivision(division: Division): boolean {
+export function isTripletDivision(division: App.Groove.Division): boolean {
   return division % 12 === 0
 }
 
 /** How many grid slots make up one measure at this division / time signature. */
 export function calcNotesPerMeasure(
-  division: Division,
-  timeSig: TimeSignature,
+  division: App.Groove.Division,
+  timeSig: App.Groove.TimeSignature,
 ): number {
   return (division / timeSig.noteValue) * timeSig.beats
 }
@@ -22,12 +20,12 @@ export function calcNotesPerMeasure(
  */
 export function noteGroupingSize(
   notesPerMeasure: number,
-  timeSig: TimeSignature,
+  timeSig: App.Groove.TimeSignature,
 ): number {
   const { beats, noteValue } = timeSig
   const division = (notesPerMeasure / beats) * noteValue
 
-  if (isTripletDivision(division as Division)) {
+  if (isTripletDivision(division as App.Groove.Division)) {
     return notesPerMeasure / (beats * (4 / noteValue))
   } else if (beats === 3) {
     return notesPerMeasure / 3
@@ -44,7 +42,10 @@ export function noteGroupingSize(
  * grid (both odd-indexed) - so the rule is simply "odd index" for any
  * straight division. Triplet divisions are never swung.
  */
-export function isUpbeatSlot(division: Division, index: number): boolean {
+export function isUpbeatSlot(
+  division: App.Groove.Division,
+  index: number,
+): boolean {
   if (isTripletDivision(division)) return false
   return index % 2 === 1
 }
@@ -69,7 +70,10 @@ export function swingDelaySeconds(
  * time signature's bottom number does not affect slot duration, only where
  * barlines fall (see `calcNotesPerMeasure`).
  */
-export function slotDurationMs(division: Division, tempo: number): number {
+export function slotDurationMs(
+  division: App.Groove.Division,
+  tempo: number,
+): number {
   const quarterNoteMs = 60000 / tempo
   return (quarterNoteMs * 4) / division
 }
@@ -93,7 +97,7 @@ export interface TempoMarking {
  * quarter-note tempo; only the displayed symbol/label varies.
  */
 export function tempoMarkingForTimeSignature(
-  timeSig: TimeSignature,
+  timeSig: App.Groove.TimeSignature,
 ): TempoMarking {
   const { beats, noteValue } = timeSig
 

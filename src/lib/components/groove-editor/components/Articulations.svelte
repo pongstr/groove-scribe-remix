@@ -3,6 +3,8 @@
   import type { SVGAttributes } from 'svelte/elements'
 
   import NoteheadBuzz from '$lib/components/groove-editor/components/articulation-icons/NoteheadBuzz.svelte'
+  import NoteheadBuzz2 from '$lib/components/groove-editor/components/articulation-icons/NoteheadBuzz2.svelte'
+  import NoteheadBuzz3 from '$lib/components/groove-editor/components/articulation-icons/NoteheadBuzz3.svelte'
   import NoteheadCircle from '$lib/components/groove-editor/components/articulation-icons/NoteheadCircle.svelte'
   import NoteheadCircleGhost from '$lib/components/groove-editor/components/articulation-icons/NoteheadCircleGhost.svelte'
   import NoteheadCircleOpen from '$lib/components/groove-editor/components/articulation-icons/NoteheadCircleOpen.svelte'
@@ -39,6 +41,8 @@
     'notehead-circle-ghost': NoteheadCircleGhost,
     'notehead-cross': NoteheadCross,
     'notehead-buzz': NoteheadBuzz,
+    'notehead-buzz2': NoteheadBuzz2,
+    'notehead-buzz3': NoteheadBuzz3,
     'notehead-flam': NoteheadFlam,
     'notehead-drag': NoteheadDrag,
     'notehead-circle-x': NoteheadCircleX,

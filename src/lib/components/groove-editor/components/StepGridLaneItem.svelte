@@ -16,24 +16,24 @@
   import { lanes } from '$lib/utils/groove-lanes'
   import { calcNotesPerMeasure } from '$lib/utils/music-math'
   import { isTripletDivision } from '$lib/utils/music-math'
+  import {
+    canTieSnareToNext,
+    isSnareTieContinuation,
+    snareArticulationHasInherentAccent,
+    snareHasAccent,
+  } from '$lib/utils/snare-modifiers'
   import { reverseStickingSlot } from '$lib/utils/sticking-display'
   import {
     findTupletGroup,
     TUPLET_SLOT_COUNT,
     tupletSlotCount,
   } from '$lib/utils/tuplet-timing'
-  import type {
-    LaneId,
-    StickingArticulation,
-    TupletGroup,
-    TupletKind,
-  } from '$lib/utils/types'
 
   let data = getDataContext()
   let ui = getUIContext()
   let playhead = data.playhead
 
-  function previewLaneArticulation(l: LaneId, articulation: string) {
+  function previewLaneArticulation(l: App.Groove.LaneId, articulation: string) {
     const artMeta = LANE_ARTICULATION_META[l][articulation]
 
     if (!artMeta) return
@@ -45,7 +45,7 @@
   }
 
   type Props = {
-    lane: LaneId
+    lane: App.Groove.LaneId
     index: number
     isBeatStart: boolean
     isMeasureStart: boolean
@@ -59,7 +59,7 @@
   let displayValue = $derived.by(() => {
     if (lane !== 'sticking' || $ui.stickingMode !== 'reverse' || value == null)
       return value
-    return reverseStickingSlot(value as StickingArticulation)
+    return reverseStickingSlot(value as App.Groove.StickingArticulation)
   })
   let meta = $derived(
     displayValue ? LANE_ARTICULATION_META[lane][displayValue] : null,
@@ -74,15 +74,35 @@
   let tupletGroups = $derived($data.groove.tupletGroups ?? [])
   let tupletAtCell = $derived(findTupletGroup(tupletGroups, index))
   let straightGrid = $derived(!isTripletDivision($data.groove.division))
+  let isSnareLane = $derived(lane === 'snare')
+  let snareAccented = $derived(
+    isSnareLane && snareHasAccent($data.groove, index),
+  )
+  let snareTiedOut = $derived(
+    isSnareLane && Boolean($data.groove.snareTies?.[index]),
+  )
+  let snareTiedIn = $derived(
+    isSnareLane && isSnareTieContinuation($data.groove, index),
+  )
+  let canTieNext = $derived(
+    isSnareLane && canTieSnareToNext($data.groove, index),
+  )
+  let canStackAccent = $derived(
+    isSnareLane &&
+      value != null &&
+      !snareArticulationHasInherentAccent(
+        value as App.Groove.SnareArticulation,
+      ),
+  )
 
-  function canPlaceTuplet(kind: TupletKind): boolean {
+  function canPlaceTuplet(kind: App.Groove.TupletKind): boolean {
     if (!straightGrid) return false
     const span = tupletSlotCount(kind)
     const total =
       $data.groove.measures *
       calcNotesPerMeasure($data.groove.division, $data.groove.timeSignature)
     if (index + span > total) return false
-    return !tupletGroups.some((g: TupletGroup) => {
+    return !tupletGroups.some((g: App.Groove.TupletGroup) => {
       const gSpan = TUPLET_SLOT_COUNT[g.kind]
       const gEnd = g.startSlot + gSpan
       const end = index + span
@@ -90,7 +110,7 @@
     })
   }
 
-  function assignTuplet(kind: TupletKind) {
+  function assignTuplet(kind: App.Groove.TupletKind) {
     if (!canPlaceTuplet(kind)) return
     data.setTupletAt(index, kind)
   }
@@ -100,6 +120,16 @@
   }
 
   function handleClick(e: MouseEvent) {
+    if (canStackAccent && e.shiftKey) {
+      const willAccent = !snareAccented
+      data.toggleSnareAccent(index)
+      const base = LANE_ARTICULATION_META.snare[value!]
+      void data.previewSample(
+        base.sample,
+        willAccent ? LANE_ARTICULATION_META.snare.accent.gain : base.gain,
+      )
+      return
+    }
     let articulation = LANE_DEFAULT_ARTICULATION[lane]
     if (e.shiftKey && LANE_SHIFT_ARTICULATION[lane]) {
       articulation = LANE_SHIFT_ARTICULATION[lane]!
@@ -135,7 +165,13 @@
   const ariaLabel = $derived(
     `${laneLabel}, ${beatNumber !== null ? `beat ${beatNumber}` : `step ${index + 1}`}, ${
       meta ? meta.label : 'off'
-    }${$ui.stickingMode === 'reverse' && lane === 'sticking' && value ? ' (display reversed)' : ''}`,
+    }${snareAccented && canStackAccent ? ', accented' : ''}${
+      snareTiedOut ? ', tied to next' : ''
+    }${
+      $ui.stickingMode === 'reverse' && lane === 'sticking' && value
+        ? ' (display reversed)'
+        : ''
+    }`,
   )
 </script>
 
@@ -195,6 +231,22 @@
                 class="pointer-events-none size-4"
               />
             {/if}
+            {#if snareAccented && canStackAccent}
+              <span
+                class="pointer-events-none absolute top-0.5 right-1 text-[0.65rem] leading-none font-bold"
+                aria-hidden="true"
+              >
+                &gt;
+              </span>
+            {/if}
+            {#if snareTiedOut || snareTiedIn}
+              <span
+                class="pointer-events-none absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[0.7rem] leading-none"
+                aria-hidden="true"
+              >
+                {snareTiedOut && snareTiedIn ? '‿‿' : '‿'}
+              </span>
+            {/if}
             {#if tupletAtCell && tupletAtCell.position === 0}
               <span
                 class="pointer-events-none absolute right-1 bottom-1 rounded bg-violet-500/15 px-1 text-[0.6rem] font-bold text-violet-700 dark:text-violet-300"
@@ -226,6 +278,33 @@
         {/if}
       </ContextMenu.Item>
     {/each}
+    {#if isSnareLane}
+      <ContextMenu.Separator />
+      <ContextMenu.Label>Snare modifiers</ContextMenu.Label>
+      <ContextMenu.CheckboxItem
+        aria-label="Stack accent"
+        disabled={!canStackAccent}
+        checked={snareAccented && canStackAccent}
+        onCheckedChange={(next) => {
+          if (Boolean(next) !== (snareAccented && canStackAccent)) {
+            data.toggleSnareAccent(index)
+          }
+        }}
+      >
+        Stack accent
+        <ContextMenu.Shortcut>Shift+click</ContextMenu.Shortcut>
+      </ContextMenu.CheckboxItem>
+      <ContextMenu.CheckboxItem
+        aria-label="Tie to next"
+        disabled={!canTieNext && !snareTiedOut}
+        checked={snareTiedOut}
+        onCheckedChange={(next) => {
+          if (Boolean(next) !== snareTiedOut) data.toggleSnareTie(index)
+        }}
+      >
+        Tie to next
+      </ContextMenu.CheckboxItem>
+    {/if}
     {#if straightGrid}
       <ContextMenu.Separator />
       <ContextMenu.Label>Rhythm grouping</ContextMenu.Label>

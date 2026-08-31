@@ -6,6 +6,7 @@ import {
   createABCFromGrooveData,
 } from '../../src/lib/utils/abc/vendor/abcNotation.js'
 import { calcNotesPerMeasure } from '../../src/lib/utils/music-math'
+import { PRESETS } from '../../src/lib/utils/presets'
 import { createEmptyGrooveData } from '../../src/lib/utils/tab-notation'
 import { upsertTupletAt } from '../../src/lib/utils/tuplet-timing'
 
@@ -156,5 +157,69 @@ describe('abc in-bar tuplets', () => {
     const hands = abc.split('V:Hands')[1] ?? ''
     expect(hands).toMatch(/\(3\^g4\^g4\^g4/)
     expect(hands).not.toMatch(/\(3\^g8/)
+  })
+})
+
+describe('abc snare rolls and ties', () => {
+  it('engraves a 2-slash roll with stacked accent and a tie', () => {
+    const groove = createEmptyGrooveData()
+    groove.snare[8] = 'buzz2'
+    groove.snare[10] = 'buzz2'
+    groove.snareAccent = groove.snare.map(() => false)
+    groove.snareTies = groove.snare.map(() => false)
+    groove.snareAccent[8] = true
+    groove.snareTies[8] = true
+
+    const abc = createABCFromGrooveData(
+      makeBridge(),
+      grooveToLegacy(groove),
+      720,
+    )
+    const hands = abc.split('V:Hands')[1] ?? ''
+    expect(hands).toMatch(/!accent!/)
+    expect(hands).toMatch(/!\/\/!c/)
+    expect(hands).toMatch(/-/)
+    expect(hands).not.toMatch(/!\/\/\/!/)
+  })
+
+  it('engraves the tied 2-slash roll example', () => {
+    const preset = PRESETS.find((p) => p.name === 'Tied 2-Slash Rolls')
+    expect(preset).toBeDefined()
+    const abc = createABCFromGrooveData(
+      makeBridge(),
+      grooveToLegacy(preset!.data),
+      720,
+    )
+    const hands = abc.split('V:Hands')[1] ?? ''
+    expect(hands).toMatch(/!\/\/!c/)
+    expect(hands).toMatch(/-/)
+    expect(hands).toMatch(/!accent!/)
+    expect(hands).toMatch(/\{\/c\}/)
+  })
+
+  it('engraves a 1-slash roll', () => {
+    const groove = createEmptyGrooveData()
+    groove.snare[0] = 'buzz'
+    const abc = createABCFromGrooveData(
+      makeBridge(),
+      grooveToLegacy(groove),
+      720,
+    )
+    const hands = abc.split('V:Hands')[1] ?? ''
+    expect(hands).toMatch(/!\/!c/)
+    expect(hands).not.toMatch(/!\/\/!/)
+    expect(hands).not.toMatch(/!\/\/\/!/)
+  })
+
+  it('still engraves a 3-slash buzz', () => {
+    const groove = createEmptyGrooveData()
+    groove.snare[0] = 'buzz3'
+    const abc = createABCFromGrooveData(
+      makeBridge(),
+      grooveToLegacy(groove),
+      720,
+    )
+    const hands = abc.split('V:Hands')[1] ?? ''
+    expect(hands).toMatch(/!\/\/\/!c/)
   })
 })

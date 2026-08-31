@@ -22,14 +22,13 @@
     downloadGrooveAsJson,
     parseGrooveJsonFile,
   } from '$lib/utils/storage/share'
-  import type { SavedGroove } from '$lib/utils/types'
 
   const SHOWS_FILTER_INPUT_COUNT = 20
 
   let data: App.Groove.ContextStore = getDataContext()
   let ui = getUIContext()
 
-  let savedGrooves = $state<SavedGroove[]>([])
+  let savedGrooves = $state<App.Groove.SavedGroove[]>([])
   let loading = $state(false)
   let search = $state('')
   let renamingId = $state<string | null>(null)
@@ -54,7 +53,7 @@
     }
   }
 
-  function handleLoad(record: SavedGroove) {
+  function handleLoad(record: App.Groove.SavedGroove) {
     data.load(record.data, record.name)
     data.update((s) => ({
       ...s,
@@ -64,19 +63,19 @@
     ui.closeDrawer()
   }
 
-  async function handleDelete(record: SavedGroove) {
+  async function handleDelete(record: App.Groove.SavedGroove) {
     if (!confirm(`Delete "${record.name}"? This can't be undone.`)) return
     await db.deleteGroove(record.id)
     if ($data.groove.id === record.id) data.newGroove()
     await refresh()
   }
 
-  async function handleDuplicate(record: SavedGroove) {
+  async function handleDuplicate(record: App.Groove.SavedGroove) {
     await db.duplicateGroove(record.id)
     await refresh()
   }
 
-  function startRename(record: SavedGroove) {
+  function startRename(record: App.Groove.SavedGroove) {
     renamingId = record.id
     renameValue = record.name
   }
@@ -101,7 +100,7 @@
     await refresh()
   }
 
-  function handleExportSaved(record: SavedGroove) {
+  function handleExportSaved(record: App.Groove.SavedGroove) {
     downloadGrooveAsJson(record.data)
   }
 
@@ -247,7 +246,7 @@
   </form>
 {/snippet}
 
-{#snippet GrooveItem(item: SavedGroove)}
+{#snippet GrooveItem(item: App.Groove.SavedGroove)}
   <button
     type="button"
     class="flex min-w-0 flex-1 cursor-pointer flex-col items-start gap-0.5 border-none bg-transparent px-2.5 py-2 text-left"

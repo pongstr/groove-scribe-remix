@@ -4,30 +4,28 @@
 // continuously autosaved to a single `drafts` record so a page refresh never
 // loses work (the ergonomic the URL used to provide).
 //
-// Important: GrooveData often arrives as a Svelte 5 `$state` proxy. Proxies
+// Important: App.Groove.Data often arrives as a Svelte 5 `$state` proxy. Proxies
 // cannot be structured-cloned into IndexedDB, so every write path first
 // converts the value to a plain JSON object via `toPlain`.
 
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb'
 
-import type { GrooveData, SavedGroove } from '../types'
-
 export interface HistoryRecord {
   id: string
-  past: GrooveData[]
-  future: GrooveData[]
+  past: App.Groove.Data[]
+  future: App.Groove.Data[]
   updatedAt: number
 }
 
 interface GrooveDBSchema extends DBSchema {
   grooves: {
     key: string
-    value: SavedGroove
+    value: App.Groove.SavedGroove
     indexes: { 'by-updatedAt': number }
   }
   drafts: {
     key: string
-    value: { id: string; data: GrooveData; updatedAt: number }
+    value: { id: string; data: App.Groove.Data; updatedAt: number }
   }
   history: {
     key: string
@@ -43,7 +41,7 @@ interface GrooveDBSchema extends DBSchema {
 export type PracticeQueueRecord = {
   id: string
   name: string
-  data: GrooveData
+  data: App.Groove.Data
 }
 
 const DB_NAME = 'groove-studio'
@@ -88,13 +86,15 @@ function toPlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
 
-export async function listGrooves(): Promise<SavedGroove[]> {
+export async function listGrooves(): Promise<App.Groove.SavedGroove[]> {
   const db = await getDb()
   const all = await db.getAllFromIndex('grooves', 'by-updatedAt')
   return all.reverse()
 }
 
-export async function getGroove(id: string): Promise<SavedGroove | undefined> {
+export async function getGroove(
+  id: string,
+): Promise<App.Groove.SavedGroove | undefined> {
   const db = await getDb()
   return db.get('grooves', id)
 }
@@ -102,15 +102,15 @@ export async function getGroove(id: string): Promise<SavedGroove | undefined> {
 /** Create a new saved groove, or update an existing one when `existingId` is provided. */
 export async function saveGroove(
   name: string,
-  data: GrooveData,
+  data: App.Groove.Data,
   existingId?: string | null,
-): Promise<SavedGroove> {
+): Promise<App.Groove.SavedGroove> {
   const db = await getDb()
   const now = Date.now()
   const id = existingId ?? newId()
   const existing = existingId ? await db.get('grooves', existingId) : undefined
   const plain = toPlain(data)
-  const record: SavedGroove = {
+  const record: App.Groove.SavedGroove = {
     id,
     name,
     createdAt: existing?.createdAt ?? now,
@@ -129,7 +129,7 @@ export async function deleteGroove(id: string): Promise<void> {
 export async function renameGroove(
   id: string,
   name: string,
-): Promise<SavedGroove | undefined> {
+): Promise<App.Groove.SavedGroove | undefined> {
   const db = await getDb()
   const record = await db.get('grooves', id)
   if (!record) return undefined
@@ -142,14 +142,14 @@ export async function renameGroove(
 
 export async function duplicateGroove(
   id: string,
-): Promise<SavedGroove | undefined> {
+): Promise<App.Groove.SavedGroove | undefined> {
   const db = await getDb()
   const record = await db.get('grooves', id)
   if (!record) return undefined
   const now = Date.now()
   const id2 = newId()
   const name = `${record.name} copy`
-  const copy: SavedGroove = {
+  const copy: App.Groove.SavedGroove = {
     id: id2,
     name,
     createdAt: now,
@@ -160,7 +160,7 @@ export async function duplicateGroove(
   return copy
 }
 
-export async function saveDraft(data: GrooveData): Promise<void> {
+export async function saveDraft(data: App.Groove.Data): Promise<void> {
   const db = await getDb()
   await db.put('drafts', {
     id: DRAFT_KEY,
@@ -169,7 +169,7 @@ export async function saveDraft(data: GrooveData): Promise<void> {
   })
 }
 
-export async function loadDraft(): Promise<GrooveData | undefined> {
+export async function loadDraft(): Promise<App.Groove.Data | undefined> {
   const db = await getDb()
   const draft = await db.get('drafts', DRAFT_KEY)
   return draft?.data
@@ -181,8 +181,8 @@ export async function clearDraft(): Promise<void> {
 }
 
 export async function saveHistory(
-  past: GrooveData[],
-  future: GrooveData[],
+  past: App.Groove.Data[],
+  future: App.Groove.Data[],
 ): Promise<void> {
   const db = await getDb()
   const record: HistoryRecord = {
@@ -195,7 +195,7 @@ export async function saveHistory(
 }
 
 export async function loadHistory(): Promise<
-  { past: GrooveData[]; future: GrooveData[] } | undefined
+  { past: App.Groove.Data[]; future: App.Groove.Data[] } | undefined
 > {
   const db = await getDb()
   const record = await db.get('history', HISTORY_KEY)

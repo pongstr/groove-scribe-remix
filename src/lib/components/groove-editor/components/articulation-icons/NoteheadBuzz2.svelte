@@ -14,7 +14,7 @@
 >
   <circle cx="12" cy="14" r="4.5" />
   <path
-    d="M8 8 L16 13"
+    d="M8 6.5 L16 11.5 M8 9.5 L16 14.5"
     fill="none"
     stroke="currentColor"
     stroke-width="2"

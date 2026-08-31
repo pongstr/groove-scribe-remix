@@ -2,18 +2,18 @@
 // replacement for the reference app's shareable URL now that state no longer
 // lives in the query string.
 
-import type { GrooveData } from '../types'
+import { normalizeGrooveData } from '$lib/utils/snare-modifiers'
 
 const FILE_EXTENSION = '.groove.json'
 
-export function grooveDataToJsonBlob(data: GrooveData): Blob {
-  const exportable: GrooveData = { ...data, id: null }
+export function grooveDataToJsonBlob(data: App.Groove.Data): Blob {
+  const exportable: App.Groove.Data = { ...data, id: null }
   return new Blob([JSON.stringify(exportable, null, 2)], {
     type: 'application/json',
   })
 }
 
-export function downloadGrooveAsJson(data: GrooveData): void {
+export function downloadGrooveAsJson(data: App.Groove.Data): void {
   const blob = grooveDataToJsonBlob(data)
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -27,7 +27,9 @@ export function downloadGrooveAsJson(data: GrooveData): void {
   URL.revokeObjectURL(url)
 }
 
-export async function parseGrooveJsonFile(file: File): Promise<GrooveData> {
+export async function parseGrooveJsonFile(
+  file: File,
+): Promise<App.Groove.Data> {
   const text = await file.text()
   let parsed: unknown
   try {
@@ -38,10 +40,10 @@ export async function parseGrooveJsonFile(file: File): Promise<GrooveData> {
   if (
     !parsed ||
     typeof parsed !== 'object' ||
-    !Array.isArray((parsed as GrooveData).hiHat) ||
-    !(parsed as GrooveData).timeSignature
+    !Array.isArray((parsed as App.Groove.Data).hiHat) ||
+    !(parsed as App.Groove.Data).timeSignature
   ) {
     throw new Error('That file does not look like a Groove Studio export.')
   }
-  return { ...(parsed as GrooveData), id: null }
+  return normalizeGrooveData({ ...(parsed as App.Groove.Data), id: null })
 }

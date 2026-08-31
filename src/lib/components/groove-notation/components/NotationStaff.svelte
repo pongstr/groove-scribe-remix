@@ -1,5 +1,5 @@
 <script lang="ts">
-  // GrooveScribe-faithful notation: GrooveData → ABC → abc2svg engraved SVG.
+  // GrooveScribe-faithful notation: App.Groove.Data → ABC → abc2svg engraved SVG.
   // Sized to the visible parent width; systems wrap onto new lines (vertical growth).
   import { browser } from '$app/environment'
   import {
@@ -9,11 +9,10 @@
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { calcNotesPerMeasure } from '$lib/utils/music-math'
   import { withDisplayStickings } from '$lib/utils/sticking-display'
-  import type { GrooveData } from '$lib/utils/types'
 
   interface Props {
     /** When set, render this groove instead of the live editor groove. */
-    groove?: GrooveData
+    groove?: App.Groove.Data
     /** Show playhead highlight (only meaningful for the active practice item). */
     active?: boolean
     /** When false, suppress the print header name/author block. */
@@ -47,7 +46,7 @@
       hiHat = [],
       snare = [],
       kick = [],
-      toms = [[], [], [], []] as GrooveData['toms'],
+      toms = [[], [], [], []] as App.Groove.Data['toms'],
       sticking = [],
       division = 16,
       measures = 1,
@@ -57,7 +56,7 @@
       comments = '',
     } = displaySource
 
-    const grooveData: GrooveData = {
+    const grooveData: App.Groove.Data = {
       ...displaySource,
       hiHat,
       snare,

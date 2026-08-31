@@ -64,7 +64,7 @@
 
     if (match.value !== 'off') {
       stickingMode = match
-      ui.setStickingMode(value)
+      ui.setStickingMode(value as App.Groove.StickingMode)
       setStickingVisible(ui, data, true)
 
       return

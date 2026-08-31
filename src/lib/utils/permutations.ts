@@ -5,12 +5,12 @@
 // the reference app's `js/permutations.js` (singles/doubles/triples/all on
 // each 16th-note position), but re-implemented generically against our
 // `groupSize` (works for any division/time signature) instead of a
-// hardcoded 32-slot canonical array, and produces a normal `GrooveData` that
+// hardcoded 32-slot canonical array, and produces a normal `App.Groove.Data` that
 // plays back through the exact same transport/notation/grid the rest of the
 // app already has.
 
 import { calcNotesPerMeasure } from './music-math'
-import type { GrooveData, KickArticulation, Slot } from './types'
+import { padFlagArray } from './snare-modifiers'
 
 export interface PermutationVariant {
   id: string
@@ -86,17 +86,17 @@ export function buildPermutationVariants(
 }
 
 function sliceLane<A extends string>(
-  lane: Slot<A>[],
+  lane: App.Groove.Slot<A>[],
   length: number,
-): Slot<A>[] {
+): App.Groove.Slot<A>[] {
   const out = lane.slice(0, length)
   while (out.length < length) out.push(null)
   return out
 }
 
 function addSplashToKick(
-  existing: Slot<KickArticulation>,
-): Slot<KickArticulation> {
+  existing: App.Groove.Slot<App.Groove.KickArticulation>,
+): App.Groove.Slot<App.Groove.KickArticulation> {
   return existing === 'normal' || existing === 'kickAndSplash'
     ? 'kickAndSplash'
     : 'splash'
@@ -108,10 +108,10 @@ function addSplashToKick(
  * that variant's beat positions.
  */
 export function generatePracticeGroove(
-  base: GrooveData,
+  base: App.Groove.Data,
   groupSize: number,
   variants: PermutationVariant[],
-): GrooveData {
+): App.Groove.Data {
   const notesPerMeasure = calcNotesPerMeasure(base.division, base.timeSignature)
   const beatsPerMeasure = Math.max(1, Math.round(notesPerMeasure / groupSize))
 
@@ -120,18 +120,24 @@ export function generatePracticeGroove(
   const baseKick = sliceLane(base.kick, notesPerMeasure)
   const baseToms = base.toms.map((t) =>
     sliceLane(t, notesPerMeasure),
-  ) as GrooveData['toms']
+  ) as App.Groove.Data['toms']
   const baseSticking = sliceLane(base.sticking, notesPerMeasure)
+  const baseAccent = padFlagArray(base.snareAccent, notesPerMeasure)
+  const baseTies = padFlagArray(base.snareTies, notesPerMeasure)
 
   const hiHat = [...baseHiHat]
   const snare = [...baseSnare]
   const kick = [...baseKick]
-  const toms = baseToms.map((t) => [...t]) as GrooveData['toms']
+  const toms = baseToms.map((t) => [...t]) as App.Groove.Data['toms']
   const sticking = [...baseSticking]
+  const snareAccent = [...baseAccent]
+  const snareTies = [...baseTies]
 
   for (const variant of variants) {
     hiHat.push(...baseHiHat)
     snare.push(...baseSnare)
+    snareAccent.push(...baseAccent)
+    snareTies.push(...baseTies)
     toms.forEach((t, i) => t.push(...baseToms[i]))
     sticking.push(...baseSticking)
 
@@ -158,5 +164,7 @@ export function generatePracticeGroove(
     kick,
     toms,
     sticking,
+    snareAccent,
+    snareTies,
   }
 }

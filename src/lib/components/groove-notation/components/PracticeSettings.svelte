@@ -16,12 +16,11 @@
   import { getDataContext, getUIContext } from '$lib/utils/context'
   import { PRESET_CATEGORIES, presetsByCategory } from '$lib/utils/presets'
   import * as db from '$lib/utils/storage/db'
-  import type { PresetGroove, SavedGroove } from '$lib/utils/types'
 
   let data = getDataContext()
   let ui = getUIContext()
 
-  let savedGrooves = $state<SavedGroove[]>([])
+  let savedGrooves = $state<App.Groove.SavedGroove[]>([])
   let selectedTab = $state<'queue' | 'grooves' | 'presets'>('queue')
   let search = $state('')
   let loading = $state(false)
@@ -41,11 +40,11 @@
     }
   }
 
-  function addSaved(record: SavedGroove) {
+  function addSaved(record: App.Groove.SavedGroove) {
     ui.enqueue(record.name, record.data)
   }
 
-  function addPreset(preset: PresetGroove) {
+  function addPreset(preset: App.Groove.PresetGroove) {
     ui.enqueue(preset.name, preset.data)
   }
 

@@ -20,6 +20,9 @@
 
   let { children } = $props()
   let manifestHref = $derived(pwaInfo?.webManifest.href)
+
+  const ReloadPromptComponent =
+    import('../lib/components/pwa/ReloadPrompt.svelte')
 </script>
 
 <svelte:head>
@@ -59,3 +62,7 @@
 {@render children()}
 
 <Toaster />
+
+{#await ReloadPromptComponent then { default: ReloadPrompt }}
+  <ReloadPrompt />
+{/await}
