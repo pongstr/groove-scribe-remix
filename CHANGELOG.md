@@ -1,5 +1,11 @@
 # groove-scribe-remix
 
+## 0.1.1
+
+### Patch Changes
+
+- [`ecf8e36`](https://github.com/pongstr/groove-scribe-remix/commit/ecf8e367e8dffabb8c2fe2585fdf36d8c17be693) Thanks [@pongstr](https://github.com/pongstr)! - fix(metronome): sync metromone with playback when tuplets occur
+
 ## 0.1.0
 
 ### Minor Changes
