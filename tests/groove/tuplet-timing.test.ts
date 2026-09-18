@@ -15,6 +15,16 @@ describe('tuplet-timing', () => {
     expect(slotAbsoluteMs(7, 100, groups)).toBe(600)
   })
 
+  it('interpolates fractional indices on a straight grid', () => {
+    expect(slotAbsoluteMs(5.5, 100, [])).toBe(550)
+    expect(slotAbsoluteMs(0.25, 100, [])).toBe(25)
+  })
+
+  it('interpolates fractional indices inside a triplet', () => {
+    const groups = upsertTupletAt([], 4, 'triplet', 16)
+    expect(slotAbsoluteMs(5.5, 100, groups)).toBeCloseTo(500, 5)
+  })
+
   it('drops overlapping groups', () => {
     const groups = clampTupletGroups(
       [

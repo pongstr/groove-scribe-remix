@@ -48,12 +48,15 @@ function groupAtIndex(
 /**
  * Wall-clock offset for a slot index when tuplets compress consecutive cells.
  * Example on a 16th grid: a triplet uses 3 columns but only 2 columns of time.
+ * Fractional indices interpolate inside the current straight slot or tuplet span.
  */
 export function slotAbsoluteMs(
   slotIndex: number,
   slotMs: number,
   groups: App.Groove.TupletGroup[],
 ): number {
+  if (slotIndex <= 0) return 0
+
   let time = 0
   let i = 0
   const sorted = normalizeTupletGroups(groups)
@@ -71,12 +74,53 @@ export function slotAbsoluteMs(
 
       time += timeSpan
       i += span
+    } else if (slotIndex < i + 1) {
+      return time + (slotIndex - i) * slotMs
     } else {
       time += slotMs
       i += 1
     }
   }
   return time
+}
+
+export type MetronomeClickOffsetArgs = {
+  division: number
+  subdivision: number
+  slotMs: number
+  totalSlots: number
+  groups: App.Groove.TupletGroup[]
+  originSlot?: number
+}
+
+/**
+ * Wall-clock offset (ms) from the playback origin to metronome tick `tick`.
+ * Tick 0 is the first subdivision-aligned slot; later ticks follow the same
+ * tuplet-compressed timeline as notes. `originSlot` is the slot playback
+ * started or resumed from so resume/seek still starts at t=0.
+ */
+export function metronomeClickOffsetMs(
+  tick: number,
+  {
+    division,
+    subdivision,
+    slotMs,
+    totalSlots,
+    groups,
+    originSlot = 0,
+  }: MetronomeClickOffsetArgs,
+): number {
+  if (subdivision <= 0 || totalSlots <= 0) return 0
+
+  const slotsPerTick = division / subdivision
+  const absoluteSlot = tick * slotsPerTick
+  const loopDurationMs = slotAbsoluteMs(totalSlots, slotMs, groups)
+  const originMs = slotAbsoluteMs(originSlot, slotMs, groups)
+
+  const loop = Math.floor(absoluteSlot / totalSlots)
+  const slotInLoop = absoluteSlot - loop * totalSlots
+
+  return loop * loopDurationMs + slotAbsoluteMs(slotInLoop, slotMs, groups) - originMs
 }
 
 export function totalGrooveDurationMs(

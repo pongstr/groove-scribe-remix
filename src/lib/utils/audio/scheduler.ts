@@ -5,18 +5,14 @@ import {
   METRONOME_SAMPLE,
   TOM_SAMPLES,
 } from '../config'
-import {
-  calcNotesPerMeasure,
-  isUpbeatSlot,
-  swingDelaySeconds,
-} from '../music-math'
+import { isUpbeatSlot, swingDelaySeconds } from '../music-math'
 import {
   isSnareBuzz,
   isSnareTieContinuation,
   snarePlaybackMeta,
   snareSustainSeconds,
 } from '../snare-modifiers'
-import { slotAbsoluteMs } from '../tuplet-timing'
+import { metronomeClickOffsetMs, slotAbsoluteMs } from '../tuplet-timing'
 import { sampleLibrary } from './sample-library'
 
 const LOOKAHEAD_MS = 25
@@ -74,6 +70,8 @@ export function createScheduler(host: SchedulerHost) {
   let countInNextTime = 0
   let metronomeNextTime = 0
   let metronomeTickCounter = 0
+  /** Slot playback started or resumed from — click offsets are relative to it. */
+  let metronomeOriginSlot = 0
   /** Tracks subdivision so live changes can resync click timing to the groove. */
   let lastMetronomeSubdivision: 0 | 4 | 8 | 16 | null = null
   let uiEvents: UiEvent[] = []
@@ -173,10 +171,23 @@ export function createScheduler(host: SchedulerHost) {
   }
 
   function metronomeTickForSlot(groove: App.Groove.Data, slot: number): number {
-    const npm = calcNotesPerMeasure(groove.division, groove.timeSignature)
-    const ticksPerBeat = groove.metronomeSubdivision / 4
-    const slotsPerBeat = npm / groove.timeSignature.beats
-    return Math.round((slot % npm) * (ticksPerBeat / slotsPerBeat))
+    const slotsPerTick = groove.division / groove.metronomeSubdivision
+    return Math.round(slot / slotsPerTick)
+  }
+
+  function metronomeClickTime(groove: App.Groove.Data, tick: number): number {
+    return (
+      grooveStartTime +
+      metronomeClickOffsetMs(tick, {
+        division: groove.division,
+        subdivision: groove.metronomeSubdivision,
+        slotMs: host.getSlotMs(),
+        totalSlots: host.getTotalSlots(),
+        groups: groove.tupletGroups ?? [],
+        originSlot: metronomeOriginSlot,
+      }) /
+        1000
+    )
   }
 
   function syncMetronomeToSlot(
@@ -185,6 +196,7 @@ export function createScheduler(host: SchedulerHost) {
     nextClickTime: number,
   ): void {
     if (groove.metronomeSubdivision === 0) return
+    metronomeOriginSlot = slot
     metronomeTickCounter = metronomeTickForSlot(groove, slot)
     metronomeNextTime = nextClickTime
   }
@@ -241,7 +253,6 @@ export function createScheduler(host: SchedulerHost) {
       syncMetronomeToCurrentPosition()
     }
     lastMetronomeSubdivision = subdivision
-    const intervalSeconds = (60 / groove.tempo) * (4 / subdivision)
     const ticksPerBeat = subdivision / 4
     const ticksPerMeasure = Math.max(
       1,
@@ -252,6 +263,7 @@ export function createScheduler(host: SchedulerHost) {
       if (metronomeNextTime + 0.0001 < grooveStartTime) {
         metronomeNextTime = grooveStartTime
         metronomeTickCounter = 0
+        metronomeOriginSlot = 0
         continue
       }
       const isDownbeat = metronomeTickCounter % ticksPerMeasure === 0
@@ -261,8 +273,8 @@ export function createScheduler(host: SchedulerHost) {
         metronomeNextTime,
         isDownbeat ? CLICK_DOWNBEAT_RATE : CLICK_OTHER_RATE,
       )
-      metronomeNextTime += intervalSeconds
       metronomeTickCounter += 1
+      metronomeNextTime = metronomeClickTime(groove, metronomeTickCounter)
     }
   }
 
@@ -400,6 +412,7 @@ export function createScheduler(host: SchedulerHost) {
     nextNoteTime = grooveStartTime
     metronomeNextTime = grooveStartTime
     metronomeTickCounter = 0
+    metronomeOriginSlot = 0
     lastMetronomeSubdivision = groove.metronomeSubdivision
     if (isResume && groove.metronomeSubdivision > 0) {
       syncMetronomeToSlot(groove, startIndex, grooveStartTime)
@@ -526,6 +539,7 @@ export function createScheduler(host: SchedulerHost) {
     nextNoteTime = startAt
     metronomeNextTime = startAt
     metronomeTickCounter = 0
+    metronomeOriginSlot = 0
     lastMetronomeSubdivision = groove.metronomeSubdivision
 
     if (groove.metronomeSubdivision > 0) {
@@ -563,6 +577,7 @@ export function createScheduler(host: SchedulerHost) {
     nextNoteTime = startAt
     metronomeNextTime = startAt
     metronomeTickCounter = 0
+    metronomeOriginSlot = 0
     lastMetronomeSubdivision = groove.metronomeSubdivision
     uiEvents = []
     resumeSlot = null
