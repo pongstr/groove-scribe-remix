@@ -1,5 +1,11 @@
 # groove-scribe-remix
 
+## 0.1.2
+
+### Patch Changes
+
+- [`1fb89b1`](https://github.com/pongstr/groove-scribe-remix/commit/1fb89b1ea7a528b47e10d651bfe8c45ad3d9fb0f) Thanks [@pongstr](https://github.com/pongstr)! - fix(practice-mode): playback+metronome sync issues
+
 ## 0.1.1
 
 ### Patch Changes
