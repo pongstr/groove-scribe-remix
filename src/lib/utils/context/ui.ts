@@ -197,7 +197,9 @@ function toContext(input: App.UI.ContextInput): App.UI.Context {
     },
     previewMode: Boolean(input.previewMode),
     drawer: {
-      open: Boolean(input.drawer?.open),
+      // Never restore open — vaul sets body pointer-events:none while open;
+      // a persisted true bricks the whole UI after reload.
+      open: false,
       tab: input.drawer?.tab === 'presets' ? 'presets' : 'mine',
     },
     aboutOpen: false,
@@ -275,7 +277,12 @@ function updateStorage(input: App.UI.Context): void {
       UI_CONTEXT,
       JSON.stringify({
         ...rest,
+        // Ephemeral overlays — never restore open across reloads (vaul locks
+        // body pointer-events while open; a stuck true bricks other drawers).
+        drawer: { ...rest.drawer, open: false },
         practiceMode: practiceMeta,
+        queueOpen: false,
+        aboutOpen: false,
         helpOpen: false,
         permutationsOpen: false,
         shortcutsOpen: false,
@@ -392,6 +399,7 @@ export function createUIContextStore(
       data.setLoop(savedLoop)
       savedLoop = null
     }
+    data.setSessionTempo(null)
     data.stop()
     if (savedBeforePractice) {
       data.load(savedBeforePractice.groove, savedBeforePractice.sourceLabel, {
@@ -427,6 +435,7 @@ export function createUIContextStore(
       }
     })
     savedLoop = get(data).playback.loop
+    data.setSessionTempo(current.groove.tempo)
     data.setLoop('once')
     data.stop()
     const { queue, currentIndex } = snapshot().practiceMode

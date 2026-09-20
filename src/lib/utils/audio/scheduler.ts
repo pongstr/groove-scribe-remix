@@ -78,6 +78,8 @@ export function createScheduler(host: SchedulerHost) {
   /** Slot to resume from after pause; null means start from the beginning. */
   let resumeSlot: number | null = null
   let naturalEndTimer: ReturnType<typeof setTimeout> | null = null
+  /** Transport BufferSources — stopped on user stop/pause so they cannot unmute later. */
+  const transportVoices = new Set<AudioBufferSourceNode>()
 
   function clearNaturalEndTimer(): void {
     if (naturalEndTimer !== null) {
@@ -106,6 +108,18 @@ export function createScheduler(host: SchedulerHost) {
 
   function setAudible(audible: boolean): void {
     if (masterGain) masterGain.gain.value = audible ? MASTER_GAIN : 0
+  }
+
+  function stopTransportVoices(): void {
+    const now = ctx?.currentTime
+    for (const source of transportVoices) {
+      try {
+        source.stop(now)
+      } catch {
+        // Already stopped.
+      }
+    }
+    transportVoices.clear()
   }
 
   function clearTransportTimers(): void {
@@ -143,6 +157,10 @@ export function createScheduler(host: SchedulerHost) {
     gainNode.connect(dest)
     const startAt = Math.max(time, audio.currentTime)
     source.start(startAt)
+    if (dest === masterGain) {
+      transportVoices.add(source)
+      source.addEventListener('ended', () => transportVoices.delete(source))
+    }
     if (durationSeconds && durationSeconds > 0) {
       const stopAt = time + durationSeconds
       if (stopAt <= startAt) return
@@ -333,18 +351,17 @@ export function createScheduler(host: SchedulerHost) {
         } else {
           finished = true
           const chainAt = nextNoteTime
-          const notifyDelayMs = Math.max(
-            0,
-            (chainAt - audio.currentTime) * 1000 + 30,
-          )
+          // Notify immediately while chainAt is still in the lookahead window
+          // so practice mode can schedule the next groove on the same beat.
+          host.notifyNaturalEnd(chainAt)
           clearNaturalEndTimer()
+          const haltDelayMs = Math.max(0, (chainAt - audio.currentTime) * 1000)
           naturalEndTimer = setTimeout(() => {
             naturalEndTimer = null
-            host.notifyNaturalEnd(chainAt)
-            // Stop transport after the last note; practice mode chains in the
-            // naturalEnd effect before the user sees a stuck playing state.
-            stop()
-          }, notifyDelayMs)
+            // Halt only if nobody chained. chain() clears this timer.
+            // Do not mute or kill voices: tails can finish.
+            haltTransport({ mute: false, killVoices: false })
+          }, haltDelayMs)
         }
       }
     }
@@ -387,6 +404,7 @@ export function createScheduler(host: SchedulerHost) {
   }): Promise<void> {
     if (host.getIsPlaying()) return
     await prepare()
+    stopTransportVoices()
     const audio = ensureContext()
     const groove = host.getGroove()
     const beatSeconds = 60 / groove.tempo
@@ -448,6 +466,7 @@ export function createScheduler(host: SchedulerHost) {
     const countingIn = host.getIsCountingIn()
     const slot = host.getCurrentSlot()
     clearTransportTimers()
+    stopTransportVoices()
     setAudible(false)
     uiEvents = []
 
@@ -471,11 +490,15 @@ export function createScheduler(host: SchedulerHost) {
     host.onStopped()
   }
 
-  function stop(): void {
+  function haltTransport(options: {
+    mute: boolean
+    killVoices: boolean
+  }): void {
     const wasPlaying = host.getIsPlaying()
     const hadResume = resumeSlot !== null || host.getCurrentSlot() >= 0
     clearTransportTimers()
-    setAudible(false)
+    if (options.killVoices) stopTransportVoices()
+    if (options.mute) setAudible(false)
     resumeSlot = null
     lastMetronomeSubdivision = null
     host.patchPlayhead({
@@ -490,6 +513,10 @@ export function createScheduler(host: SchedulerHost) {
     if (wasPlaying || hadResume) {
       host.onStopped()
     }
+  }
+
+  function stop(): void {
+    haltTransport({ mute: true, killVoices: true })
   }
 
   async function toggle(): Promise<void> {
@@ -529,6 +556,7 @@ export function createScheduler(host: SchedulerHost) {
     const startAt = audio.currentTime + START_DELAY_SECONDS
 
     clearTransportTimers()
+    stopTransportVoices()
     uiEvents = []
     finished = false
     countInBeatsTotal = 0

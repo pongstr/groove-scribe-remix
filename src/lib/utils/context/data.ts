@@ -58,6 +58,7 @@ function initDataContext(
       countInEnabled: true,
       naturalEndCount: 0,
       naturalEndAt: null as number | null,
+      sessionTempo: null as number | null,
       loadProgress: { loaded: 0, total: 0, ready: false },
       ...init.playback,
     },
@@ -368,6 +369,10 @@ export function createDataContextStore(
     const plain = normalizeGrooveData(
       JSON.parse(JSON.stringify(data)) as App.Groove.Data,
     )
+    const sessionTempo = snapshot().playback.sessionTempo
+    if (sessionTempo != null) {
+      plain.tempo = Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, sessionTempo))
+    }
     suppressHistory = true
     update((store) => ({
       ...store,
@@ -566,10 +571,24 @@ export function createDataContextStore(
     setDivision,
     setTimeSignature,
     setMeasures,
-    setTempo: (tempo) =>
+    setTempo: (tempo) => {
+      const clamped = Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, tempo))
+      if (snapshot().playback.sessionTempo != null) {
+        patchPlayback({ sessionTempo: clamped })
+      }
       mutateGroove((g) => {
-        g.tempo = Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, tempo))
-      }),
+        g.tempo = clamped
+      })
+    },
+    setSessionTempo: (tempo) => {
+      if (tempo == null) {
+        patchPlayback({ sessionTempo: null })
+        return
+      }
+      patchPlayback({
+        sessionTempo: Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, tempo)),
+      })
+    },
     setMetronomeSubdivision: (subdivision) => {
       if (snapshot().groove.metronomeSubdivision === subdivision) return
       mutateGroove((g) => {

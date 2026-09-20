@@ -120,7 +120,11 @@ export function metronomeClickOffsetMs(
   const loop = Math.floor(absoluteSlot / totalSlots)
   const slotInLoop = absoluteSlot - loop * totalSlots
 
-  return loop * loopDurationMs + slotAbsoluteMs(slotInLoop, slotMs, groups) - originMs
+  return (
+    loop * loopDurationMs +
+    slotAbsoluteMs(slotInLoop, slotMs, groups) -
+    originMs
+  )
 }
 
 export function totalGrooveDurationMs(

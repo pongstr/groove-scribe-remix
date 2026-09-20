@@ -10,7 +10,6 @@
 
   import { hydrateQueueItem } from '$lib/components/groove-notation/components/queue-hydrate'
   import Button from '$lib/components/ui/button/button.svelte'
-  import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import * as Drawer from '$lib/components/ui/drawer/index'
   import * as Tabs from '$lib/components/ui/tabs/index'
   import { getDataContext, getUIContext } from '$lib/utils/context'
@@ -24,6 +23,7 @@
   let selectedTab = $state<'queue' | 'grooves' | 'presets'>('queue')
   let search = $state('')
   let loading = $state(false)
+  let queueDrawerOpen = $state(false)
 
   let filteredSaved = $derived(
     savedGrooves.filter((g) =>
@@ -64,20 +64,21 @@
   onMount(async () => void (await refresh()))
 </script>
 
-<Drawer.Root direction="left">
-  <Drawer.Trigger>
-    {#snippet child({ props })}
-      <ButtonWithTooltip
-        size="icon"
-        variant="outline"
-        content="Open Practice Queue"
-        tooltipContentProps={{ align: 'start', sideOffset: 10 }}
-        {...props}
-      >
-        <ListOrdered class="size-5" />
-      </ButtonWithTooltip>
-    {/snippet}
-  </Drawer.Trigger>
+<Button
+  size="icon"
+  variant="outline"
+  aria-label="Open Practice Queue"
+  title="Open Practice Queue"
+  onclick={() => (queueDrawerOpen = true)}
+>
+  <ListOrdered class="size-5" />
+</Button>
+
+<Drawer.Root
+  direction="left"
+  open={queueDrawerOpen}
+  onOpenChange={(open) => (queueDrawerOpen = open)}
+>
   <Drawer.Content>
     <Tabs.Root value={selectedTab} class="w-full" onValueChange={onTabSwitch}>
       <Tabs.List class="w-full p-0 group-data-horizontal/tabs:h-9">

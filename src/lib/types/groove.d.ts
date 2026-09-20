@@ -167,6 +167,11 @@ declare global {
         naturalEndCount: number
         /** AudioContext time when the last slot of a once-loop groove finishes. */
         naturalEndAt: number | null
+        /**
+         * Practice-session tempo. When set, load/chain ignore each groove
+         * document's saved tempo so the queue plays as one continuous piece.
+         */
+        sessionTempo: number | null
         loadProgress: LoadProgress
       }
 
@@ -218,6 +223,8 @@ declare global {
         setTimeSignature: (timeSignature: GrooveData['timeSignature']) => void
         setMeasures: (measures: number) => void
         setTempo: (tempo: number) => void
+        /** Practice-session tempo override; `null` restores document tempos on load. */
+        setSessionTempo: (tempo: number | null) => void
         setMetronomeSubdivision: (subdivision: 0 | 4 | 8 | 16) => void
         setSwing: (percent: number) => void
         setName: (name: string) => void

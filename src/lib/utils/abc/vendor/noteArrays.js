@@ -178,9 +178,9 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
 
   console.log(
     'Bad tablature note found in tablatureToABCNotationPerNote.  Tab: ' +
-    tablatureChar +
-    ' for drum type: ' +
-    drumType,
+      tablatureChar +
+      ' for drum type: ' +
+      drumType,
   )
   return false
 }
@@ -684,8 +684,8 @@ export function convert_sticking_counts_to_actual_counts(
       var adjusted_index = Math.floor(
         /* @ts-ignore */
         i /
-        (actual_notes_per_measure_in_this_array /
-          notes_per_measure_in_time_division),
+          (actual_notes_per_measure_in_this_array /
+            notes_per_measure_in_time_division),
       )
       var new_count = figure_out_sticking_count_for_index(
         adjusted_index,

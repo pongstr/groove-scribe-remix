@@ -165,7 +165,7 @@
       onclick={() => ui.togglePracticeMode()}
       content="Practice mode (P)"
       aria-label="Toggle Practice mode"
-      aria-pressed={$ui.previewMode}
+      aria-pressed={$ui.practiceMode.active}
       tooltipContentProps={{ sideOffset: 10 }}
     >
       <CircleParking class="size-5" />

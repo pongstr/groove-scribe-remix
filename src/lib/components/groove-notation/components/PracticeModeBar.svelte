@@ -10,7 +10,11 @@
   } from '@lucide/svelte'
 
   import PracticeSettings from '$lib/components/groove-notation/components/PracticeSettings.svelte'
-  import { hydrateQueueItem } from '$lib/components/groove-notation/components/queue-hydrate'
+  import {
+    hydrateQueueItem,
+    hydrateQueueOnPracticeEnter,
+    resolvePracticeNaturalEnd,
+  } from '$lib/components/groove-notation/components/queue-hydrate'
   import ButtonWithTooltip from '$lib/components/ui/button/button-with-tooltip.svelte'
   import * as ButtonGroup from '$lib/components/ui/button-group/index'
   import ToggleWithTooltip from '$lib/components/ui/toggle/toggle-with-tooltip.svelte'
@@ -24,7 +28,8 @@
   let data = getDataContext()
   let ui = getUIContext()
 
-  let lastNaturalEnd = $state(0)
+  // Seed from current transport so leftover editor once-play ends are not treated as new.
+  let lastNaturalEnd = $state($data.playback.naturalEndCount)
   let wasPracticeActive = $state(false)
 
   async function loadQueueItem(
@@ -57,54 +62,45 @@
   $effect(() => {
     const count = $data.playback.naturalEndCount
     const chainAt = $data.playback.naturalEndAt
+    const action = resolvePracticeNaturalEnd({
+      lastNaturalEnd,
+      count,
+      active: $ui.practiceMode.active,
+      autoAdvance: $ui.practiceMode.autoAdvance,
+      queueLength: $ui.practiceMode.queue.length,
+      loop: $data.playback.loop,
+      chainAt,
+    })
 
-    if (!$ui.practiceMode.active) {
+    if (action === 'ignore') {
       lastNaturalEnd = count
       return
     }
 
-    if (count === lastNaturalEnd) return
-
     lastNaturalEnd = count
 
-    if (!$ui.practiceMode.autoAdvance) {
-      data.stop()
+    if (action === 'stop') {
+      // Early natural-end notify must not cut the last bars or the chain window.
+      if (chainAt == null) data.stop()
       return
     }
-
-    if ($ui.practiceMode.queue.length < 2) {
-      data.stop()
-      return
-    }
-
-    if ($data.playback.loop === 'loop') return
 
     const item = ui.nextInQueue()
-
     if (!item || chainAt == null) {
-      data.stop()
+      // Missing item still lets last bars finish; only stop if no halt time.
+      if (chainAt == null) data.stop()
       return
     }
 
-    // Chain immediately from the in-memory snapshot; refresh from IndexedDB in the background.
     data.chainPlay(item.data, item.name, chainAt)
     applyUiPrefsToGroove(ui, data, { quiet: true })
     void hydrateQueueItem(ui, item)
   })
 
-  // On practice enter, refresh saved queue snapshots from IndexedDB.
-  // Do not data.load here — enterPracticeMode already loads the current index.
   $effect(() => {
     const active = $ui.practiceMode.active
     if (active && !wasPracticeActive) {
-      const { queue } = $ui.practiceMode
-      void (async () => {
-        for (const item of queue) {
-          await hydrateQueueItem(ui, item)
-        }
-        if (!$ui.practiceMode.active) return
-        applyUiPrefsToGroove(ui, data, { quiet: true })
-      })()
+      void hydrateQueueOnPracticeEnter(ui, data)
     }
     wasPracticeActive = active
   })
